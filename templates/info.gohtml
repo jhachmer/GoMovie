@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>{{.Movie.Title}} ({{.Movie.Year}}) - GoTo</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="/static/css/goto.css">
+</head>
+<body>
+<div class="container">
+    <h1>{{ .Movie.Title }} ({{ .Movie.Year }})</h1>
+    <div class="imdbid">
+        <h2>{{ .Movie.ImdbID }}</h2>
+    </div>
+    <img src="{{.Movie.Poster}}" alt="Movie Poster">
+    <div class="content-box">
+        <!-- Info list -->
+        <div class="info-box">
+            <h2>Info</h2>
+            <ul class="details-list">
+                <li><b>Genres:</b> {{ .Movie.Genre }}</li>
+                <li><b>Actors:</b> {{ .Movie.Actors }}</li>
+                <li><b>Director:</b> {{ .Movie.Director }}</li>
+                <li><b>Runtime:</b> {{ .Movie.Runtime }}</li>
+                <li><b>Rated:</b> {{ .Movie.Rated }}</li>
+                <li><b>Released on:</b> {{ .Movie.Released }}</li>
+                <li><b>Plot:</b> {{ .Movie.Plot }}</li>
+            </ul>
+        </div>
+
+        <!-- Ratings and Feedback Container -->
+        <div class="center-box">
+            <!-- Ratings box -->
+            <div class="ratings-box">
+                <h2>Ratings</h2>
+                <ul>
+                    {{range $val := .Movie.Ratings}}
+                        <li><b>{{ $val.Source }}:</b> {{ $val.Value }}</li>
+                    {{end}}
+                </ul>
+            </div>
+
+            <!-- Feedback box -->
+            <div class="feedback-box">
+                <h2>User Feedback</h2>
+                <ul id="feedback-list">
+                    <!-- Example feedback -->
+                    <li><b>{{ .Name }}:</b> "{{ printf "%s" .Comment }}"</li>
+                    <li><b>Jane Smith:</b> "The story was a bit slow, but great performances."</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Form box -->
+        <div class="form-box">
+            <h2>Your Feedback</h2>
+            <form action="/films/{{ .Movie.ImdbID }}" method="POST">
+                <label for="name">Your Name:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="watched">Did you watch the movie?</label>
+                <input type="checkbox" id="watched" name="watched">
+
+                <label for="comment">Your Comment:</label>
+                <textarea id="comment" name="comment" rows="4" required></textarea>
+
+                <button type="submit">Submit Feedback</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+# https://taskfile.dev
+version: 3
+
+vars:
+  dir: ./bin/
+  app_name_windows: goto_svr.exe
+  app_name_unix: goto_svr
+  main_file: ./cmd/goList/main.go
+
+tasks:
+  default:
+    desc: Default task which will be run if no target is specified
+    aliases:
+      - all
+    cmds:
+      - task: clean
+      - task: setup
+      - task: tidy
+      - task: mod
+      - task: test
+      - task: build
+
+  setup:
+    desc: Sets up required directories etc.
+    cmds:
+      - cmd: mkdir {{.dir}}
+        platforms: [darwin, linux]
+      - cmd: powershell mkdir {{.dir}}
+        platforms: [ windows ]
+
+  build:
+    desc: Builds the application
+    deps: [clean]
+    cmds:
+      - cmd: go build -v -o {{.dir}}{{.app_name_windows}} {{.main_file}}
+        platforms: [windows]
+      - cmd: go build -v -o {{.dir}}{{.app_name_unix}} {{.main_file}}
+        platforms: [darwin, linux]
+
+  test:
+    desc: Runs tests for the application
+    cmds:
+      - go test -v ./...
+
+  tidy:
+    cmds:
+      - go mod tidy
+
+  mod:
+    cmds:
+      - go mod download
+
+  clean:
+    desc: Cleans up previously build binaries
+    cmds:
+      - cmd: rm -rf {{.dir}}*
+        platforms: [darwin, linux]
+      - cmd: powershell -File ./scripts/clean.ps1
+        platforms: [windows]
