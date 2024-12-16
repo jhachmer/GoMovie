@@ -3,7 +3,6 @@ package media
 import (
 	"fmt"
 	"github.com/jhachmer/gotocollection/pkg/config"
-	"github.com/jhachmer/gotocollection/pkg/types"
 	"github.com/jhachmer/gotocollection/pkg/util"
 	"net/http"
 	"net/url"
@@ -12,7 +11,7 @@ import (
 )
 
 type OmdbRequest interface {
-	SendRequest() (*types.Movie, error)
+	SendRequest() (*Movie, error)
 	Validate() error
 }
 
@@ -48,12 +47,12 @@ func NewOmdbTitleRequest(title, year string) (*OmdbTitleRequest, error) {
 	return &req, nil
 }
 
-func (r OmdbTitleRequest) SendRequest() (*types.Movie, error) {
+func (r OmdbTitleRequest) SendRequest() (*Movie, error) {
 	requestURL, err := makeRequestURL(r)
 	if err != nil {
 		return nil, err
 	}
-	var mov types.Movie
+	var mov Movie
 	mov, err = decodeRequest(requestURL)
 	if err != nil {
 		return nil, err
@@ -61,12 +60,12 @@ func (r OmdbTitleRequest) SendRequest() (*types.Movie, error) {
 	return &mov, nil
 }
 
-func (r OmdbIDRequest) SendRequest() (*types.Movie, error) {
+func (r OmdbIDRequest) SendRequest() (*Movie, error) {
 	requestURL, err := makeRequestURL(r)
 	if err != nil {
 		return nil, err
 	}
-	var mov types.Movie
+	var mov Movie
 	mov, err = decodeRequest(requestURL)
 	if err != nil {
 		return nil, err
@@ -122,8 +121,8 @@ func makeRequestURL(r OmdbRequest) (string, error) {
 	}
 }
 
-func decodeRequest(requestURL string) (types.Movie, error) {
-	var mov types.Movie
+func decodeRequest(requestURL string) (Movie, error) {
+	var mov Movie
 	req, err := getRequest(requestURL)
 	if err != nil {
 		return mov, err
@@ -132,12 +131,12 @@ func decodeRequest(requestURL string) (types.Movie, error) {
 	if err != nil {
 		return mov, err
 	}
-	mov, err = util.Decode[types.Movie](res)
+	mov, err = util.Decode[Movie](res)
 	if err != nil {
 		return mov, err
 	}
 	if !checkIfResponseTrue(mov) {
-		return types.Movie{}, fmt.Errorf("response value is false")
+		return Movie{}, fmt.Errorf("response value is false")
 	}
 	return mov, nil
 }
@@ -150,6 +149,6 @@ func getRequest(requestURL string) (*http.Request, error) {
 	return res, nil
 }
 
-func checkIfResponseTrue(mov types.Movie) bool {
+func checkIfResponseTrue(mov Movie) bool {
 	return strings.ToLower(mov.Response) == "true"
 }

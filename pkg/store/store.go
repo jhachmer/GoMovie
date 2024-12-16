@@ -2,7 +2,7 @@ package store
 
 import (
 	"database/sql"
-	"github.com/jhachmer/gotocollection/pkg/types"
+	"github.com/jhachmer/gotocollection/pkg/media"
 )
 
 type Storage struct {
@@ -10,10 +10,10 @@ type Storage struct {
 }
 type Store interface {
 	InitDatabase() error
-	CreateEntry(entry *types.Entry) (*types.Entry, error)
-	GetEntries(id string) ([]types.Entry, error)
-	CreateMovie(mov types.Movie) (*types.Movie, error)
-	GetMovie(id string) (*types.Movie, error)
+	CreateEntry(entry *media.Entry) (*media.Entry, error)
+	GetEntries(id string) ([]media.Entry, error)
+	CreateMovie(mov media.Movie) (*media.Movie, error)
+	GetMovie(id string) (*media.Movie, error)
 }
 
 func NewStore(db *sql.DB) *Storage {
@@ -67,7 +67,7 @@ func (s *Storage) InitDatabase() error {
 	return nil
 }
 
-func (s *Storage) CreateEntry(e *types.Entry) (*types.Entry, error) {
+func (s *Storage) CreateEntry(e *media.Entry) (*media.Entry, error) {
 	_, err := s.CreateMovie(e.Movie)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ func (s *Storage) CreateEntry(e *types.Entry) (*types.Entry, error) {
 	return e, nil
 }
 
-func (s *Storage) CreateMovie(m *types.Movie) (*types.Movie, error) {
+func (s *Storage) CreateMovie(m *media.Movie) (*media.Movie, error) {
 	_, err := s.db.Exec(`INSERT INTO movies (id, title, year, genre, actors, director, runtime, rated, released, plot, poster)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		m.ImdbID, m.Title, m.Year, m.Genre, m.Actors, m.Director, m.Runtime, m.Rated, m.Released, m.Plot, m.Poster)

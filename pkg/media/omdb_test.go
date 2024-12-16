@@ -2,7 +2,6 @@ package media
 
 import (
 	"github.com/jhachmer/gotocollection/pkg/config"
-	"github.com/jhachmer/gotocollection/pkg/types"
 	"testing"
 )
 
@@ -14,8 +13,8 @@ func TestMain(m *testing.M) {
 type OmdbMock struct {
 }
 
-func (r OmdbMock) SendRequest() (*types.Movie, error) {
-	return &types.Movie{}, nil
+func (r OmdbMock) SendRequest() (*Movie, error) {
+	return &Movie{}, nil
 }
 
 func (r OmdbMock) Validate() error {

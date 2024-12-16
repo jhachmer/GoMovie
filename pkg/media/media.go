@@ -1,4 +1,4 @@
-package types
+package media
 
 type Rating struct {
 	Source string `json:"Source"`

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/jhachmer/gotocollection/pkg/media"
 	"github.com/jhachmer/gotocollection/pkg/store"
-	"github.com/jhachmer/gotocollection/pkg/types"
 	"github.com/jhachmer/gotocollection/pkg/util"
 	"html/template"
 	"log"
@@ -42,7 +41,7 @@ func (h Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {
-	var entry = new(types.Entry)
+	var entry = new(media.Entry)
 	id := r.PathValue("imdb")
 	if !validPath.MatchString(id) {
 		http.Error(w, "not a valid id", http.StatusBadRequest)
@@ -70,7 +69,7 @@ func (h Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {
 
 // TODO: Cache Movie
 func (h Handler) InfoTitleYearHandler(w http.ResponseWriter, r *http.Request) {
-	var entry = new(types.Entry)
+	var entry = new(media.Entry)
 	title := r.PathValue("title")
 	year := r.PathValue("year")
 	req, err := media.NewOmdbTitleRequest(title, year)
@@ -111,7 +110,7 @@ func (h Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		return
 	}
-	entry := &types.Entry{
+	entry := &media.Entry{
 		ID:      0,
 		Name:    name,
 		Watched: watched,

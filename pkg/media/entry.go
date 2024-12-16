@@ -1,6 +1,4 @@
-package types
-
-import "github.com/jhachmer/gotocollection/pkg/media"
+package media
 
 type Entry struct {
 	ID      int64
@@ -11,7 +9,7 @@ type Entry struct {
 }
 
 func NewEntryFromId(name, imdb, comment string, watched bool) (*Entry, error) {
-	movReq, err := media.NewOmdbIDRequest(imdb)
+	movReq, err := NewOmdbIDRequest(imdb)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +26,7 @@ func NewEntryFromId(name, imdb, comment string, watched bool) (*Entry, error) {
 }
 
 func NewEntryFromTitleAndYear(name, title, year, comment string, watched bool) (*Entry, error) {
-	movReq, err := media.NewOmdbTitleRequest(title, year)
+	movReq, err := NewOmdbTitleRequest(title, year)
 	if err != nil {
 		return nil, err
 	}
