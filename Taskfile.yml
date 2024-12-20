@@ -3,8 +3,8 @@ version: 3
 
 vars:
   dir: ./bin/
-  app_name_windows: goto_svr.exe
-  app_name_unix: goto_svr
+  app_name_windows: golist_svr.exe
+  app_name_unix: golist_svr
   main_file: ./cmd/goList/main.go
 
 tasks:
