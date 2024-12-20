@@ -1,3 +1,4 @@
+// Package config initialises config variables used in application
 package config
 
 import (
@@ -5,6 +6,7 @@ import (
 	"os"
 )
 
+// Config struct holds fields set by environment variables
 type Config struct {
 	Addr       string
 	OmdbApiKey string
@@ -19,6 +21,8 @@ func initConfig() Config {
 	}
 }
 
+// GetEnv retrieves environment variable with name `key`
+// if not present will use fallback value
 func GetEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
