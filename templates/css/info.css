@@ -1,24 +1,21 @@
-/* Base styles */
+
 html, body {
     margin: 0;
     padding: 0;
     height: 100%;
     width: 100%;
-    box-sizing: border-box; /* Include borders in the total dimensions */
+    box-sizing: border-box;
 }
 
 body {
     font-family: Arial, sans-serif;
     background-color: #34495e;
     color: #333;
-    width: 100vw; /* Ensures the width spans the entire viewport */
-    height: 100%; /* Allows the height to adjust based on content */
-    overflow: auto; /* Enables scrolling if the content overflows */
+    width: 100vw;
+    height: 100%;
+    overflow: auto;
 }
 
-
-
-/* Centered container for content */
 .container {
     display: flex;
     flex-direction: column;
@@ -26,7 +23,6 @@ body {
     justify-content: center;
 }
 
-/* Header styles */
 h1 {
     text-align: center;
     color: #2c3e50;
@@ -34,7 +30,7 @@ h1 {
     background-color: #ecf0f1;
     padding: 10px;
     margin: 20px 0;
-    border: 5px solid #333; /* Use thicker border if needed */
+    border: 5px solid #333;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -45,12 +41,11 @@ h1 {
     background-color: #ecf0f1;
     padding: 10px;
     margin: 20px 0;
-    border: 5px solid #333; /* Use thicker border if needed */
+    border: 5px solid #333;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Image styles */
 img {
     display: block;
     margin: 20px auto;
@@ -60,19 +55,18 @@ img {
     border-radius: 8px;
 }
 
-/* Flexbox for content lists */
 .content-box {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 20px;
     width: 100%;
-    max-width: 1200px; /* This will control the width */
+    max-width: 1200px;
 }
 
-/* Details list styles */
+
 .details-list {
-    flex: 1; /* Equal width */
+    flex: 1;
     list-style-type: none;
     padding: 0;
     margin: 0;
@@ -97,9 +91,8 @@ img {
     border-bottom: none;
 }
 
-/* Ratings box styles */
 .ratings-box {
-    flex: 1; /* Equal width */
+    flex: 1;
     background-color: #ecf0f1;
     padding: 1px;
     border-radius: 8px;
@@ -109,7 +102,7 @@ img {
 .ratings-box h2 {
     text-align: center;
     color: #2c3e50;
-    margin: 15px; /* Remove extra spacing */
+    margin: 15px;
 }
 
 .ratings-box ul {
@@ -133,38 +126,34 @@ img {
     border-bottom: none;
 }
 
-/* Info box */
 .info-box {
-    flex: 1; /* Equal width */
+    flex: 1;
     display: flex;
-    flex-direction: column; /* Stack header and list vertically */
-    gap: 0; /* No gap for seamless transition */
+    flex-direction: column;
+    gap: 0;
     padding: 1px;
 }
 
-/* Header styles inside info-box */
 .info-box h2 {
-    text-align: center; /* Align text with list items */
-    margin: 0; /* Remove extra spacing */
-    padding: 15px; /* Consistent padding with list items */
+    text-align: center;
+    margin: 0;
+    padding: 15px;
     color: #2c3e50;
     background-color: #f1f8ff;
     border: 4px solid #333;
     border-bottom: 0;
-    /* Subtle border for transition */
 }
 
-/* Details list styles */
 .details-list {
-    flex: 1; /* Equal width */
+    flex: 1;
     list-style-type: none;
     padding: 0;
     margin: 0;
     background-color: #ffffff;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 0 0 8px 8px; /* Rounded corners only at the bottom */
+    border-radius: 0 0 8px 8px;
     border: 4px solid #333;
-    border-top: none; /* Seamless connection with the header */
+    border-top: none;
 }
 
 .details-list li {
@@ -183,7 +172,6 @@ img {
 }
 
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .content-box {
         flex-direction: column;
@@ -195,18 +183,15 @@ img {
     }
 }
 
-/* New form box styles */
 .form-box {
-    flex: 1; /* Equal width */
+    flex: 1;
     background-color: #ecf0f1;
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border: 4px solid #333;
-    /*margin-top: 20px;*/
 }
 
-/* Form element styles */
 .form-box h2 {
     text-align: center;
     color: #2c3e50;
@@ -249,15 +234,12 @@ img {
     background-color: #2980b9;
 }
 
-/* Ensure the form box and other elements are responsive */
 @media (max-width: 768px) {
     .form-box {
         margin-top: 20px;
     }
 }
-/* Feedback box styles */
-/* Make all boxes align horizontally in the content-box */
-/* Flex container for main content */
+
 .content-box {
     display: flex;
     justify-content: space-between;
@@ -267,9 +249,8 @@ img {
     max-width: 75%;
 }
 
-/* Info box styles */
 .info-box {
-    flex: 1; /* Takes 1/3 of the space */
+    flex: 1;
     display: flex;
     flex-direction: column;
     padding: 1px;
@@ -296,11 +277,10 @@ img {
     border-top: none;
 }
 
-/* Center box containing ratings and feedback */
 .center-box {
-    flex: 1; /* Takes 1/3 of the space */
+    flex: 1;
     display: flex;
-    flex-direction: column; /* Stack ratings on top of feedback */
+    flex-direction: column;
     gap: 20px;
 }
 
@@ -335,9 +315,8 @@ img {
     background-color: #d6eaf8;
 }
 
-/* Form box styles */
 .form-box {
-    flex: 1; /* Takes 1/3 of the space */
+    flex: 1;
     background-color: #ecf0f1;
     padding: 15px;
     border-radius: 8px;
@@ -351,7 +330,6 @@ img {
     margin: 0 0 15px;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .content-box {
         flex-direction: column;
@@ -359,15 +337,15 @@ img {
     }
 
     .center-box {
-        order: 2; /* Keep ratings and feedback in the middle */
+        order: 2;
     }
 
     .form-box {
-        order: 3; /* Form comes last */
+        order: 3;
         margin-top: 20px;
     }
 }
 
 .plot {
-    line-height: 1.5; /* More line height for longer plot text */
+    line-height: 1.5;
 }
