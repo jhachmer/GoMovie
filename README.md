@@ -1,5 +1,6 @@
 # GoList
-![gopher](assets/gopher_small.png "https://gopherize.me/")
+<div style="text-align:center"><img alt="gopherize.me" src="assets/gopher_small.png" /></div>
+
 ## About
 GoList is a basic web app I build for personal use.
 Someday it is supposed to be an app to manage a watchlist in the browser saving data regarding
