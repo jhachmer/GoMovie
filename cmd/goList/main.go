@@ -1,12 +1,14 @@
 package main
 
 import (
-	"database/sql"
-	"github.com/jhachmer/gotocollection/pkg/config"
-	"github.com/jhachmer/gotocollection/pkg/server"
-	"github.com/jhachmer/gotocollection/pkg/store"
+	"github.com/jhachmer/gotocollection/internal/cache"
+	"github.com/jhachmer/gotocollection/internal/config"
+	"github.com/jhachmer/gotocollection/internal/media"
+	"github.com/jhachmer/gotocollection/internal/server"
+	"github.com/jhachmer/gotocollection/internal/store"
 	"log"
 	"os"
+	"time"
 )
 
 func main() {
@@ -16,24 +18,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 	dbStore := store.NewStore(db)
-	testDBConnection(db)
+	dbStore.TestDBConnection()
 	err = dbStore.InitDatabase()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	handler := server.NewHandler(dbStore)
+	movC := cache.NewCache[string, *media.Movie](time.Second*15, time.Second*60, nil)
+	handler := server.NewHandler(dbStore, movC)
 
 	svr := server.NewServer(config.Envs.Addr, logger, handler)
 	svr.Serve()
-}
-
-func testDBConnection(db *sql.DB) {
-	err := db.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("connected to DB...")
 }
