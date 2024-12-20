@@ -1,10 +1,12 @@
 package media
 
+// Rating holds rating data, which are pairs of Source and the actual rating value
 type Rating struct {
 	Source string `json:"Source"`
 	Value  string `json:"Value"`
 }
 
+// Media struct holds data acquired from omdb api
 type Media struct {
 	Title      string   `json:"Title"`
 	Year       string   `json:"Year"`
@@ -31,7 +33,6 @@ type Media struct {
 	Response   string   `json:"Response"`
 }
 
-// Movie struct for fields in an OMDb API response
 type Movie struct {
 	Media
 }
@@ -41,4 +42,30 @@ type Series struct {
 	TotalSeasons string `json:"totalSeasons"`
 }
 
-// Rating is a nested object in an OMDb Response
+// NewMovieFromID returns pointer to a new movie instance
+// creates a new OmdbIDRequest and sends it to receive data
+func NewMovieFromID(imdbID string) (*Movie, error) {
+	req, err := NewOmdbIDRequest(imdbID)
+	if err != nil {
+		return nil, err
+	}
+	mov, err := req.SendRequest()
+	if err != nil {
+		return nil, err
+	}
+	return mov, nil
+}
+
+// NewMovieFromTitleAndYear returns pointer to a new movie instance
+// creates a new OmdbTitleRequest and sends it to receive data
+func NewMovieFromTitleAndYear(title, year string) (*Movie, error) {
+	req, err := NewOmdbTitleRequest(title, year)
+	if err != nil {
+		return nil, err
+	}
+	mov, err := req.SendRequest()
+	if err != nil {
+		return nil, err
+	}
+	return mov, nil
+}
