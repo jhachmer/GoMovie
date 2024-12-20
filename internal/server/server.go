@@ -12,7 +12,7 @@ type Server struct {
 	Handler *Handler
 }
 
-// NewServer returns a new Server instance with given Address and Logger values
+// NewServer returns a new Server instance with given Address and Logger and Handler values
 func NewServer(addr string, logger *log.Logger, handler *Handler) *Server {
 	svr := &Server{
 		Addr:    addr,
@@ -27,7 +27,7 @@ func NewServer(addr string, logger *log.Logger, handler *Handler) *Server {
 func (svr *Server) setupRoutes(mux *http.ServeMux) {
 	fileServer := http.FileServer(http.Dir("./templates/"))
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
-	
+
 	mux.HandleFunc("GET /health", Chain(svr.Handler.HealthHandler, Logging(svr.Logger)))
 	mux.HandleFunc("GET /films/{imdb}", Chain(svr.Handler.InfoIDHandler, Logging(svr.Logger)))
 	mux.HandleFunc("GET /films/{title}/{year}", Chain(svr.Handler.InfoTitleYearHandler, Logging(svr.Logger)))

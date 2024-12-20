@@ -2,28 +2,34 @@ package media
 
 import (
 	"fmt"
-	"github.com/jhachmer/gotocollection/pkg/config"
-	"github.com/jhachmer/gotocollection/pkg/util"
+	"github.com/jhachmer/gotocollection/internal/config"
+	"github.com/jhachmer/gotocollection/internal/util"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
 )
 
+// OmdbRequest is an interface that defines the methods required for interacting with the OMDB API.
+// - SendRequest: Sends a request to the OMDB API and returns the corresponding movie details or an error.
+// - Validate: Performs validation on the request parameters to ensure they meet the requirements of the OMDB API.
 type OmdbRequest interface {
 	SendRequest() (*Movie, error)
 	Validate() error
 }
 
+// OmdbIDRequest is a request using the movies IMDb ID
 type OmdbIDRequest struct {
 	imdbID string
 }
 
+// OmdbTitleRequest is a request using the movies title and year
 type OmdbTitleRequest struct {
 	title string
 	year  string
 }
 
+// NewOmdbIDRequest returns a pointer to a new OmdbIDRequest
 func NewOmdbIDRequest(imdbID string) (*OmdbIDRequest, error) {
 	req := OmdbIDRequest{
 		imdbID: imdbID,
@@ -35,6 +41,7 @@ func NewOmdbIDRequest(imdbID string) (*OmdbIDRequest, error) {
 	return &req, nil
 }
 
+// NewOmdbTitleRequest returns a pointer to a new OmdbTitleRequest
 func NewOmdbTitleRequest(title, year string) (*OmdbTitleRequest, error) {
 	req := OmdbTitleRequest{
 		title: title,
@@ -47,6 +54,7 @@ func NewOmdbTitleRequest(title, year string) (*OmdbTitleRequest, error) {
 	return &req, nil
 }
 
+// SendRequest returns movie data of movie in OmdbTitleRequest
 func (r OmdbTitleRequest) SendRequest() (*Movie, error) {
 	requestURL, err := makeRequestURL(r)
 	if err != nil {
@@ -60,6 +68,7 @@ func (r OmdbTitleRequest) SendRequest() (*Movie, error) {
 	return &mov, nil
 }
 
+// SendRequest returns movie data of movie in OmdbIDRequest
 func (r OmdbIDRequest) SendRequest() (*Movie, error) {
 	requestURL, err := makeRequestURL(r)
 	if err != nil {
@@ -73,6 +82,9 @@ func (r OmdbIDRequest) SendRequest() (*Movie, error) {
 	return &mov, nil
 }
 
+// Validate validates title and year in request
+// Title must not be empty
+// Year must be 4 digits
 func (r OmdbTitleRequest) Validate() error {
 	if len(r.title) < 1 {
 		return fmt.Errorf("title %s is not valid", r.title)
@@ -83,13 +95,21 @@ func (r OmdbTitleRequest) Validate() error {
 	return nil
 }
 
+// Validate validates IMDB id in request
+// ID must have:
+// - 7 or 8 digits
+// - two leading tt characters
 func (r OmdbIDRequest) Validate() error {
-	if !regexp.MustCompile(`tt\d{7,8}$`).MatchString(r.imdbID) {
+	if !regexp.MustCompile(`^tt\d{7,8}$`).MatchString(r.imdbID) {
 		return fmt.Errorf("id %s is not a valid id", r.imdbID)
 	}
 	return nil
 }
 
+// makeRequestURL is building request URL depending on request type
+// OMDB_KEY environment variable must be set
+// id requests use i=id query
+// title requests is using t=title and y=year queries
 func makeRequestURL(r OmdbRequest) (string, error) {
 	if config.Envs.OmdbApiKey == "" {
 		return "", fmt.Errorf("OMDb API is not set")
