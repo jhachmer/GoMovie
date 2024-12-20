@@ -1,0 +1,373 @@
+/* Base styles */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box; /* Include borders in the total dimensions */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #34495e;
+    color: #333;
+    width: 100vw; /* Ensures the width spans the entire viewport */
+    height: 100%; /* Allows the height to adjust based on content */
+    overflow: auto; /* Enables scrolling if the content overflows */
+}
+
+
+
+/* Centered container for content */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Header styles */
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    font-size: 2rem;
+    background-color: #ecf0f1;
+    padding: 10px;
+    margin: 20px 0;
+    border: 5px solid #333; /* Use thicker border if needed */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.imdbid h2 {
+    text-align: center;
+    color: #2c3e50;
+    background-color: #ecf0f1;
+    padding: 10px;
+    margin: 20px 0;
+    border: 5px solid #333; /* Use thicker border if needed */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Image styles */
+img {
+    display: block;
+    margin: 20px auto;
+    max-width: 90%;
+    height: auto;
+    border: 5px solid #333;
+    border-radius: 8px;
+}
+
+/* Flexbox for content lists */
+.content-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px; /* This will control the width */
+}
+
+/* Details list styles */
+.details-list {
+    flex: 1; /* Equal width */
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    border: 4px solid #333;
+}
+
+.details-list li {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    background-color: #f1f8ff;
+    color: #34495e;
+}
+
+.details-list li:nth-child(odd) {
+    background-color: #d6eaf8;
+}
+
+.details-list li:last-child {
+    border-bottom: none;
+}
+
+/* Ratings box styles */
+.ratings-box {
+    flex: 1; /* Equal width */
+    background-color: #ecf0f1;
+    padding: 1px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 4px solid #333;}
+
+.ratings-box h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin: 15px; /* Remove extra spacing */
+}
+
+.ratings-box ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ratings-box li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    background-color: #f1f8ff;
+    color: #34495e;
+}
+
+.ratings-box li:nth-child(odd) {
+    background-color: #d6eaf8;
+}
+
+.ratings-box li:last-child {
+    border-bottom: none;
+}
+
+/* Info box */
+.info-box {
+    flex: 1; /* Equal width */
+    display: flex;
+    flex-direction: column; /* Stack header and list vertically */
+    gap: 0; /* No gap for seamless transition */
+    padding: 1px;
+}
+
+/* Header styles inside info-box */
+.info-box h2 {
+    text-align: center; /* Align text with list items */
+    margin: 0; /* Remove extra spacing */
+    padding: 15px; /* Consistent padding with list items */
+    color: #2c3e50;
+    background-color: #f1f8ff;
+    border: 4px solid #333;
+    border-bottom: 0;
+    /* Subtle border for transition */
+}
+
+/* Details list styles */
+.details-list {
+    flex: 1; /* Equal width */
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 8px 8px; /* Rounded corners only at the bottom */
+    border: 4px solid #333;
+    border-top: none; /* Seamless connection with the header */
+}
+
+.details-list li {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    background-color: #f1f8ff;
+    color: #34495e;
+}
+
+.details-list li:nth-child(odd) {
+    background-color: #d6eaf8;
+}
+
+.details-list li:last-child {
+    border-bottom: none;
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .content-box {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .ratings-box {
+        margin-top: 20px;
+    }
+}
+
+/* New form box styles */
+.form-box {
+    flex: 1; /* Equal width */
+    background-color: #ecf0f1;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 4px solid #333;
+    /*margin-top: 20px;*/
+}
+
+/* Form element styles */
+.form-box h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin: 0 0 15px;
+}
+
+.form-box label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #34495e;
+}
+
+.form-box input[type="text"],
+.form-box textarea {
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #34495e;
+}
+
+.form-box textarea {
+    resize: vertical;
+}
+
+.form-box button {
+    padding: 10px 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.form-box button:hover {
+    background-color: #2980b9;
+}
+
+/* Ensure the form box and other elements are responsive */
+@media (max-width: 768px) {
+    .form-box {
+        margin-top: 20px;
+    }
+}
+/* Feedback box styles */
+/* Make all boxes align horizontally in the content-box */
+/* Flex container for main content */
+.content-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+    max-width: 75%;
+}
+
+/* Info box styles */
+.info-box {
+    flex: 1; /* Takes 1/3 of the space */
+    display: flex;
+    flex-direction: column;
+    padding: 1px;
+}
+
+.info-box h2 {
+    text-align: center;
+    margin: 0;
+    padding: 15px;
+    color: #2c3e50;
+    background-color: #f1f8ff;
+    border: 4px solid #333;
+    border-bottom: 0;
+}
+
+.details-list {
+    flex: 1;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    background-color: #ffffff;
+    border-radius: 0 0 8px 8px;
+    border: 4px solid #333;
+    border-top: none;
+}
+
+/* Center box containing ratings and feedback */
+.center-box {
+    flex: 1; /* Takes 1/3 of the space */
+    display: flex;
+    flex-direction: column; /* Stack ratings on top of feedback */
+    gap: 20px;
+}
+
+.ratings-box, .feedback-box {
+    background-color: #ecf0f1;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 4px solid #333;
+}
+
+.ratings-box h2, .feedback-box h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin: 0 0 15px;
+}
+
+.ratings-box ul, .feedback-box ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ratings-box li, .feedback-box li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    background-color: #f1f8ff;
+    color: #34495e;
+}
+
+.ratings-box li:nth-child(odd), .feedback-box li:nth-child(odd) {
+    background-color: #d6eaf8;
+}
+
+/* Form box styles */
+.form-box {
+    flex: 1; /* Takes 1/3 of the space */
+    background-color: #ecf0f1;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 4px solid #333;
+}
+
+.form-box h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin: 0 0 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .content-box {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .center-box {
+        order: 2; /* Keep ratings and feedback in the middle */
+    }
+
+    .form-box {
+        order: 3; /* Form comes last */
+        margin-top: 20px;
+    }
+}
+
+.plot {
+    line-height: 1.5; /* More line height for longer plot text */
+}
