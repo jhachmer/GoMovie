@@ -1,5 +1,5 @@
 # GoList
-<div style="text-align:center"><img alt="gopherize.me" src="assets/gopher_small.png" /></div>
+![gopher](assets/gopher_small.png "https://gopherize.me/")
 
 ## About
 GoList is a basic web app I build for personal use.
@@ -9,8 +9,11 @@ Currently, there is only an info page accessible by a movies IMDb ID or Title an
 
 ### TODO:
   - Index Page
-  - Search
+  - Search Bar
+    - search for genres, year, already watched etc.
   - Delete Entries
+  - Split Genres and Actors
+    - separate db tables for them
 
 ### Routes:
 - GET /health : returns healthy if server is running
