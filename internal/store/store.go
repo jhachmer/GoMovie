@@ -4,9 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/jhachmer/gotocollection/internal/types"
 	"log"
-
-	"github.com/jhachmer/gotocollection/internal/media"
 )
 
 type Storage struct {
@@ -14,10 +13,11 @@ type Storage struct {
 }
 type Store interface {
 	InitDatabase() error
-	CreateEntry(entry *media.InfoPage) (*media.InfoPage, error)
-	GetEntries(id string) ([]media.InfoPage, error)
-	CreateMovie(mov media.Movie) (*media.Movie, error)
-	GetMovie(id string) (*media.Movie, error)
+	CreateEntry(*types.Entry, *types.Movie) (*types.Entry, error)
+	GetEntries(string) ([]*types.Entry, error)
+	CreateMovie(*types.Movie) (*types.Movie, error)
+	GetMovie(id string) (*types.Movie, error)
+	GetAllMovies() ([]*types.Movie, error)
 }
 
 func NewStore(db *sql.DB) *Storage {
@@ -84,7 +84,7 @@ func (s *Storage) InitDatabase() error {
 	return nil
 }
 
-func (s *Storage) CreateEntry(e *media.Entry, mov *media.Movie) (*media.Entry, error) {
+func (s *Storage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, error) {
 	var exists bool
 	row := s.db.QueryRow(`SELECT EXISTS(SELECT movies.title FROM movies WHERE movies.id = ?)`, mov.ImdbID)
 	if err := row.Scan(&exists); err != nil {
@@ -110,21 +110,20 @@ func (s *Storage) CreateEntry(e *media.Entry, mov *media.Movie) (*media.Entry, e
 	if err != nil {
 		return nil, err
 	}
-
 	return e, nil
 }
 
-func (s *Storage) GetEntries(id string) ([]*media.Entry, error) {
+func (s *Storage) GetEntries(id string) ([]*types.Entry, error) {
 	rows, err := s.db.Query(`SELECT id, name, watched, comment FROM entries WHERE movie_id = ?`, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var entries []*media.Entry
+	var entries []*types.Entry
 
 	for rows.Next() {
-		var entry media.Entry
+		var entry types.Entry
 		if err := rows.Scan(&entry.ID, &entry.Name, &entry.Watched, &entry.Comment); err != nil {
 			return nil, err
 		}
@@ -136,7 +135,7 @@ func (s *Storage) GetEntries(id string) ([]*media.Entry, error) {
 	return entries, nil
 }
 
-func (s *Storage) CreateMovie(m *media.Movie) (*media.Movie, error) {
+func (s *Storage) CreateMovie(m *types.Movie) (*types.Movie, error) {
 	_, err := s.db.Exec(`INSERT INTO movies (id, title, year, genre, actors, director, runtime, rated, released, plot, poster)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		m.ImdbID, m.Title, m.Year, m.Genre, m.Actors, m.Director, m.Runtime, m.Rated, m.Released, m.Plot, m.Poster)
@@ -154,8 +153,8 @@ func (s *Storage) CreateMovie(m *media.Movie) (*media.Movie, error) {
 	return m, nil
 }
 
-func (s *Storage) GetMovie(id string) (*media.Movie, error) {
-	var mov media.Movie
+func (s *Storage) GetMovie(id string) (*types.Movie, error) {
+	var mov types.Movie
 	if err := s.db.QueryRow(`SELECT * FROM movies WHERE id = ?`, id).Scan(&mov.ImdbID, &mov.Title, &mov.Year, &mov.Genre, &mov.Actors, &mov.Director, &mov.Runtime, &mov.Rated, &mov.Released, &mov.Plot, &mov.Poster); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("could not find movie with id %s", id)
@@ -170,17 +169,39 @@ func (s *Storage) GetMovie(id string) (*media.Movie, error) {
 	return &mov, nil
 }
 
-func (s *Storage) getRatings(id string) ([]media.Rating, error) {
+func (s *Storage) GetAllMovies() ([]*types.Movie, error) {
+	rows, err := s.db.Query(`SELECT id, title, year FROM movies ORDER BY title`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var movies []*types.Movie
+
+	for rows.Next() {
+		var movie types.Movie
+		if err := rows.Scan(&movie.ImdbID, &movie.Title, &movie.Year); err != nil {
+			return nil, err
+		}
+		movies = append(movies, &movie)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return movies, nil
+}
+
+func (s *Storage) getRatings(id string) ([]types.Rating, error) {
 	rows, err := s.db.Query(`SELECT source, value FROM ratings WHERE movie_id = ?`, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var ratings []media.Rating
+	var ratings []types.Rating
 
 	for rows.Next() {
-		var rating media.Rating
+		var rating types.Rating
 		if err := rows.Scan(&rating.Source, &rating.Value); err != nil {
 			return nil, err
 		}
