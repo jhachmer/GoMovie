@@ -1,4 +1,4 @@
-package media
+package types
 
 import (
 	"github.com/jhachmer/gotocollection/internal/config"

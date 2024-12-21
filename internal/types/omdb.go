@@ -1,4 +1,4 @@
-package media
+package types
 
 import (
 	"fmt"
@@ -109,7 +109,7 @@ func (r OmdbIDRequest) Validate() error {
 // makeRequestURL is building request URL depending on request type
 // OMDB_KEY environment variable must be set
 // id requests use i=id query
-// title requests is using t=title and y=year queries
+// title requests are using t=title and y=year queries
 func makeRequestURL(r OmdbRequest) (string, error) {
 	if config.Envs.OmdbApiKey == "" {
 		return "", fmt.Errorf("OMDb API is not set")
