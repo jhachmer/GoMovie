@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/jhachmer/gotocollection/internal/handlers"
 	"log"
 	"net/http"
 )
@@ -9,11 +10,11 @@ import (
 type Server struct {
 	Addr    string
 	Logger  *log.Logger
-	Handler *Handler
+	Handler *handlers.Handler
 }
 
 // NewServer returns a new Server instance with given Address and Logger and Handler values
-func NewServer(addr string, logger *log.Logger, handler *Handler) *Server {
+func NewServer(addr string, logger *log.Logger, handler *handlers.Handler) *Server {
 	svr := &Server{
 		Addr:    addr,
 		Logger:  logger,
@@ -31,7 +32,7 @@ func (svr *Server) setupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /health", Chain(svr.Handler.HealthHandler, Logging(svr.Logger)))
 	mux.HandleFunc("GET /films/{imdb}", Chain(svr.Handler.InfoIDHandler, Logging(svr.Logger)))
 	mux.HandleFunc("GET /films/{title}/{year}", Chain(svr.Handler.InfoTitleYearHandler, Logging(svr.Logger)))
-	mux.HandleFunc("GET /{$}", Chain(svr.Handler.HomeHandler, Logging(svr.Logger)))
+	mux.HandleFunc("GET /overview", Chain(svr.Handler.HomeHandler, Logging(svr.Logger)))
 
 	mux.HandleFunc("POST /films/{imdb}", Chain(svr.Handler.CreateEntryHandler, Logging(svr.Logger)))
 }
