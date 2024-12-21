@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Movies Overview - GoTo</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="/static/css/overview.css">
+    <link rel="stylesheet" href="/static/css/bar.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="top-bar">
+    <a href="/overview"><img src="/static/images/gopher.png" alt="Logo"></a>
+    <div class="info">
+        <b>Movies Overview</b>
+    </div>
+</div>
+
+<div class="container">
+    <h1>All Movies</h1>
+    <div class="movies-grid">
+        {{range $val := .}}
+        <div class="movie-card">
+            <a href="/films/{{$val.ImdbID}}">
+                <div class="movie-info">
+                    <h2>{{ $val.Title}}</h2>
+                    <p>Year: {{$val.Year}}</p>
+                    <p>ID: {{$val.ImdbID}}</p>
+                </div>
+            </a>
+        </div>
+        {{end}}
+    </div>
+</div>
+
+</body>
+</html>

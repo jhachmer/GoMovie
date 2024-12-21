@@ -4,10 +4,19 @@
     <title>{{.Movie.Title}} ({{.Movie.Year}}) - GoTo</title>
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
     <link rel="stylesheet" href="/static/css/info.css">
+    <link rel="stylesheet" href="/static/css/bar.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+<div class="top-bar">
+    <a href="/overview"><img src="/static/images/gopher.png" alt="Logo"></a>
+    <div class="info">
+        <b>{{.Movie.Title}} ({{.Movie.Year}})</b>
+        <span><a href="https://www.imdb.com/de/title/{{ .Movie.ImdbID }}"><i>ID:{{.Movie.ImdbID}}</i></a></span>
+    </div>
+</div>
+
 <div class="container">
-    <h1>{{ .Movie.Title }} ({{ .Movie.Year }}) | {{ .Movie.ImdbID }}</h1>
     <img src="{{.Movie.Poster}}" alt="Movie Poster">
     <div class="content-box">
         <!-- Info list -->
