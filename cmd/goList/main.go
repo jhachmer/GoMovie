@@ -3,9 +3,10 @@ package main
 import (
 	"github.com/jhachmer/gotocollection/internal/cache"
 	"github.com/jhachmer/gotocollection/internal/config"
-	"github.com/jhachmer/gotocollection/internal/media"
+	"github.com/jhachmer/gotocollection/internal/handlers"
 	"github.com/jhachmer/gotocollection/internal/server"
 	"github.com/jhachmer/gotocollection/internal/store"
+	"github.com/jhachmer/gotocollection/internal/types"
 	"log"
 	"os"
 	"time"
@@ -24,8 +25,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	movC := cache.NewCache[string, *media.Movie](time.Second*15, time.Second*60, nil)
-	handler := server.NewHandler(dbStore, movC)
+	movC := cache.NewCache[string, *types.Movie](time.Second*15, time.Second*60, nil)
+	handler := handlers.NewHandler(dbStore, movC)
 
 	svr := server.NewServer(config.Envs.Addr, logger, handler)
 	svr.Serve()
