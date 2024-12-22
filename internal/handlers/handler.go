@@ -14,14 +14,16 @@ var validPath = regexp.MustCompile("^tt\\d{7,8}$")
 var validYear = regexp.MustCompile("^(19|20)\\d{2}$")
 
 type Handler struct {
+	logger   *log.Logger
 	store    store.Store
 	movCache *cache.Cache[string, *types.Movie]
 }
 
-func NewHandler(store store.Store, movC *cache.Cache[string, *types.Movie]) *Handler {
+func NewHandler(store store.Store, movC *cache.Cache[string, *types.Movie], logger *log.Logger) *Handler {
 	return &Handler{
 		store:    store,
 		movCache: movC,
+		logger:   logger,
 	}
 }
 
