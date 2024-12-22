@@ -14,6 +14,8 @@ Currently, there is only an info page accessible by a movies IMDb ID or Title an
   - Delete Entries
   - Split Genres and Actors
     - separate db tables for them
+  - Update Button for new movie info (poster, ratings)
+  - Color Grading of rows
 
 ### Routes:
 - GET /health : returns healthy if server is running
