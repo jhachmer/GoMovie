@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/jhachmer/gotocollection/internal/util"
 	"net/http"
+
+	"github.com/jhachmer/gotocollection/internal/util"
 )
 
 func (h *Handler) HealthHandler(w http.ResponseWriter, r *http.Request) {

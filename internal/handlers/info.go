@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/jhachmer/gotocollection/internal/types"
 	"log"
 	"net/http"
+
+	"github.com/jhachmer/gotocollection/internal/types"
 )
 
 func (h *Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {

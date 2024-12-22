@@ -3,17 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
+	"os"
+	"os/signal"
+	"time"
+
 	"github.com/jhachmer/gotocollection/internal/cache"
 	"github.com/jhachmer/gotocollection/internal/config"
 	"github.com/jhachmer/gotocollection/internal/handlers"
 	"github.com/jhachmer/gotocollection/internal/server"
 	"github.com/jhachmer/gotocollection/internal/store"
 	"github.com/jhachmer/gotocollection/internal/types"
-	"io"
-	"log"
-	"os"
-	"os/signal"
-	"time"
 )
 
 func main() {

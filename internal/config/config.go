@@ -2,8 +2,9 @@
 package config
 
 import (
-	_ "github.com/joho/godotenv/autoload"
 	"os"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 // Config struct holds fields set by environment variables

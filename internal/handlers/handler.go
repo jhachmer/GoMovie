@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/jhachmer/gotocollection/internal/cache"
-	"github.com/jhachmer/gotocollection/internal/store"
-	"github.com/jhachmer/gotocollection/internal/types"
 	"log"
 	"net/http"
 	"regexp"
+
+	"github.com/jhachmer/gotocollection/internal/cache"
+	"github.com/jhachmer/gotocollection/internal/store"
+	"github.com/jhachmer/gotocollection/internal/types"
 )
 
 var validPath = regexp.MustCompile("^tt\\d{7,8}$")

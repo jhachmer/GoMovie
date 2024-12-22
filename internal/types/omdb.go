@@ -2,12 +2,13 @@ package types
 
 import (
 	"fmt"
-	"github.com/jhachmer/gotocollection/internal/config"
-	"github.com/jhachmer/gotocollection/internal/util"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/jhachmer/gotocollection/internal/config"
+	"github.com/jhachmer/gotocollection/internal/util"
 )
 
 // OmdbRequest is an interface that defines the methods required for interacting with the OMDB API.

@@ -1,8 +1,9 @@
 package types
 
 import (
-	"github.com/jhachmer/gotocollection/internal/config"
 	"testing"
+
+	"github.com/jhachmer/gotocollection/internal/config"
 )
 
 func TestMain(m *testing.M) {
