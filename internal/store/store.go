@@ -4,8 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/jhachmer/gotocollection/internal/types"
 	"log"
+
+	"github.com/jhachmer/gotocollection/internal/types"
+	"github.com/jhachmer/gotocollection/internal/util"
 )
 
 type Storage struct {
@@ -44,8 +46,6 @@ func (s *Storage) InitDatabase() error {
 		id VARCHAR(9) NOT NULL,
 		title VARCHAR(255) NOT NULL,
 		year VARCHAR(255) NOT NULL,
-		genre VARCHAR(255) NOT NULL,
-		actors VARCHAR(500) NOT NULL,
     	director VARCHAR(500) NOT NULL,
     	runtime VARCHAR(500) NOT NULL,
     	rated VARCHAR(255) NOT NULL,
@@ -78,6 +78,41 @@ func (s *Storage) InitDatabase() error {
 
 		FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE SET NULL
 		);`)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Exec(`CREATE TABLE IF NOT EXISTS genres (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(255) NOT NULL UNIQUE
+	);`)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Exec(`CREATE TABLE IF NOT EXISTS actors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(255) NOT NULL UNIQUE
+	);`)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Exec(`CREATE TABLE IF NOT EXISTS movies_genres (
+    movie_id VARCHAR(9) NOT NULL,
+    genre_id INTEGER NOT NULL,
+    PRIMARY KEY (movie_id, genre_id),
+    FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
+    FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE CASCADE
+);`)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Exec(`CREATE TABLE IF NOT EXISTS movies_actors (
+    movie_id VARCHAR(9) NOT NULL,
+    actor_id INTEGER NOT NULL,
+    PRIMARY KEY (movie_id, actor_id),
+    FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
+    FOREIGN KEY (actor_id) REFERENCES actors(id) ON DELETE CASCADE
+);
+`)
 	if err != nil {
 		return err
 	}
@@ -136,26 +171,27 @@ func (s *Storage) GetEntries(id string) ([]*types.Entry, error) {
 }
 
 func (s *Storage) CreateMovie(m *types.Movie) (*types.Movie, error) {
-	_, err := s.db.Exec(`INSERT INTO movies (id, title, year, genre, actors, director, runtime, rated, released, plot, poster)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		m.ImdbID, m.Title, m.Year, m.Genre, m.Actors, m.Director, m.Runtime, m.Rated, m.Released, m.Plot, m.Poster)
+	_, err := s.db.Exec(`INSERT INTO movies (id, title, year, director, runtime, rated, released, plot, poster)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		m.ImdbID, m.Title, m.Year, m.Director, m.Runtime, m.Rated, m.Released, m.Plot, m.Poster)
 	if err != nil {
 		return nil, err
 	}
-	for _, rating := range m.Ratings {
-		_, err = s.db.Exec(`INSERT INTO ratings (movie_id, source, value)
-		VALUES (?, ?, ?)`,
-			m.ImdbID, rating.Source, rating.Value)
-		if err != nil {
-			return nil, err
-		}
+	err = s.createRatings(m, err)
+	if err != nil {
+		return nil, err
 	}
+	err = s.createGenres(m)
+	if err != nil {
+		return nil, err
+	}
+	err = s.createActors(m)
 	return m, nil
 }
 
 func (s *Storage) GetMovie(id string) (*types.Movie, error) {
 	var mov types.Movie
-	if err := s.db.QueryRow(`SELECT * FROM movies WHERE id = ?`, id).Scan(&mov.ImdbID, &mov.Title, &mov.Year, &mov.Genre, &mov.Actors, &mov.Director, &mov.Runtime, &mov.Rated, &mov.Released, &mov.Plot, &mov.Poster); err != nil {
+	if err := s.db.QueryRow(`SELECT * FROM movies WHERE id = ?`, id).Scan(&mov.ImdbID, &mov.Title, &mov.Year, &mov.Director, &mov.Runtime, &mov.Rated, &mov.Released, &mov.Plot, &mov.Poster); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("could not find movie with id %s", id)
 		}
@@ -166,6 +202,16 @@ func (s *Storage) GetMovie(id string) (*types.Movie, error) {
 		return nil, err
 	}
 	mov.Ratings = ratings
+	actors, err := s.getActors(id)
+	if err != nil {
+		return nil, err
+	}
+	mov.Actors = actors
+	genres, err := s.getGenres(id)
+	if err != nil {
+		return nil, err
+	}
+	mov.Genre = genres
 	return &mov, nil
 }
 
@@ -191,6 +237,18 @@ func (s *Storage) GetAllMovies() ([]*types.Movie, error) {
 	return movies, nil
 }
 
+func (s *Storage) createRatings(m *types.Movie, err error) error {
+	for _, rating := range m.Ratings {
+		_, err = s.db.Exec(`INSERT INTO ratings (movie_id, source, value)
+		VALUES (?, ?, ?)`,
+			m.ImdbID, rating.Source, rating.Value)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *Storage) getRatings(id string) ([]types.Rating, error) {
 	rows, err := s.db.Query(`SELECT source, value FROM ratings WHERE movie_id = ?`, id)
 	if err != nil {
@@ -211,4 +269,88 @@ func (s *Storage) getRatings(id string) ([]types.Rating, error) {
 		return nil, err
 	}
 	return ratings, nil
+}
+
+func (s *Storage) createGenres(m *types.Movie) error {
+	genres := util.SplitIMDBString(m.Genre)
+	for _, genre := range genres {
+		var genreID int64
+		err := s.db.QueryRow("SELECT id FROM genres WHERE name = ?", genre).Scan(&genreID)
+		if errors.Is(err, sql.ErrNoRows) {
+			res, err := s.db.Exec("INSERT OR IGNORE INTO genres (name) VALUES (?)", genre)
+			if err != nil {
+				return err
+			}
+			genreID, _ = res.LastInsertId()
+		}
+		_, err = s.db.Exec(`INSERT OR IGNORE INTO movies_genres (movie_id, genre_id) VALUES (?, ?);`, m.ImdbID, genreID)
+	}
+	return nil
+}
+
+func (s *Storage) getGenres(id string) (string, error) {
+	rows, err := s.db.Query(`SELECT g.name 
+		FROM genres g
+		JOIN movies_genres mg ON g.id = mg.genre_id
+		WHERE mg.movie_id = ?;
+		`, id)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+	var genres []string
+
+	for rows.Next() {
+		var genre string
+		if err := rows.Scan(&genre); err != nil {
+			return "", err
+		}
+		genres = append(genres, genre)
+	}
+	if err = rows.Err(); err != nil {
+		return "", err
+	}
+	return util.JoinIMDBStrings(genres), nil
+}
+
+func (s *Storage) createActors(m *types.Movie) error {
+	actors := util.SplitIMDBString(m.Actors)
+	for _, actor := range actors {
+		var actorID int64
+		err := s.db.QueryRow("SELECT id FROM actors WHERE name = ?", actor).Scan(&actorID)
+		if errors.Is(err, sql.ErrNoRows) {
+			res, err := s.db.Exec("INSERT OR IGNORE INTO actors (name) VALUES (?)", actor)
+			if err != nil {
+				return err
+			}
+			actorID, _ = res.LastInsertId()
+		}
+		_, err = s.db.Exec(`INSERT OR IGNORE INTO movies_actors (movie_id, actor_id) VALUES (?, ?);`, m.ImdbID, actorID)
+	}
+	return nil
+}
+
+func (s *Storage) getActors(id string) (string, error) {
+	rows, err := s.db.Query(`SELECT a.name 
+		FROM actors a
+		JOIN movies_actors ma ON a.id = ma.actor_id
+		WHERE ma.movie_id = ?;
+		`, id)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+	var actors []string
+
+	for rows.Next() {
+		var actor string
+		if err := rows.Scan(&actor); err != nil {
+			return "", err
+		}
+		actors = append(actors, actor)
+	}
+	if err = rows.Err(); err != nil {
+		return "", err
+	}
+	return util.JoinIMDBStrings(actors), nil
 }
