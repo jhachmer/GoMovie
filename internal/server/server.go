@@ -1,9 +1,12 @@
 package server
 
 import (
-	"github.com/jhachmer/gotocollection/internal/handlers"
+	"context"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/jhachmer/gotocollection/internal/handlers"
 )
 
 // Server struct with Address and Logger fields
@@ -38,9 +41,34 @@ func (svr *Server) setupRoutes(mux *http.ServeMux) {
 }
 
 // Serve calls setup functions and spins up the Server
-func (svr *Server) Serve() {
+func (svr *Server) Serve(ctx context.Context) error {
 	mux := http.NewServeMux()
 	svr.setupRoutes(mux)
-	svr.Logger.Println("Starting server on " + svr.Addr)
-	log.Fatal(http.ListenAndServe(svr.Addr, mux))
+
+	server := &http.Server{
+		Addr:    svr.Addr,
+		Handler: mux,
+	}
+
+	errCh := make(chan error, 1)
+
+	go func() {
+		svr.Logger.Println("Starting server on " + svr.Addr)
+		errCh <- server.ListenAndServe()
+	}()
+
+	select {
+	case <-ctx.Done():
+		svr.Logger.Println("Shutting down server gracefully...")
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			svr.Logger.Printf("Error during server shutdown: %v", err)
+			return err
+		}
+		svr.Logger.Println("Server stopped")
+		return ctx.Err()
+	case err := <-errCh:
+		return err
+	}
 }
