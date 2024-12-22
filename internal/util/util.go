@@ -63,3 +63,11 @@ func ExtractTitleAndYearFromPath(s string) (string, int, error) {
 	}
 	return title, year, nil
 }
+
+func SplitIMDBString(s string) []string {
+	return strings.Split(s, ", ")
+}
+
+func JoinIMDBStrings(s []string) string {
+	return strings.Join(s, ", ")
+}
