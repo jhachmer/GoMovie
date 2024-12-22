@@ -34,10 +34,6 @@ func NewOmdbIDRequest(imdbID string) (*OmdbIDRequest, error) {
 	req := OmdbIDRequest{
 		imdbID: imdbID,
 	}
-	err := req.Validate()
-	if err != nil {
-		return nil, err
-	}
 	return &req, nil
 }
 
@@ -46,10 +42,6 @@ func NewOmdbTitleRequest(title, year string) (*OmdbTitleRequest, error) {
 	req := OmdbTitleRequest{
 		title: title,
 		year:  year,
-	}
-	err := req.Validate()
-	if err != nil {
-		return nil, err
 	}
 	return &req, nil
 }
@@ -111,6 +103,9 @@ func (r OmdbIDRequest) Validate() error {
 // id requests use i=id query
 // title requests are using t=title and y=year queries
 func makeRequestURL(r OmdbRequest) (string, error) {
+	if err := r.Validate(); err != nil {
+		return "", fmt.Errorf("request not valid %w", err)
+	}
 	if config.Envs.OmdbApiKey == "" {
 		return "", fmt.Errorf("OMDb API is not set")
 	}

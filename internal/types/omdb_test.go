@@ -32,9 +32,11 @@ func Test_makeRequestURL(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "ID",
-			args:    args{r: OmdbIDRequest{imdbID: "tt123123"}},
-			want:    "http://www.omdbapi.com/?apikey=TESTKEY&i=tt123123",
+			name: "ID",
+			args: args{r: OmdbIDRequest{
+				imdbID: "tt1234567",
+			}},
+			want:    "http://www.omdbapi.com/?apikey=TESTKEY&i=tt1234567",
 			wantErr: false,
 		},
 		{
