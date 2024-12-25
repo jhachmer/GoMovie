@@ -16,15 +16,18 @@
 </div>
 
 <div class="container">
-    <h1>All Movies</h1>
+    <form action="/search" method="GET" class="search-bar">
+        <input type="text" name="query" placeholder="Search movies..." required>
+        <button type="submit">Search</button>
+    </form>
     <div class="movies-grid">
         {{range $val := .}}
         <div class="movie-card">
             <a href="/films/{{$val.ImdbID}}">
                 <div class="movie-info">
-                    <h2>{{ $val.Title}}</h2>
-                    <p>Year: {{$val.Year}}</p>
-                    <p>ID: {{$val.ImdbID}}</p>
+                    <h2>{{ $val.Title  }}</h2>
+                    <p>Year: {{ $val.Year }}</p>
+                    <p>ID: {{ $val.ImdbID }}</p>
                 </div>
             </a>
         </div>

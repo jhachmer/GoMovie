@@ -19,7 +19,6 @@
 <div class="container">
     <img src="{{.Movie.Poster}}" alt="Movie Poster">
     <div class="content-box">
-        <!-- Info list -->
         <div class="info-box">
             <h2>Info</h2>
             <ul class="details-list">
@@ -33,9 +32,7 @@
             </ul>
         </div>
 
-        <!-- Ratings and Feedback Container -->
         <div class="center-box">
-            <!-- Ratings box -->
             <div class="ratings-box">
                 <h2>Ratings</h2>
                 <ul>
@@ -45,7 +42,6 @@
                 </ul>
             </div>
 
-            <!-- Feedback box -->
             <div class="feedback-box">
                 <h2>Notes</h2>
                 <ul id="feedback-list">
@@ -61,7 +57,6 @@
             </div>
         </div>
 
-        <!-- Form box -->
         <div class="form-box">
             <h2>Your Feedback</h2>
             <form action="/films/{{ .Movie.ImdbID }}" method="POST">
