@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"regexp"
 
 	"github.com/jhachmer/gotocollection/internal/cache"
@@ -11,8 +10,8 @@ import (
 	"github.com/jhachmer/gotocollection/internal/types"
 )
 
-var validPath = regexp.MustCompile("^tt\\d{7,8}$")
-var validYear = regexp.MustCompile("^(19|20)\\d{2}$")
+var validPath = regexp.MustCompile(`^tt\d{7,8}$`)
+var validYear = regexp.MustCompile(`^(19|20)\d{2}$`)
 
 type Handler struct {
 	logger   *log.Logger
@@ -48,38 +47,4 @@ func (h *Handler) getMovie(id string) (*types.Movie, error) {
 		return mov, nil
 	}
 	return nil, fmt.Errorf("could not get movie")
-}
-
-func (h *Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		http.Error(w, "error parsing form", http.StatusInternalServerError)
-		log.Println(err.Error())
-	}
-	name := r.FormValue("name")
-	watched := r.FormValue("watched") == "on"
-
-	comment := r.FormValue("comment")
-	id := r.PathValue("imdb")
-	mov, err := h.getMovie(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err.Error())
-		return
-	}
-	entry := types.NewEntry(name, watched, comment)
-	entry, err = h.store.CreateEntry(entry, mov)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err.Error())
-		return
-	}
-	entries, err := h.store.GetEntries(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Println(err.Error())
-		return
-	}
-	page := types.NewInfoPage(mov, entries)
-	renderTemplate(w, "info", page)
 }
