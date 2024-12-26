@@ -1,0 +1,11 @@
+{{range $val := .}}
+        <div class="movie-card">
+            <a href="/films/{{$val.ImdbID}}">
+                <div class="movie-info">
+                    <h2>{{ $val.Title  }}</h2>
+                    <p>Year: {{ $val.Year }}</p>
+                    <p>ID: {{ $val.ImdbID }}</p>
+                </div>
+            </a>
+        </div>
+{{end}}
