@@ -37,11 +37,12 @@ func (svr *Server) setupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /films/{imdb}", Chain(svr.Handler.CreateEntryHandler, Logging(svr.Logger)))
 	mux.HandleFunc("GET /films/{title}/{year}", Chain(svr.Handler.InfoTitleYearHandler, Logging(svr.Logger)))
 	mux.HandleFunc("GET /overview", Chain(svr.Handler.HomeHandler, Logging(svr.Logger)))
-
+	mux.HandleFunc("GET /search", Chain(svr.Handler.SearchHandler, Logging(svr.Logger)))
 }
 
 // Serve calls setup functions and spins up the Server
 func (svr *Server) Serve(ctx context.Context) error {
+	handlers.InitTemplates()
 	mux := http.NewServeMux()
 	svr.setupRoutes(mux)
 
