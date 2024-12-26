@@ -267,14 +267,14 @@ func (s *Storage) GetAllMovies() ([]*types.Movie, error) {
 }
 
 type SearchParams struct {
-	genres []string
-	actors []string
-	years  YearSearch
+	Genres []string
+	Actors []string
+	Years  YearSearch
 }
 
 type YearSearch struct {
-	startYear string
-	endYear   string
+	StartYear string
+	EndYear   string
 }
 
 func (s *Storage) SearchMovie(params SearchParams) ([]*types.Movie, error) {
