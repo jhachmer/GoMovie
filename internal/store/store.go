@@ -278,30 +278,30 @@ type YearSearch struct {
 }
 
 func (s *Storage) SearchMovie(params SearchParams) ([]*types.Movie, error) {
-	filters := make([]string, 1)
-	args := make([]any, 1)
+	filters := []string{}
+	args := []any{}
 
-	if len(params.genres) > 0 {
-		genrePlaceholders := make([]string, len(params.genres))
-		for i := range params.genres {
+	if len(params.Genres) > 0 {
+		genrePlaceholders := make([]string, len(params.Genres))
+		for i, genre := range params.Genres {
 			genrePlaceholders[i] = "?"
-			args = append(args, params.genres[i])
+			args = append(args, "%"+genre+"%")
 		}
-		filters = append(filters, "g.name IN ("+strings.Join(genrePlaceholders, ",")+")")
+		filters = append(filters, "g.name LIKE "+strings.Join(genrePlaceholders, " OR g.name LIKE "))
 	}
 
-	if len(params.actors) > 0 {
-		actorPlaceholders := make([]string, len(params.actors))
-		for i := range params.actors {
+	if len(params.Actors) > 0 {
+		actorPlaceholders := make([]string, len(params.Actors))
+		for i, actor := range params.Actors {
 			actorPlaceholders[i] = "?"
-			args = append(args, params.actors[i])
+			args = append(args, "%"+actor+"%")
 		}
-		filters = append(filters, "a.name IN ("+strings.Join(actorPlaceholders, ",")+")")
+		filters = append(filters, "a.name LIKE "+strings.Join(actorPlaceholders, " OR a.name LIKE "))
 	}
 
-	if params.years.startYear != "" && params.years.endYear != "" {
+	if params.Years.StartYear != "" && params.Years.EndYear != "" {
 		filters = append(filters, "m.year BETWEEN ? AND ?")
-		args = append(args, params.years.startYear, params.years.endYear)
+		args = append(args, params.Years.StartYear, params.Years.EndYear)
 	}
 
 	query := /*sql*/ `
@@ -317,19 +317,13 @@ func (s *Storage) SearchMovie(params SearchParams) ([]*types.Movie, error) {
 		query += "WHERE " + strings.Join(filters, " AND ")
 	}
 
-	stmt, err := s.db.Prepare(query)
-	if err != nil {
-		return nil, fmt.Errorf("failed to prepare query: %w", err)
-	}
-	defer stmt.Close()
-
-	rows, err := stmt.Query(args...)
+	rows, err := s.db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
 
-	results := make([]*types.Movie, 1)
+	results := []*types.Movie{}
 	for rows.Next() {
 		var id string
 		if err := rows.Scan(&id); err != nil {
