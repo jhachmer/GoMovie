@@ -1,11 +1,12 @@
 package handlers
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/jhachmer/gotocollection/internal/store"
+	"github.com/jhachmer/gotocollection/internal/types"
 	"github.com/jhachmer/gotocollection/internal/util"
 )
 
@@ -19,33 +20,49 @@ func (h *Handler) HealthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
+	data := types.HomeData{}
 	movies, err := h.store.GetAllMovies()
+	types.SortMovieSlice(movies)
+	data.Movies = movies
 	if err != nil {
-		http.Error(w, "error getting movies", http.StatusInternalServerError)
+		//http.Error(w, "error getting movies", http.StatusInternalServerError)
+		h.logger.Println("HomeHandler: Getting Movies:", err)
+		data.Error = err
 	}
-	renderTemplate(w, "overview", movies)
+	renderTemplate(w, "overview", data)
 }
 
 func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
+	data := types.HomeData{}
 	err := r.ParseForm()
 	if err != nil {
-		http.Error(w, "error parsing form", http.StatusInternalServerError)
-		log.Println(err.Error())
+		//http.Error(w, "error parsing form", http.StatusInternalServerError)
+		data.Error = err
+		h.logger.Println(err.Error())
+		renderTemplate(w, "overview", data)
 	}
 	query := r.FormValue("query")
-	sp := parseSearchQuery(query)
+	sp, err := parseSearchQuery(query)
+	if err != nil {
+		data.Error = err
+		h.logger.Println(err.Error())
+		renderTemplate(w, "overview", data)
+		return
+	}
 	movs, err := h.store.SearchMovie(sp)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		log.Println(err.Error())
+		//http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		data.Error = err
+		h.logger.Println(err.Error())
+		renderTemplate(w, "overview", data)
 	}
-	log.Println(movs)
-	renderTemplate(w, "overview", movs)
+	data.Movies = movs
+	renderTemplate(w, "overview", data)
 }
 
 // TODO: invalid string handling (maybe regex?)
 // genre:horror,thriller;actors:Hans Albers, Keeanu Reeves
-func parseSearchQuery(query string) store.SearchParams {
+func parseSearchQuery(query string) (store.SearchParams, error) {
 	var sp store.SearchParams
 	subQueries := strings.Split(query, ";")
 	for i := range subQueries {
@@ -53,6 +70,9 @@ func parseSearchQuery(query string) store.SearchParams {
 	}
 	for _, subquery := range subQueries {
 		q := strings.Split(subquery, ":")
+		if len(q) != 2 {
+			return sp, fmt.Errorf("invalid search string passed %s", query)
+		}
 		searchType := q[0]
 		values := q[1]
 		switch searchType {
@@ -73,5 +93,5 @@ func parseSearchQuery(query string) store.SearchParams {
 			sp.Years = store.YearSearch{StartYear: yearParams[0], EndYear: yearParams[1]}
 		}
 	}
-	return sp
+	return sp, nil
 }
