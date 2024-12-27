@@ -1,9 +1,18 @@
 package types
 
+import (
+	"fmt"
+	"slices"
+)
+
 // Rating holds rating data, which are pairs of Source and the actual rating value
 type Rating struct {
 	Source string `json:"Source"`
 	Value  string `json:"Value"`
+}
+
+func (r Rating) String() string {
+	return fmt.Sprint(r.Value)
 }
 
 // Media struct holds data acquired from omdb api
@@ -70,18 +79,23 @@ func NewMovieFromTitleAndYear(title, year string) (*Movie, error) {
 	return mov, nil
 }
 
-// NewInfoPage returns pointer to a new InfoPage instance
-func NewInfoPage(mov *Movie, entries []*Entry) *InfoPage {
-	return &InfoPage{
-		Entries: entries,
-		Movie:   mov,
-	}
+func SortMovieSlice(movies []*Movie) {
+	slices.SortFunc(movies, func(a, b *Movie) int {
+		if a.Title < b.Title {
+			return -1
+		}
+		if a.Title > b.Title {
+			return 1
+		}
+		return 0
+	})
 }
 
 // InfoPage holds necessary data for the InfoHandler
 type InfoPage struct {
 	Entries []*Entry
 	Movie   *Movie
+	Error   error
 }
 
 // Entry holds data regarding user submitted info
@@ -101,4 +115,9 @@ func NewEntry(name string, watched bool, comment string) *Entry {
 		Watched: watched,
 		Comment: []byte(comment),
 	}
+}
+
+type HomeData struct {
+	Movies []*Movie
+	Error  error
 }
