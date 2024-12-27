@@ -11,7 +11,8 @@ import (
 )
 
 var validPath = regexp.MustCompile(`^tt\d{7,8}$`)
-var validYear = regexp.MustCompile(`^(19|20)\d{2}$`)
+
+// var validYear = regexp.MustCompile(`^(19|20)\d{2}$`)
 
 type Handler struct {
 	logger   *log.Logger
@@ -33,16 +34,16 @@ func (h *Handler) Close() {
 
 func (h *Handler) getMovie(id string) (*types.Movie, error) {
 	if mov, ok := h.movCache.Get(id); ok {
-		log.Printf("got movie with id %s from cache", id)
+		h.logger.Printf("got movie with id %s from cache", id)
 		return mov, nil
 	}
-	if mov, err := h.store.GetMovie(id); err == nil {
-		log.Printf("got movie with id %s from db", id)
+	if mov, err := h.store.GetMovieByID(id); err == nil {
+		h.logger.Printf("got movie with id %s from db", id)
 		h.movCache.Set(id, mov)
 		return mov, nil
 	}
 	if mov, err := types.NewMovieFromID(id); err == nil {
-		log.Printf("got movie with id %s from api", id)
+		h.logger.Printf("got movie with id %s from api", id)
 		h.movCache.Set(id, mov)
 		return mov, nil
 	}
