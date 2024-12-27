@@ -6,15 +6,21 @@
     <link rel="stylesheet" href="/static/css/info.css">
     <link rel="stylesheet" href="/static/css/bar.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org"></script>
+    <script src="/static/scripts/newinfo.js"></script>
+
 </head>
 <body>
-<div class="top-bar">
-    <a href="/overview"><img src="/static/images/gopher.png" alt="Logo"></a>
-    <div class="info">
-        <b>{{.Movie.Title}} ({{.Movie.Year}})</b>
-        <span><a href="https://www.imdb.com/de/title/{{ .Movie.ImdbID }}"><i>ID:{{.Movie.ImdbID}}</i></a></span>
+    <div class="top-bar">
+        <a href="/overview"><img src="/static/images/gopher.png" alt="Logo"></a>
+        <form id="menu-search-bar" class="menu-search-bar">
+            <input type="text" id="search-input" name="q" placeholder="Input IMDb ID...">
+            <button type="submit" id="submit-button">Go To!</button>
+        </form>
+        <div class="info">
+            <b>{{.Movie.Title}} ({{.Movie.Year}})</b>
+            <span><a href="https://www.imdb.com/de/title/{{ .Movie.ImdbID }}"><i>ID:{{.Movie.ImdbID}}</i></a></span>        </div>
     </div>
-</div>
 
 <div class="container">
     <img src="{{.Movie.Poster}}" alt="Movie Poster">
