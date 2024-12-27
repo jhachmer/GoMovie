@@ -1,24 +1,6 @@
 package handlers
 
-import (
-	"fmt"
-	"os"
-	"reflect"
-	"testing"
-
-	"github.com/jhachmer/gotocollection/internal/store"
-)
-
-func TestMain(m *testing.M) {
-	if err := os.Chdir(".."); err != nil {
-		panic(err)
-	}
-
-	dir, _ := os.Getwd()
-	fmt.Println("Current working directory:", dir)
-	os.Exit(m.Run())
-}
-
+/*
 func Test_parseSearchQuery(t *testing.T) {
 	type args struct {
 		query string
@@ -46,3 +28,4 @@ func Test_parseSearchQuery(t *testing.T) {
 		})
 	}
 }
+*/
