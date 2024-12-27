@@ -19,7 +19,7 @@ type Store interface {
 	CreateEntry(*types.Entry, *types.Movie) (*types.Entry, error)
 	GetEntries(string) ([]*types.Entry, error)
 	CreateMovie(*types.Movie) (*types.Movie, error)
-	GetMovie(string) (*types.Movie, error)
+	GetMovieByID(string) (*types.Movie, error)
 	GetAllMovies() ([]*types.Movie, error)
 	SearchMovie(SearchParams) ([]*types.Movie, error)
 }
@@ -78,8 +78,7 @@ func (s *Storage) InitDatabase() error {
 		name VARCHAR(255) NOT NULL,
 		watched INTEGER DEFAULT 0,
 		comment TEXT,
-		movie_id VARCHAR(9) NOT NULL,
-
+		movie_id VARCHAR(9) NOT NULL UNIQUE,
 		FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE SET NULL);
 		`)
 	if err != nil {
@@ -210,59 +209,110 @@ func (s *Storage) CreateMovie(m *types.Movie) (*types.Movie, error) {
 	return m, nil
 }
 
-func (s *Storage) GetMovie(id string) (*types.Movie, error) {
-	var mov types.Movie
-	if err := s.db.QueryRow( /*sql*/ `
-		SELECT *
-		FROM movies
-		WHERE id = ?;
-		`, id).Scan(&mov.ImdbID, &mov.Title, &mov.Year, &mov.Director, &mov.Runtime, &mov.Rated, &mov.Released, &mov.Plot, &mov.Poster); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("could not find movie with id %s", id)
-		}
-		return nil, err
-	}
-	ratings, err := s.getRatings(id)
-	if err != nil {
-		return nil, err
-	}
-	mov.Ratings = ratings
-	actors, err := s.getActors(id)
-	if err != nil {
-		return nil, err
-	}
-	mov.Actors = actors
-	genres, err := s.getGenres(id)
-	if err != nil {
-		return nil, err
-	}
-	mov.Genre = genres
-	return &mov, nil
-}
+func (s *Storage) GetMovieByID(movieID string) (*types.Movie, error) {
+	var movie types.Movie
 
-func (s *Storage) GetAllMovies() ([]*types.Movie, error) {
-	rows, err := s.db.Query( /*sql*/ `
-		SELECT id, title, year
-		FROM movies
-		ORDER BY title;
-		`)
+	err := s.db.QueryRow(`
+        SELECT
+            id, title, year, rated, released, runtime, plot, poster, director
+        FROM movies
+        WHERE id = ?`, movieID).Scan(
+		&movie.ImdbID, &movie.Title, &movie.Year, &movie.Rated,
+		&movie.Released, &movie.Runtime, &movie.Plot, &movie.Poster, &movie.Director)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := s.db.Query(`
+        SELECT g.name
+        FROM genres g
+        INNER JOIN movies_genres mg ON g.id = mg.genre_id
+        WHERE mg.movie_id = ?`, movieID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var movies []*types.Movie
-
+	var genres []string
 	for rows.Next() {
-		var movie types.Movie
-		if err := rows.Scan(&movie.ImdbID, &movie.Title, &movie.Year); err != nil {
+		var genre string
+		if err := rows.Scan(&genre); err != nil {
 			return nil, err
 		}
-		movies = append(movies, &movie)
+		genres = append(genres, genre)
 	}
-	if err = rows.Err(); err != nil {
+	movie.Genre = strings.Join(genres, ", ")
+
+	rows, err = s.db.Query(`
+        SELECT a.name
+        FROM actors a
+        INNER JOIN movies_actors ma ON a.id = ma.actor_id
+        WHERE ma.movie_id = ?`, movieID)
+	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+
+	var actors []string
+	for rows.Next() {
+		var actor string
+		if err := rows.Scan(&actor); err != nil {
+			return nil, err
+		}
+		actors = append(actors, actor)
+	}
+	movie.Actors = strings.Join(actors, ", ")
+
+	rows, err = s.db.Query(`
+        SELECT source, value
+        FROM ratings
+        WHERE movie_id = ?`, movieID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ratings []types.Rating
+	for rows.Next() {
+		var rating types.Rating
+		if err := rows.Scan(&rating.Source, &rating.Value); err != nil {
+			return nil, err
+		}
+		ratings = append(ratings, rating)
+	}
+	movie.Ratings = ratings
+
+	return &movie, nil
+}
+
+func (s *Storage) GetAllMovies() ([]*types.Movie, error) {
+	var movies []*types.Movie
+
+	rows, err := s.db.Query(`
+        SELECT id
+        FROM movies`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var movieIDs []string
+	for rows.Next() {
+		var movieID string
+		if err := rows.Scan(&movieID); err != nil {
+			return nil, err
+		}
+		movieIDs = append(movieIDs, movieID)
+	}
+
+	for _, movieID := range movieIDs {
+		movie, err := s.GetMovieByID(movieID)
+		if err != nil {
+			return nil, err
+		}
+		movies = append(movies, movie)
+	}
+
 	return movies, nil
 }
 
@@ -329,7 +379,7 @@ func (s *Storage) SearchMovie(params SearchParams) ([]*types.Movie, error) {
 		if err := rows.Scan(&id); err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
-		mov, err := s.GetMovie(id)
+		mov, err := s.GetMovieByID(id)
 		if err != nil {
 			return nil, err
 		}
