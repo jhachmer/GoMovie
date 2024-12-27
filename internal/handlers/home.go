@@ -43,20 +43,31 @@ func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "overview", movs)
 }
 
-// TODOS: Spaces need to be handled further
+// TODO: invalid string handling (maybe regex?)
 // genre:horror,thriller;actors:Hans Albers, Keeanu Reeves
 func parseSearchQuery(query string) store.SearchParams {
 	var sp store.SearchParams
 	subQueries := strings.Split(query, ";")
+	for i := range subQueries {
+		subQueries[i] = strings.TrimSpace(subQueries[i])
+	}
 	for _, subquery := range subQueries {
 		q := strings.Split(subquery, ":")
 		searchType := q[0]
 		values := q[1]
 		switch searchType {
 		case "genre":
-			sp.Genres = strings.Split(values, ",")
+			subVals := strings.Split(values, ",")
+			for i := range subVals {
+				subVals[i] = strings.TrimSpace(subVals[i])
+			}
+			sp.Genres = subVals
 		case "actors":
-			sp.Actors = strings.Split(values, ",")
+			subVals := strings.Split(values, ",")
+			for i := range subVals {
+				subVals[i] = strings.TrimSpace(subVals[i])
+			}
+			sp.Actors = subVals
 		case "year":
 			yearParams := strings.Split(values, ",")
 			sp.Years = store.YearSearch{StartYear: yearParams[0], EndYear: yearParams[1]}
