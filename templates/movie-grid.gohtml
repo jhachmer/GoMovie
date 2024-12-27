@@ -1,11 +1,28 @@
-{{range $val := .}}
-        <div class="movie-card">
-            <a href="/films/{{$val.ImdbID}}">
-                <div class="movie-info">
-                    <h2>{{ $val.Title  }}</h2>
-                    <p>Year: {{ $val.Year }}</p>
-                    <p>ID: {{ $val.ImdbID }}</p>
-                </div>
-            </a>
-        </div>
-{{end}}
+<table class="movies-table" id="moviesTable">
+    <thead>
+        <tr>
+            <th onclick="sortTable(0)">Title &#x25B2;&#x25BC;</th>
+            <th onclick="sortTable(1)">Year &#x25B2;&#x25BC;</th>
+            <th onclick="sortTable(2)">Runtime &#x25B2;&#x25BC;</th>
+            <th onclick="sortTable(3)">Genres &#x25B2;&#x25BC;</th>
+            <th onclick="sortTable(4)">IMDb &#x25B2;&#x25BC;</th>
+            <th onclick="sortTable(5)">Rotten Tomatoes &#x25B2;&#x25BC;</th>
+            <th onclick="sortTable(6)">Metacritic &#x25B2;&#x25BC;</th>
+
+
+        </tr>
+    </thead>
+    <tbody>
+        {{range $val := .Movies}}
+        <tr>
+            <td class="title-left"><a href="/films/{{$val.ImdbID}}">{{ $val.Title }}</a></td>
+            <td>{{ $val.Year }}</td>
+            <td>{{ $val.Runtime }}</td>
+            <td class="title-left">{{ $val.Genre }}</td>
+            {{ range $rating := $val.Ratings }}
+                <td>{{ $rating }}</td>
+            {{end}}
+        </tr>
+        {{end}}
+    </tbody>
+</table>

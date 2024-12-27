@@ -5,6 +5,7 @@
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
     <link rel="stylesheet" href="/static/css/info.css">
     <link rel="stylesheet" href="/static/css/bar.css">
+    <link rel="stylesheet" href="/static/css/error.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org"></script>
     <script src="/static/scripts/newinfo.js"></script>
@@ -19,8 +20,11 @@
         </form>
         <div class="info">
             <b>{{.Movie.Title}} ({{.Movie.Year}})</b>
-            <span><a href="https://www.imdb.com/de/title/{{ .Movie.ImdbID }}"><i>ID:{{.Movie.ImdbID}}</i></a></span>        </div>
+            <span><a href="https://www.imdb.com/de/title/{{ .Movie.ImdbID }}"><i> </br >ID:{{.Movie.ImdbID}}</i></a></span>
+        </div>
     </div>
+
+    {{ template "error.gohtml" .}}
 
 <div class="container">
     <img src="{{.Movie.Poster}}" alt="Movie Poster">

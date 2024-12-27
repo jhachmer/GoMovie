@@ -5,9 +5,11 @@
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
     <link rel="stylesheet" href="/static/css/overview.css">
     <link rel="stylesheet" href="/static/css/bar.css">
+    <link rel="stylesheet" href="/static/css/error.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org"></script>
     <script src="/static/scripts/newinfo.js"></script>
+    <script src="/static/scripts/table.js"></script>
 </head>
 <body>
     <div class="top-bar">
@@ -21,11 +23,13 @@
         </div>
     </div>
 
-<div class="container">
-    <form action="/search" method="GET" class="search-bar">
-        <input type="text" name="query" placeholder="Search movies..." required>
-        <button type="submit">Search</button>
-    </form>
+    {{ template "error.gohtml" . }}
+
+    <div class="container">
+        <form action="/search" method="GET" class="search-bar">
+            <input type="text" name="query" placeholder="Search movies..." required>
+            <button type="submit">Search</button>
+        </form>
     <div class="movies-grid">
         {{ template "movie-grid.gohtml" . }}
     </div>

@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (imdbIdPattern.test(searchInput)) {
             window.location.href = `/films/${searchInput}`;
         } else {
-            window.location.href = `/search?q=${encodeURIComponent(searchInput)}`;
+            window.alert("invalid imdb id");
+            // window.location.href = `/search?q=${encodeURIComponent(searchInput)}`;
         }
     });
 });
