@@ -72,6 +72,9 @@ func (r OmdbIDRequest) SendRequest() (*Movie, error) {
 	if err != nil {
 		return nil, err
 	}
+	if mov.Response == "False" {
+		return nil, fmt.Errorf("could not find movie with id %s", r.imdbID)
+	}
 	return &mov, nil
 }
 
