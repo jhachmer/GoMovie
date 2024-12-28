@@ -47,5 +47,5 @@ func (h *Handler) getMovie(id string) (*types.Movie, error) {
 		h.movCache.Set(id, mov)
 		return mov, nil
 	}
-	return nil, fmt.Errorf("could not get movie")
+	return nil, fmt.Errorf("error getting movie with id: %s", id)
 }

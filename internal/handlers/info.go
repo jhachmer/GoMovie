@@ -11,27 +11,30 @@ func (h *Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {
 	data := types.InfoPage{}
 	id := r.PathValue("imdb")
 	if !validPath.MatchString(id) {
-		//http.Error(w, "not a valid id", http.StatusBadRequest)
+		http.Error(w, "not a valid id", http.StatusBadRequest)
 		data.Error = fmt.Errorf("error validating imdb id: %s", id)
 		h.logger.Println("could not match id", id)
-		renderTemplate(w, "info", data)
+		return
 	}
 	mov, err := h.getMovie(id)
 	if err != nil {
-		//http.Error(w, err.Error(), http.StatusBadRequest)
-		data.Error = err
-		h.logger.Println(err.Error())
+		// http.Error(w, err.Error(), http.StatusBadRequest)
+		data.Error = fmt.Errorf("error getting movie, %w", err)
+		data.Movie = &types.Movie{}
+		h.logger.Println("Hallo", err.Error())
 		renderTemplate(w, "info", data)
+		return
 	}
+	data.Movie = mov
 	entries, err := h.store.GetEntries(id)
 	if err != nil {
 		//http.Error(w, fmt.Sprintf("error getting movie %s", err.Error()), http.StatusInternalServerError)
-		data.Error = err
+		data.Error = fmt.Errorf("error getting entries")
 		h.logger.Println(err.Error())
 		renderTemplate(w, "info", data)
+		return
 	}
 	data.Entries = entries
-	data.Movie = mov
 	renderTemplate(w, "info", data)
 }
 
@@ -40,7 +43,7 @@ func (h *Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		//http.Error(w, "error parsing form", http.StatusInternalServerError)
-		data.Error = err
+		data.Error = fmt.Errorf("error parsing form: %w", err)
 		h.logger.Println(err.Error())
 		renderTemplate(w, "info", data)
 	}
@@ -52,7 +55,7 @@ func (h *Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {
 	mov, err := h.getMovie(id)
 	if err != nil {
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
-		data.Error = err
+		data.Error = fmt.Errorf("error getting movie: %w", err)
 		h.logger.Println(err.Error())
 		renderTemplate(w, "info", data)
 	}
@@ -60,14 +63,14 @@ func (h *Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = h.store.CreateEntry(entry, mov)
 	if err != nil {
 		// http.Error(w, err.Error(), http.StatusInternalServerError)
-		data.Error = err
+		data.Error = fmt.Errorf("error creating entry: %w", err)
 		h.logger.Println(err.Error())
 		renderTemplate(w, "info", data)
 	}
 	entries, err := h.store.GetEntries(id)
 	if err != nil {
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
-		data.Error = err
+		data.Error = fmt.Errorf("error getting entries: %w", err)
 		h.logger.Println(err.Error())
 		renderTemplate(w, "info", data)
 	}

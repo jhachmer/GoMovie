@@ -37,14 +37,14 @@ func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		//http.Error(w, "error parsing form", http.StatusInternalServerError)
-		data.Error = err
+		data.Error = fmt.Errorf("error parsing form: %w", err)
 		h.logger.Println(err.Error())
 		renderTemplate(w, "overview", data)
 	}
 	query := r.FormValue("query")
 	sp, err := parseSearchQuery(query)
 	if err != nil {
-		data.Error = err
+		data.Error = fmt.Errorf("error parsing search query: %w", err)
 		h.logger.Println(err.Error())
 		renderTemplate(w, "overview", data)
 		return
@@ -52,7 +52,7 @@ func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 	movs, err := h.store.SearchMovie(sp)
 	if err != nil {
 		//http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		data.Error = err
+		data.Error = fmt.Errorf("error searching for movie: %w", err)
 		h.logger.Println(err.Error())
 		renderTemplate(w, "overview", data)
 	}
@@ -91,6 +91,8 @@ func parseSearchQuery(query string) (store.SearchParams, error) {
 		case "year":
 			yearParams := strings.Split(values, ",")
 			sp.Years = store.YearSearch{StartYear: yearParams[0], EndYear: yearParams[1]}
+		default:
+			return sp, fmt.Errorf("invalid search type: %s", searchType)
 		}
 	}
 	return sp, nil
