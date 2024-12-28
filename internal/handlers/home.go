@@ -73,7 +73,7 @@ func parseSearchQuery(query string) (store.SearchParams, error) {
 		if len(q) != 2 {
 			return sp, fmt.Errorf("invalid search string passed %s", query)
 		}
-		searchType := q[0]
+		searchType := strings.ToLower(q[0])
 		values := q[1]
 		switch searchType {
 		case "genre":
