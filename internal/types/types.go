@@ -11,6 +11,7 @@ type Rating struct {
 	Value  string `json:"Value"`
 }
 
+// String method to implement Stringer interface
 func (r Rating) String() string {
 	return fmt.Sprint(r.Value)
 }
@@ -79,12 +80,18 @@ func NewMovieFromTitleAndYear(title, year string) (*Movie, error) {
 	return mov, nil
 }
 
-func SortMovieSlice(movies []*Movie) {
-	slices.SortFunc(movies, func(a, b *Movie) int {
-		if a.Title < b.Title {
+type MovieOverviewData struct {
+	Movie *Movie
+	Entry []*Entry
+}
+
+// SortMovieSlice sorts slice of movies based on their title
+func SortMovieSlice(movies []*MovieOverviewData) {
+	slices.SortFunc(movies, func(a, b *MovieOverviewData) int {
+		if a.Movie.Title < b.Movie.Title {
 			return -1
 		}
-		if a.Title > b.Title {
+		if a.Movie.Title > b.Movie.Title {
 			return 1
 		}
 		return 0
@@ -118,6 +125,6 @@ func NewEntry(name string, watched bool, comment string) *Entry {
 }
 
 type HomeData struct {
-	Movies []*Movie
+	Movies []*MovieOverviewData
 	Error  error
 }
