@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -77,4 +78,39 @@ func (h *Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {
 	data.Entries = entries
 	data.Movie = mov
 	renderTemplate(w, "info", data)
+}
+
+func (h *Handler) UpdateEntryHandler(w http.ResponseWriter, r *http.Request) {
+	movieId := r.PathValue("imdb")
+
+	var payload struct {
+		Name    string `json:"name"`
+		Watched bool   `json:"watched"`
+		Comment string `json:"comment"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		h.logger.Println(err.Error())
+		http.Error(w, "invalid JSON payload", http.StatusBadRequest)
+		return
+	}
+	_, err = h.store.UpdateEntry(movieId, payload.Name, payload.Comment, payload.Watched)
+	if err != nil {
+		h.logger.Println(err.Error())
+		http.Error(w, "error updating entry", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(payload)
+}
+
+func (h *Handler) DeleteEntryHandler(w http.ResponseWriter, r *http.Request) {
+	movieId := r.PathValue("imdb")
+	err := h.store.DeleteEntry(movieId)
+	if err != nil {
+		h.logger.Println(err.Error())
+		http.Error(w, "error deleting entry", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

@@ -35,6 +35,9 @@ func (svr *Server) setupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /health", Chain(svr.Handler.HealthHandler, Logging(svr.Logger)))
 	mux.HandleFunc("GET /films/{imdb}", Chain(svr.Handler.InfoIDHandler, Logging(svr.Logger)))
 	mux.HandleFunc("POST /films/{imdb}", Chain(svr.Handler.CreateEntryHandler, Logging(svr.Logger)))
+	mux.HandleFunc("PUT /films/{imdb}", Chain(svr.Handler.UpdateEntryHandler, Logging(svr.Logger)))
+	mux.HandleFunc("DELETE /films/{imdb}", Chain(svr.Handler.DeleteEntryHandler, Logging(svr.Logger)))
+
 	mux.HandleFunc("GET /overview", Chain(svr.Handler.HomeHandler, Logging(svr.Logger)))
 	mux.HandleFunc("GET /search", Chain(svr.Handler.SearchHandler, Logging(svr.Logger)))
 }

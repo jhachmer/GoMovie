@@ -18,6 +18,8 @@ type Store interface {
 	InitDatabase() error
 	CreateEntry(*types.Entry, *types.Movie) (*types.Entry, error)
 	GetEntries(string) ([]*types.Entry, error)
+	UpdateEntry(string, string, string, bool) (*types.Entry, error)
+	DeleteEntry(string) error
 	CreateMovie(*types.Movie) (*types.Movie, error)
 	GetMovieByID(string) (*types.Movie, error)
 	GetAllMovies() ([]*types.Movie, error)
@@ -158,6 +160,43 @@ func (s *Storage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, e
 		return nil, err
 	}
 	return e, nil
+}
+
+func (s *Storage) UpdateEntry(movieId, name, comment string, watched bool) (*types.Entry, error) {
+	var watchedInt = 0
+	if watched {
+		watchedInt = 1
+	}
+	res, err := s.db.Exec( /*sql*/ `
+		UPDATE entries
+		SET name = ?, comment = ?, watched = ?
+		WHERE movie_id = ?
+	`, name, comment, watchedInt, movieId)
+	if err != nil {
+		return nil, err
+	}
+	resID, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	entry := types.Entry{
+		ID:      resID,
+		Name:    name,
+		Comment: []byte(comment),
+		Watched: watched,
+	}
+	return &entry, nil
+}
+
+func (s *Storage) DeleteEntry(imdbId string) error {
+	_, err := s.db.Exec( /*sql*/ `
+		DELETE FROM entries
+		WHERE movie_id = ?
+	`, imdbId)
+	if err != nil {
+		return fmt.Errorf("error deleting entry for movie: %s\n%w", imdbId, err)
+	}
+	return nil
 }
 
 func (s *Storage) GetEntries(id string) ([]*types.Entry, error) {
