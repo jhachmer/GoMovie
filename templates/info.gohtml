@@ -56,12 +56,16 @@
                 <h2>Notes</h2>
                 <ul id="feedback-list">
                     {{range $val := .Entries}}
-                    <li><b>{{ $val.Name }}
+                    <li id="entry-1">
+                        <b>{{ $val.Name }}
                         {{if $val.Watched}}
                             (&#10003)
                         {{else}}
                             (&#10006)
-                        {{end}}:</b> <i>"{{ printf "%s" $val.Comment }}"</i></li>
+                        {{end}}:</b> <i>"{{ printf "%s" $val.Comment }}"</i>
+                        <button class="edit-button" onclick="editEntry(1)">Edit</button>
+                        <button class="delete-button" onclick="deleteEntry(1)">Delete</button>
+                    </li>
                     {{end}}
                 </ul>
             </div>

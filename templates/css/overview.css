@@ -23,45 +23,6 @@ h1 {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.movies-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.movie-card {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: box-shadow 0.3s ease;
-}
-
-.movie-card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.movie-card img {
-    width: 100%;
-    height: auto;
-}
-
-.movie-info {
-    padding: 10px;
-    text-align: center;
-}
-
-.movie-info h2 {
-    font-size: 18px;
-    margin: 0;
-    color: #333;
-}
-
-.movie-info p {
-    margin: 5px 0;
-    color: #666;
-}
-
 .search-bar {
     display: flex;
     justify-content: center;
@@ -117,6 +78,7 @@ h1 {
     max-width: 100%;
     margin: 0 auto;
     border-collapse: collapse;
+    table-layout: auto;
 }
 
 .movies-table th, .movies-table td {
@@ -125,11 +87,16 @@ h1 {
     border: 1px solid #ddd;
 }
 
+
+
 .movies-table th {
     background-color: #2c3e50;
     color: #ecf0f1;
 }
 
+
+
+/*
 .movies-table tr:nth-child(even) {
     background-color: #f2f2f2;
 }
@@ -137,7 +104,7 @@ h1 {
 .movies-table tr:hover {
     background-color: #dcdcdc;
 }
-
+*/
 .movies-table a {
     text-decoration: none;
     color: #007BFF;
@@ -155,16 +122,37 @@ th:hover {
 .movies-table td:first-child {
     text-align: left;
     padding-left: 30px;
+    width: auto;
+}
+.movies-table td:nth-child(4) {
+    text-align: left;
+    padding-left: 30px;
 }
 
-.ratings .imdb {
-    color: #f1c40f;
+.watched {
+    background-color: #c3ffc3;
 }
 
-.ratings .rotten-tomatoes {
-    color: #e74c3c;
+.not-watched {
+    background-color: #ffc2c2;
 }
 
-.ratings .metacritic {
-    color: #2ecc71;
+
+.movies-table td:nth-child(5) {
+    max-width: 150px;
+}
+.movies-table td:nth-child(6) {
+    max-width: 150px;
+
+}.movies-table td:nth-child(7) {
+    max-width: 150px;
+}
+.movies-table th:nth-child(5) {
+    max-width: 150px;
+}
+.movies-table th:nth-child(6) {
+    max-width: 150px;
+
+}.movies-table th:nth-child(7) {
+    max-width: 150px;
 }

@@ -6,20 +6,18 @@
             <th onclick="sortTable(2)">Runtime &#x25B2;&#x25BC;</th>
             <th onclick="sortTable(3)">Genres &#x25B2;&#x25BC;</th>
             <th onclick="sortTable(4)">IMDb &#x25B2;&#x25BC;</th>
-            <th onclick="sortTable(5)">Rotten Tomatoes &#x25B2;&#x25BC;</th>
+            <th onclick="sortTable(5)">RT &#x25B2;&#x25BC;</th>
             <th onclick="sortTable(6)">Metacritic &#x25B2;&#x25BC;</th>
-
-
         </tr>
     </thead>
     <tbody>
         {{range $val := .Movies}}
-        <tr>
-            <td class="title-left"><a href="/films/{{$val.ImdbID}}">{{ $val.Title }}</a></td>
-            <td>{{ $val.Year }}</td>
-            <td>{{ $val.Runtime }}</td>
-            <td class="title-left">{{ $val.Genre }}</td>
-            {{ range $rating := $val.Ratings }}
+        <tr class="{{if and $val.Entry (index $val.Entry 0).Watched}}watched{{else}}not-watched{{end}}">
+            <td class="title-left"><a href="/films/{{$val.Movie.ImdbID}}">{{ $val.Movie.Title }}</a></td>
+            <td>{{ $val.Movie.Year }}</td>
+            <td>{{ $val.Movie.Runtime }}</td>
+            <td class="title-left">{{ $val.Movie.Genre }}</td>
+            {{ range $rating := $val.Movie.Ratings }}
                 <td>{{ $rating }}</td>
             {{end}}
         </tr>

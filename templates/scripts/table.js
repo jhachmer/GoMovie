@@ -1,24 +1,3 @@
-window.onload = function() {
-    const ratingCells = document.querySelectorAll('.ratings');
-
-    ratingCells.forEach(function(cell) {
-        let rawText = cell.textContent || cell.innerText;
-
-        let ratings = rawText.replace(/[\[\]]/g, '')
-                            .split('Rotten Tomatoes')
-                            .map(function(part, index) {
-                                if (index === 0) {
-                                    return part.trim().replace('Internet Movie Database', '<span class="imdb">IMDb</span>');
-                                } else {
-                                    return '<span class="rotten-tomatoes"> Rotten Tomatoes</span>' + part.trim().replace('Metacritic', ', <span class="metacritic">Metacritic</span>');
-                                }
-                            }).join(', ');
-
-        cell.innerHTML = ratings;
-    });
-};
-
-
 function sortTable(columnIndex) {
     const table = document.getElementById("moviesTable");
     const rows = Array.from(table.tBodies[0].rows);
