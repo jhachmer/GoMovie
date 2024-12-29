@@ -14,6 +14,8 @@ import (
 type Storage struct {
 	db *sql.DB
 }
+
+// TODO: add UpdateMovie
 type Store interface {
 	InitDatabase() error
 	CreateEntry(*types.Entry, *types.Movie) (*types.Entry, error)
@@ -22,8 +24,8 @@ type Store interface {
 	DeleteEntry(string) error
 	CreateMovie(*types.Movie) (*types.Movie, error)
 	GetMovieByID(string) (*types.Movie, error)
-	GetAllMovies() ([]*types.Movie, error)
-	SearchMovie(SearchParams) ([]*types.Movie, error)
+	GetAllMovies() ([]*types.MovieOverviewData, error)
+	SearchMovie(SearchParams) ([]*types.MovieOverviewData, error)
 }
 
 func NewStore(db *sql.DB) *Storage {
@@ -324,8 +326,8 @@ func (s *Storage) GetMovieByID(movieID string) (*types.Movie, error) {
 	return &movie, nil
 }
 
-func (s *Storage) GetAllMovies() ([]*types.Movie, error) {
-	var movies []*types.Movie
+func (s *Storage) GetAllMovies() ([]*types.MovieOverviewData, error) {
+	var movies []*types.MovieOverviewData
 
 	rows, err := s.db.Query(`
         SELECT id
@@ -349,7 +351,12 @@ func (s *Storage) GetAllMovies() ([]*types.Movie, error) {
 		if err != nil {
 			return nil, err
 		}
-		movies = append(movies, movie)
+		entries, err := s.GetEntries(movieID)
+		if err != nil {
+			return nil, err
+		}
+		data := types.MovieOverviewData{Movie: movie, Entry: entries}
+		movies = append(movies, &data)
 	}
 
 	return movies, nil
@@ -366,7 +373,7 @@ type YearSearch struct {
 	EndYear   string
 }
 
-func (s *Storage) SearchMovie(params SearchParams) ([]*types.Movie, error) {
+func (s *Storage) SearchMovie(params SearchParams) ([]*types.MovieOverviewData, error) {
 	filters := []string{}
 	args := []any{}
 
@@ -412,7 +419,7 @@ func (s *Storage) SearchMovie(params SearchParams) ([]*types.Movie, error) {
 	}
 	defer rows.Close()
 
-	results := []*types.Movie{}
+	results := []*types.MovieOverviewData{}
 	for rows.Next() {
 		var id string
 		if err := rows.Scan(&id); err != nil {
@@ -422,7 +429,11 @@ func (s *Storage) SearchMovie(params SearchParams) ([]*types.Movie, error) {
 		if err != nil {
 			return nil, err
 		}
-		results = append(results, mov)
+		entry, err := s.GetEntries(id)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, &types.MovieOverviewData{Movie: mov, Entry: entry})
 	}
 
 	if err := rows.Err(); err != nil {
