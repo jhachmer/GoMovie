@@ -122,17 +122,11 @@ func makeRequestURL(r OmdbRequest) (string, error) {
 		values := reqURL.Query()
 		values.Add("t", v.title)
 		values.Add("y", v.year)
-		if err != nil {
-			return "", err
-		}
 		reqURL.RawQuery = values.Encode()
 		return reqURL.String(), nil
 	case OmdbIDRequest:
 		values := reqURL.Query()
 		values.Add("i", v.imdbID)
-		if err != nil {
-			return "", err
-		}
 		reqURL.RawQuery = values.Encode()
 		return reqURL.String(), nil
 	default:
