@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -58,10 +57,7 @@ func Authenticate() Middleware {
 				http.Redirect(w, r, "/login", http.StatusUnauthorized)
 				return
 			}
-
-			val := cookie.Value
-			fmt.Println(val)
-			_, err = auth.VerifyToken(val)
+			_, err = auth.VerifyToken(cookie.Value)
 			if err != nil {
 				log.Println("jwt not verified", err)
 				http.Redirect(w, r, "/login", http.StatusUnauthorized)
