@@ -31,6 +31,7 @@ func (h *Handler) CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		data := types.LoginData{Error: fmt.Errorf("invalid credentials")}
 		renderTemplate(w, "index", data)
+		return
 	}
 	tokenString, err := auth.CreateToken(username)
 	if err != nil {
