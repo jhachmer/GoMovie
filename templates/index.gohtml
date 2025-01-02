@@ -3,9 +3,35 @@
     <head>
         <title>Index GoTo</title>
         <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
-        <link rel="stylesheet" href="/static/css/goto.css">
+        <link rel="stylesheet" href="/static/css/overview.css">
+        <link rel="stylesheet" href="/static/css/login.css">
+        <link rel="stylesheet" href="/static/css/bar.css">
+        <link rel="stylesheet" href="/static/css/error.css">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+        <script src="https://unpkg.com/htmx.org"></script>
     </head>
     <body>
-        <h1>Index {{ .Name }}</h1>
+        <div class="top-bar">
+            <a href="/login"><img src="/static/images/gopher.png" alt="Logo"></a>
+            <form id="menu-search-bar" class="menu-search-bar">
+                <input type="text" id="search-input" name="q" placeholder="Input IMDb ID...">
+                <button type="submit" id="submit-button">Go To!</button>
+            </form>
+            <div class="info">
+                <b>Login</b>
+            </div>
+        </div>
+
+        {{ template "error.gohtml" . }}
+
+        <div class="login-box">
+            <form action="/login" method="POST">
+                <input type="text" id="username" name="username" placeholder="Your username..." required>
+            </br >
+                <input type="password" id="password" name="password" placeholder="Your password..." required>
+            </br >
+                <button type="submit">Login</button>
+            </form>
+        </div>
     </body>
 </html>
