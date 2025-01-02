@@ -3,9 +3,16 @@
 
 ## About
 GoList is a basic web app I build for personal use.
-Someday it is supposed to be an app to manage a watchlist in the browser saving data regarding
-who recommended the movie, if it is already watched and user comments in a SQLite database.\
-Currently, there is only an info page accessible by a movies IMDb ID or Title and Year
+Someday it is supposed to be an app to manage a watchlist in the browser, saving data regarding
+who recommended the movie, if we already watched it and comments about the movie in a SQLite database.\
+
+### Example Overview
+![overview](assets/overview.png)
+### Example Info Page
+![info](assets/info.png)
+
+
+
 
 ### To build yourself you'll need:
   - Go (developed with 1.23)
@@ -13,20 +20,27 @@ Currently, there is only an info page accessible by a movies IMDb ID or Title an
   - [OMDB](https://www.omdbapi.com/) API key
 
 ### TODO:
-  - Index Page
-  - Search Bar
+  - ~~Index Page~~
+  - ~~Search Bar~~
     - search for genres, year, already watched etc.
-  - Delete Entries
+    - kinda done, but needs additional work
+  - ~~Delete Entries~~
   - ~~Split Genres and Actors~~
     - ~~separate db tables for them~~
   - Update Button for new movie info (poster, ratings)
-  - Color Grading of rows
+    - especially recently announed movies have a placeholder image as poster and obviously no ratings, updating them should provide the ratings and poster at the time of updating
+  - ~~Color Grading of rows, to show if they are watched~~
+  - checkbox to toggle showing only unwatched movies on overview
 
 ### Routes:
 - GET /health : returns healthy if server is running
+- GET /login : displays login page
+- POST /login : checks credentials provided by form values of username and password
+- GET /overview : displays overview page of all movies in database
 - GET /films/{imdb} : returns info page for movie with imdb id
 - POST /films/{imdb} : posts a new entry for movie
-- GET /films/{title}/{year} : returns info page for movie with title and year
+- PUT /films/{imdb} : changes the entry saved for that movie
+- DELETE /films/{imdb} : deletes entry belonging to movie (does not delete movie from db, maybe later)
 - GET /{$} : index page for root route (really basic atm)
 
 ## Setup
