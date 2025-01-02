@@ -9,6 +9,7 @@ import (
 
 	"github.com/jhachmer/gotocollection/internal/types"
 	"github.com/jhachmer/gotocollection/internal/util"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Storage struct {
@@ -18,6 +19,7 @@ type Storage struct {
 // TODO: add UpdateMovie
 type Store interface {
 	InitDatabase() error
+	CheckCredentials(string, string) (bool, error)
 	CreateEntry(*types.Entry, *types.Movie) (*types.Entry, error)
 	GetEntries(string) ([]*types.Entry, error)
 	UpdateEntry(string, string, string, bool) (*types.Entry, error)
@@ -48,6 +50,15 @@ func (s *Storage) TestDBConnection() {
 
 func (s *Storage) InitDatabase() error {
 	_, err := s.db.Exec( /*sql*/ `
+		CREATE TABLE IF NOT EXISTS useraccounts (
+    	UserID INTEGER PRIMARY KEY AUTOINCREMENT,
+    	Username TEXT NOT NULL UNIQUE,
+    	PasswordHash TEXT NOT NULL);
+		`)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS movies (
 		id VARCHAR(9) NOT NULL,
 		title VARCHAR(255) NOT NULL,
@@ -127,6 +138,28 @@ func (s *Storage) InitDatabase() error {
 		return err
 	}
 	return nil
+}
+
+func (s *Storage) CheckCredentials(username, password string) (bool, error) {
+	var hashedPassword string
+
+	err := s.db.QueryRow( /*sql*/ `
+		SELECT PasswordHash
+		FROM UserAccounts
+		WHERE Username = ?
+		`, username).Scan(&hashedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err != nil {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (s *Storage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, error) {
@@ -253,7 +286,7 @@ func (s *Storage) CreateMovie(m *types.Movie) (*types.Movie, error) {
 func (s *Storage) GetMovieByID(movieID string) (*types.Movie, error) {
 	var movie types.Movie
 
-	err := s.db.QueryRow(`
+	err := s.db.QueryRow( /*sql*/ `
         SELECT
             id, title, year, rated, released, runtime, plot, poster, director
         FROM movies
@@ -264,7 +297,7 @@ func (s *Storage) GetMovieByID(movieID string) (*types.Movie, error) {
 		return nil, err
 	}
 
-	rows, err := s.db.Query(`
+	rows, err := s.db.Query( /*sql*/ `
         SELECT g.name
         FROM genres g
         INNER JOIN movies_genres mg ON g.id = mg.genre_id
@@ -284,7 +317,7 @@ func (s *Storage) GetMovieByID(movieID string) (*types.Movie, error) {
 	}
 	movie.Genre = strings.Join(genres, ", ")
 
-	rows, err = s.db.Query(`
+	rows, err = s.db.Query( /*sql*/ `
         SELECT a.name
         FROM actors a
         INNER JOIN movies_actors ma ON a.id = ma.actor_id
@@ -304,7 +337,7 @@ func (s *Storage) GetMovieByID(movieID string) (*types.Movie, error) {
 	}
 	movie.Actors = strings.Join(actors, ", ")
 
-	rows, err = s.db.Query(`
+	rows, err = s.db.Query( /*sql*/ `
         SELECT source, value
         FROM ratings
         WHERE movie_id = ?`, movieID)
@@ -327,11 +360,19 @@ func (s *Storage) GetMovieByID(movieID string) (*types.Movie, error) {
 }
 
 func (s *Storage) GetAllMovies() ([]*types.MovieOverviewData, error) {
+	// if s == nil {
+	// 	fmt.Println("storage is not initialized")
+	// 	return nil, fmt.Errorf("storage is not initialized")
+	// }
+	// if s.db == nil {
+	// 	fmt.Println("db conn is not initialized")
+	// 	return nil, fmt.Errorf("db conn is not initialized")
+	// }
 	var movies []*types.MovieOverviewData
-
-	rows, err := s.db.Query(`
+	rows, err := s.db.Query( /*sql*/ `
         SELECT id
-        FROM movies`)
+        FROM movies
+		`)
 	if err != nil {
 		return nil, err
 	}
@@ -345,7 +386,6 @@ func (s *Storage) GetAllMovies() ([]*types.MovieOverviewData, error) {
 		}
 		movieIDs = append(movieIDs, movieID)
 	}
-
 	for _, movieID := range movieIDs {
 		movie, err := s.GetMovieByID(movieID)
 		if err != nil {
@@ -358,7 +398,6 @@ func (s *Storage) GetAllMovies() ([]*types.MovieOverviewData, error) {
 		data := types.MovieOverviewData{Movie: movie, Entry: entries}
 		movies = append(movies, &data)
 	}
-
 	return movies, nil
 }
 

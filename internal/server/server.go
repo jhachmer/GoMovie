@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jhachmer/gotocollection/internal/auth"
 	"github.com/jhachmer/gotocollection/internal/handlers"
 )
 
@@ -32,19 +33,26 @@ func (svr *Server) setupRoutes(mux *http.ServeMux) {
 	fileServer := http.FileServer(http.Dir("./templates/"))
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("GET /health", Chain(svr.Handler.HealthHandler, Logging(svr.Logger)))
-	mux.HandleFunc("GET /films/{imdb}", Chain(svr.Handler.InfoIDHandler, Logging(svr.Logger)))
-	mux.HandleFunc("POST /films/{imdb}", Chain(svr.Handler.CreateEntryHandler, Logging(svr.Logger)))
-	mux.HandleFunc("PUT /films/{imdb}", Chain(svr.Handler.UpdateEntryHandler, Logging(svr.Logger)))
-	mux.HandleFunc("DELETE /films/{imdb}", Chain(svr.Handler.DeleteEntryHandler, Logging(svr.Logger)))
+	mux.HandleFunc("GET /login", Chain(svr.Handler.LoginHandler, Logging(svr.Logger)))
+	mux.HandleFunc("POST /login", Chain(svr.Handler.CheckLoginHandler))
 
-	mux.HandleFunc("GET /overview", Chain(svr.Handler.HomeHandler, Logging(svr.Logger)))
-	mux.HandleFunc("GET /search", Chain(svr.Handler.SearchHandler, Logging(svr.Logger)))
+	mux.HandleFunc("GET /health", Chain(svr.Handler.HealthHandler, Logging(svr.Logger)))
+	mux.HandleFunc("GET /films/{imdb}", Chain(svr.Handler.InfoIDHandler, Authenticate(), Logging(svr.Logger)))
+	mux.HandleFunc("POST /films/{imdb}", Chain(svr.Handler.CreateEntryHandler, Authenticate(), Logging(svr.Logger)))
+	mux.HandleFunc("PUT /films/{imdb}", Chain(svr.Handler.UpdateEntryHandler, Authenticate(), Logging(svr.Logger)))
+	mux.HandleFunc("DELETE /films/{imdb}", Chain(svr.Handler.DeleteEntryHandler, Authenticate(), Logging(svr.Logger)))
+
+	mux.HandleFunc("GET /overview", Chain(svr.Handler.HomeHandler, Authenticate(), Logging(svr.Logger)))
+	mux.HandleFunc("GET /search", Chain(svr.Handler.SearchHandler, Authenticate(), Logging(svr.Logger)))
 }
 
 // Serve calls setup functions and spins up the Server
 func (svr *Server) Serve(ctx context.Context) error {
 	handlers.InitTemplates()
+	err := auth.InitAuth()
+	if err != nil {
+		svr.Logger.Fatal(err)
+	}
 	mux := http.NewServeMux()
 	svr.setupRoutes(mux)
 

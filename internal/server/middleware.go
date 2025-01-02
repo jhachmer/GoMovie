@@ -1,9 +1,12 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/jhachmer/gotocollection/internal/auth"
 )
 
 type Middleware func(handlerFunc http.HandlerFunc) http.HandlerFunc
@@ -41,6 +44,29 @@ func Logging(logger *log.Logger) Middleware {
 				message := NewLogMessage(r, time.Now())
 				logger.Println(message.Method, message.Path, time.Since(message.Time).String())
 			}()
+			handlerFunc(w, r)
+		}
+	}
+}
+
+func Authenticate() Middleware {
+	return func(handlerFunc http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			cookie, err := r.Cookie("golist")
+			if err != nil {
+				log.Println("cookie missing", err)
+				http.Redirect(w, r, "/login", http.StatusUnauthorized)
+				return
+			}
+
+			val := cookie.Value
+			fmt.Println(val)
+			_, err = auth.VerifyToken(val)
+			if err != nil {
+				log.Println("jwt not verified", err)
+				http.Redirect(w, r, "/login", http.StatusUnauthorized)
+				return
+			}
 			handlerFunc(w, r)
 		}
 	}
