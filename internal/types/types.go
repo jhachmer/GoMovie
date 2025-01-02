@@ -128,3 +128,7 @@ type HomeData struct {
 	Movies []*MovieOverviewData
 	Error  error
 }
+
+type LoginData struct {
+	Error error
+}
