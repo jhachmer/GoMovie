@@ -7,23 +7,28 @@ function sortTable(columnIndex) {
         const cellA = a.cells[columnIndex].textContent.trim();
         const cellB = b.cells[columnIndex].textContent.trim();
 
-        if (columnIndex === 2) {
-            const numA = parseInt(cellA, 10);
-            const numB = parseInt(cellB, 10);
-
-            if (isNaN(numA) || isNaN(numB)) {
-                return 0;
+        const parseValue = (value) => {
+            if (value.includes('%')) {
+                return parseFloat(value.replace('%', ''));
             }
+            if (value.includes('/')) {
+                const parts = value.split('/').map(num => parseFloat(num));
+                return parts[0] / parts[1];
+            }
+            const num = parseFloat(value);
+            return isNaN(num) ? value : num;
+        };
 
-            return isAscending ? numA - numB : numB - numA;
+        const valueA = parseValue(cellA);
+        const valueB = parseValue(cellB);
+
+        if (typeof valueA === "number" && typeof valueB === "number") {
+            return isAscending ? valueA - valueB : valueB - valueA;
         }
 
-        if (!isNaN(cellA) && !isNaN(cellB)) {
-            return isAscending ? cellA - cellB : cellB - cellA;
-        }
         return isAscending
-            ? cellA.localeCompare(cellB)
-            : cellB.localeCompare(cellA);
+            ? String(valueA).localeCompare(String(valueB))
+            : String(valueB).localeCompare(String(valueA));
     });
 
     rows.forEach(row => table.tBodies[0].appendChild(row));
