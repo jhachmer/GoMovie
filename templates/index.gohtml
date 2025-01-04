@@ -26,11 +26,19 @@
 
         <div class="login-box">
             <form action="/login" method="POST">
-                <input type="text" id="username" name="username" placeholder="Your username..." required>
-            </br >
-                <input type="password" id="password" name="password" placeholder="Your password..." required>
-            </br >
+                <div class="label-container">
+                    <label for="username">Username:</label>
+                </div>
+                    <input type="text" id="username" name="username" placeholder="Your username..." required>
+                    </br >
+                <div class="label-container">
+                    <label for="password">Password:</label>
+                </div>
+                    <input type="password" id="password" name="password" placeholder="Your password..." required>
+                    </br >
+            <div class="button-container">
                 <button type="submit">Login</button>
+            </div>
             </form>
         </div>
     </body>
