@@ -12,13 +12,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Storage struct {
+type SQLiteStorage struct {
 	db *sql.DB
 }
 
 // TODO: add UpdateMovie
 type Store interface {
-	InitDatabase() error
+	InitDatabaseTables() error
 	CheckCredentials(string, string) (bool, error)
 	CreateEntry(*types.Entry, *types.Movie) (*types.Entry, error)
 	GetEntries(string) ([]*types.Entry, error)
@@ -30,17 +30,17 @@ type Store interface {
 	SearchMovie(SearchParams) ([]*types.MovieOverviewData, error)
 }
 
-func NewStore(db *sql.DB) *Storage {
-	return &Storage{
+func NewStore(db *sql.DB) *SQLiteStorage {
+	return &SQLiteStorage{
 		db: db,
 	}
 }
 
-func (s *Storage) Close() {
+func (s *SQLiteStorage) Close() {
 	s.db.Close()
 }
 
-func (s *Storage) TestDBConnection() {
+func (s *SQLiteStorage) TestDBConnection() {
 	err := s.db.Ping()
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +48,7 @@ func (s *Storage) TestDBConnection() {
 	log.Println("connected to DB...")
 }
 
-func (s *Storage) InitDatabase() error {
+func (s *SQLiteStorage) InitDatabaseTables() error {
 	_, err := s.db.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS useraccounts (
     	UserID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -140,7 +140,7 @@ func (s *Storage) InitDatabase() error {
 	return nil
 }
 
-func (s *Storage) CheckCredentials(username, password string) (bool, error) {
+func (s *SQLiteStorage) CheckCredentials(username, password string) (bool, error) {
 	var hashedPassword string
 
 	err := s.db.QueryRow( /*sql*/ `
@@ -162,7 +162,7 @@ func (s *Storage) CheckCredentials(username, password string) (bool, error) {
 	return true, nil
 }
 
-func (s *Storage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, error) {
+func (s *SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, error) {
 	var exists bool
 	row := s.db.QueryRow( /*sql*/ `
 		SELECT EXISTS(SELECT movies.title
@@ -197,7 +197,7 @@ func (s *Storage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, e
 	return e, nil
 }
 
-func (s *Storage) UpdateEntry(movieId, name, comment string, watched bool) (*types.Entry, error) {
+func (s *SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool) (*types.Entry, error) {
 	var watchedInt = 0
 	if watched {
 		watchedInt = 1
@@ -223,7 +223,7 @@ func (s *Storage) UpdateEntry(movieId, name, comment string, watched bool) (*typ
 	return &entry, nil
 }
 
-func (s *Storage) DeleteEntry(imdbId string) error {
+func (s *SQLiteStorage) DeleteEntry(imdbId string) error {
 	_, err := s.db.Exec( /*sql*/ `
 		DELETE FROM entries
 		WHERE movie_id = ?
@@ -234,7 +234,7 @@ func (s *Storage) DeleteEntry(imdbId string) error {
 	return nil
 }
 
-func (s *Storage) GetEntries(id string) ([]*types.Entry, error) {
+func (s *SQLiteStorage) GetEntries(id string) ([]*types.Entry, error) {
 	rows, err := s.db.Query( /*sql*/ `
 		SELECT id, name, watched, comment
 		FROM entries
@@ -260,7 +260,7 @@ func (s *Storage) GetEntries(id string) ([]*types.Entry, error) {
 	return entries, nil
 }
 
-func (s *Storage) CreateMovie(m *types.Movie) (*types.Movie, error) {
+func (s *SQLiteStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
 	_, err := s.db.Exec( /*sql*/ `
 		INSERT INTO movies (id, title, year, director, runtime, rated, released, plot, poster)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
@@ -283,7 +283,7 @@ func (s *Storage) CreateMovie(m *types.Movie) (*types.Movie, error) {
 	return m, nil
 }
 
-func (s *Storage) GetMovieByID(movieID string) (*types.Movie, error) {
+func (s *SQLiteStorage) GetMovieByID(movieID string) (*types.Movie, error) {
 	var movie types.Movie
 
 	err := s.db.QueryRow( /*sql*/ `
@@ -359,15 +359,7 @@ func (s *Storage) GetMovieByID(movieID string) (*types.Movie, error) {
 	return &movie, nil
 }
 
-func (s *Storage) GetAllMovies() ([]*types.MovieOverviewData, error) {
-	// if s == nil {
-	// 	fmt.Println("storage is not initialized")
-	// 	return nil, fmt.Errorf("storage is not initialized")
-	// }
-	// if s.db == nil {
-	// 	fmt.Println("db conn is not initialized")
-	// 	return nil, fmt.Errorf("db conn is not initialized")
-	// }
+func (s *SQLiteStorage) GetAllMovies() ([]*types.MovieOverviewData, error) {
 	var movies []*types.MovieOverviewData
 	rows, err := s.db.Query( /*sql*/ `
         SELECT id
@@ -482,7 +474,7 @@ func (s *Storage) SearchMovie(params SearchParams) ([]*types.MovieOverviewData, 
 	return results, nil
 }
 
-func (s *Storage) createRatings(m *types.Movie) error {
+func (s *SQLiteStorage) createRatings(m *types.Movie) error {
 	for _, rating := range m.Ratings {
 		_, err := s.db.Exec( /*sql*/ `
 			INSERT INTO ratings (movie_id, source, value)
@@ -495,7 +487,7 @@ func (s *Storage) createRatings(m *types.Movie) error {
 	return nil
 }
 
-func (s *Storage) getRatings(id string) ([]types.Rating, error) {
+func (s *SQLiteStorage) getRatings(id string) ([]types.Rating, error) {
 	rows, err := s.db.Query( /*sql*/ `
 		SELECT source, value
 		FROM ratings
@@ -521,7 +513,7 @@ func (s *Storage) getRatings(id string) ([]types.Rating, error) {
 	return ratings, nil
 }
 
-func (s *Storage) createGenres(m *types.Movie) error {
+func (s *SQLiteStorage) createGenres(m *types.Movie) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
 		var genreID int64
@@ -552,7 +544,7 @@ func (s *Storage) createGenres(m *types.Movie) error {
 	return nil
 }
 
-func (s *Storage) getGenres(id string) (string, error) {
+func (s *SQLiteStorage) getGenres(id string) (string, error) {
 	rows, err := s.db.Query( /*sql*/ `
 		SELECT g.name
 		FROM genres g
@@ -578,7 +570,7 @@ func (s *Storage) getGenres(id string) (string, error) {
 	return util.JoinIMDBStrings(genres), nil
 }
 
-func (s *Storage) createActors(m *types.Movie) error {
+func (s *SQLiteStorage) createActors(m *types.Movie) error {
 	actors := util.SplitIMDBString(m.Actors)
 	for _, actor := range actors {
 		var actorID int64
@@ -610,7 +602,7 @@ func (s *Storage) createActors(m *types.Movie) error {
 	return nil
 }
 
-func (s *Storage) getActors(id string) (string, error) {
+func (s *SQLiteStorage) getActors(id string) (string, error) {
 	rows, err := s.db.Query( /*sql*/ `
 		SELECT a.name
 		FROM actors a

@@ -38,14 +38,14 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 	return err
 }
 
-func setupDatabase() (*store.Storage, error) {
+func setupDatabase() (*store.SQLiteStorage, error) {
 	db, err := store.NewSQLiteStorage(config.Envs)
 	if err != nil {
 		return nil, err
 	}
 	dbStore := store.NewStore(db)
 	dbStore.TestDBConnection()
-	err = dbStore.InitDatabase()
+	err = dbStore.InitDatabaseTables()
 	if err != nil {
 		return nil, err
 	}
