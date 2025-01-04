@@ -36,7 +36,7 @@ function saveEntry(event, entryId) {
         watched: watched
     };
 
-    fetch(`/films/${id}`, {
+    fetch(`/films/${id}/entry`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
@@ -80,7 +80,7 @@ function deleteEntry(entryId) {
         return;
     }
 
-    fetch(`/films/${movieId}`, {
+    fetch(`/films/${movieId}/entry`, {
         method: 'DELETE'
     })
     .then(response => {
