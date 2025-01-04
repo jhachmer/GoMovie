@@ -27,7 +27,7 @@ type Store interface {
 	CreateMovie(*types.Movie) (*types.Movie, error)
 	GetMovieByID(string) (*types.Movie, error)
 	GetAllMovies() ([]*types.MovieOverviewData, error)
-	SearchMovie(SearchParams) ([]*types.MovieOverviewData, error)
+	SearchMovie(types.SearchParams) ([]*types.MovieOverviewData, error)
 }
 
 func NewStore(db *sql.DB) *SQLiteStorage {
@@ -393,18 +393,7 @@ func (s *SQLiteStorage) GetAllMovies() ([]*types.MovieOverviewData, error) {
 	return movies, nil
 }
 
-type SearchParams struct {
-	Genres []string
-	Actors []string
-	Years  YearSearch
-}
-
-type YearSearch struct {
-	StartYear string
-	EndYear   string
-}
-
-func (s *Storage) SearchMovie(params SearchParams) ([]*types.MovieOverviewData, error) {
+func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieOverviewData, error) {
 	filters := []string{}
 	args := []any{}
 

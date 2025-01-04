@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/jhachmer/gotocollection/internal/store"
 	"github.com/jhachmer/gotocollection/internal/types"
 	"github.com/jhachmer/gotocollection/internal/util"
 )
@@ -55,6 +54,7 @@ func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 		data.Error = fmt.Errorf("error searching for movie: %w", err)
 		h.logger.Println(err.Error())
 		renderTemplate(w, "overview", data)
+		return
 	}
 	data.Movies = movs
 	renderTemplate(w, "overview", data)
@@ -62,8 +62,8 @@ func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 
 // TODO: invalid string handling (maybe regex?)
 // genre:horror,thriller;actors:Hans Albers, Keeanu Reeves
-func parseSearchQuery(query string) (store.SearchParams, error) {
-	var sp store.SearchParams
+func parseSearchQuery(query string) (types.SearchParams, error) {
+	var sp types.SearchParams
 	subQueries := strings.Split(query, ";")
 	for i := range subQueries {
 		subQueries[i] = strings.TrimSpace(subQueries[i])
@@ -90,7 +90,7 @@ func parseSearchQuery(query string) (store.SearchParams, error) {
 			sp.Actors = subVals
 		case "year":
 			yearParams := strings.Split(values, ",")
-			sp.Years = store.YearSearch{StartYear: yearParams[0], EndYear: yearParams[1]}
+			sp.Years = types.YearSearch{StartYear: yearParams[0], EndYear: yearParams[1]}
 		default:
 			return sp, fmt.Errorf("invalid search type: %s", searchType)
 		}

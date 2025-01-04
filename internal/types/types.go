@@ -132,3 +132,14 @@ type HomeData struct {
 type LoginData struct {
 	Error error
 }
+
+type SearchParams struct {
+	Genres []string
+	Actors []string
+	Years  YearSearch
+}
+
+type YearSearch struct {
+	StartYear string
+	EndYear   string
+}
