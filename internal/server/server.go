@@ -31,16 +31,18 @@ func NewServer(addr string, logger *log.Logger, handler *handlers.Handler) *Serv
 // Handlers are wrapped with Middleware
 func (svr *Server) setupRoutes(mux *http.ServeMux) {
 	fileServer := http.FileServer(http.Dir("./templates/"))
+
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+
+	mux.HandleFunc("GET /health", Chain(svr.Handler.HealthHandler, Logging(svr.Logger)))
 
 	mux.HandleFunc("GET /login", Chain(svr.Handler.LoginHandler, Logging(svr.Logger)))
 	mux.HandleFunc("POST /login", Chain(svr.Handler.CheckLoginHandler))
 
-	mux.HandleFunc("GET /health", Chain(svr.Handler.HealthHandler, Logging(svr.Logger)))
 	mux.HandleFunc("GET /films/{imdb}", Chain(svr.Handler.InfoIDHandler, Authenticate(), Logging(svr.Logger)))
-	mux.HandleFunc("POST /films/{imdb}", Chain(svr.Handler.CreateEntryHandler, Authenticate(), Logging(svr.Logger)))
-	mux.HandleFunc("PUT /films/{imdb}", Chain(svr.Handler.UpdateEntryHandler, Authenticate(), Logging(svr.Logger)))
-	mux.HandleFunc("DELETE /films/{imdb}", Chain(svr.Handler.DeleteEntryHandler, Authenticate(), Logging(svr.Logger)))
+	mux.HandleFunc("POST /films/{imdb}/entry", Chain(svr.Handler.CreateEntryHandler, Authenticate(), Logging(svr.Logger)))
+	mux.HandleFunc("PUT /films/{imdb}/entry", Chain(svr.Handler.UpdateEntryHandler, Authenticate(), Logging(svr.Logger)))
+	mux.HandleFunc("DELETE /films/{imdb}/entry", Chain(svr.Handler.DeleteEntryHandler, Authenticate(), Logging(svr.Logger)))
 
 	mux.HandleFunc("GET /overview", Chain(svr.Handler.HomeHandler, Authenticate(), Logging(svr.Logger)))
 	mux.HandleFunc("GET /search", Chain(svr.Handler.SearchHandler, Authenticate(), Logging(svr.Logger)))
