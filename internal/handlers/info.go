@@ -77,7 +77,8 @@ func (h *Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Entries = entries
 	data.Movie = mov
-	renderTemplate(w, "info", data)
+	http.Redirect(w, r, fmt.Sprintf("/films/%s", id), http.StatusSeeOther)
+	//renderTemplate(w, "info", data)
 }
 
 func (h *Handler) UpdateEntryHandler(w http.ResponseWriter, r *http.Request) {
