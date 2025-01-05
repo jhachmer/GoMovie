@@ -1,3 +1,4 @@
+// Function to sort the table columns
 function sortTable(columnIndex) {
     const table = document.getElementById("moviesTable");
     const rows = Array.from(table.tBodies[0].rows);
@@ -34,3 +35,19 @@ function sortTable(columnIndex) {
     rows.forEach(row => table.tBodies[0].appendChild(row));
     table.setAttribute("data-sort-asc", !isAscending);
 }
+
+// Checkbox Listener to filter out already watched movies
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('filterNotWatched').addEventListener('change', function () {
+        const showNotWatchedOnly = this.checked;
+        const rows = document.querySelectorAll('#moviesTable tbody tr');
+
+        rows.forEach(row => {
+            if (row.classList.contains('not-watched')) {
+                row.style.display = showNotWatchedOnly ? '' : 'table-row';
+            } else {
+                row.style.display = showNotWatchedOnly ? 'none' : 'table-row';
+            }
+        });
+    });
+});
