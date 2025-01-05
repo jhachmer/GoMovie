@@ -36,6 +36,7 @@ func (svr *Server) setupRoutes(mux *http.ServeMux) {
 
 	mux.HandleFunc("GET /health", Chain(svr.Handler.HealthHandler, Logging(svr.Logger)))
 
+	mux.Handle("GET /{$}", http.RedirectHandler("/login", http.StatusSeeOther))
 	mux.HandleFunc("GET /login", Chain(svr.Handler.LoginHandler, Logging(svr.Logger)))
 	mux.HandleFunc("POST /login", Chain(svr.Handler.CheckLoginHandler))
 
