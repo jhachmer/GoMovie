@@ -9,11 +9,11 @@ import (
 var templates *template.Template
 
 func InitTemplates() {
-	templates = template.Must(template.ParseFiles("./templates/index.gohtml", "./templates/info.gohtml", "./templates/overview.gohtml", "./templates/movie-grid.gohtml", "./templates/error.gohtml"))
+	templates = template.Must(template.ParseFiles("./templates/index.html", "./templates/info.html", "./templates/overview.html", "./templates/movie-grid.html", "./templates/error.html"))
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string, d any) {
-	err := templates.ExecuteTemplate(w, tmpl+".gohtml", d)
+	err := templates.ExecuteTemplate(w, tmpl+".html", d)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		log.Println(err.Error())
