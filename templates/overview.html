@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    {{ template "error.gohtml" . }}
+    {{ template "error.html" . }}
 
     <div class="container">
         <form action="/search" method="GET" class="search-bar">
@@ -31,9 +31,9 @@
             <button type="submit">Search</button>
         </form>
     <div class="movies-grid">
-        {{ template "movie-grid.gohtml" . }}
+        {{ template "movie-grid.html" . }}
     </div>
-</div>
+    </div>
 
 </body>
 </html>

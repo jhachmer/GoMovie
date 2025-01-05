@@ -100,6 +100,7 @@ function deleteEntry(entryId) {
     });
 }
 
+// EventListener for upper left IMDb search
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('menu-search-bar').addEventListener('submit', function (event) {
         event.preventDefault();
