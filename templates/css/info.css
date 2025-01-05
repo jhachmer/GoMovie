@@ -282,6 +282,7 @@ img {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    max-width: 50%;
 }
 
 .ratings-box, .feedback-box {
@@ -401,4 +402,8 @@ img {
 
 .hidden {
     display: none;
+}
+
+.comment {
+    line-height: 1.5;
 }

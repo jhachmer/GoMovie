@@ -156,3 +156,11 @@ th:hover {
 }.movies-table th:nth-child(7) {
     max-width: 150px;
 }
+
+.watchcheckbox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20%;
+    margin-bottom: 20px;
+}

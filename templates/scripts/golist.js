@@ -1,5 +1,5 @@
 function editEntry(entryId) {
-    const entry = document.getElementById(`entry-${entryId}`);
+    const entry = document.getElementById(`entry-1`);
 
     const name = entry.querySelector("b").textContent.split(" (")[0].trim();
     const comment = entry.querySelector("i").textContent.replace(/"/g, "");
@@ -50,10 +50,10 @@ function saveEntry(event, entryId) {
         return response.json();
     })
     .then(updatedData => {
-        const entry = document.getElementById(`entry-${entryId}`);
+        const entry = document.getElementById(`entry-1`);
         entry.innerHTML = `
             <b>${updatedData.name} ${updatedData.watched ? "(✓)" : "(✗)"}:</b> <i>"${updatedData.comment}"</i>
-            <button class="edit-button" onclick="editEntry(${entryId})">Edit</button>
+            <button class="edit-button" onclick="editEntry(1)">Edit</button>
             <button class="delete-button" onclick="deleteEntry(1)">Delete</button>
         `;
     })
@@ -64,10 +64,10 @@ function saveEntry(event, entryId) {
 }
 
 function cancelEdit(entryId, originalName, originalComment, originalWatched) {
-    const entry = document.getElementById(`entry-${entryId}`);
+    const entry = document.getElementById(`entry-1`);
     entry.innerHTML = `
         <b>${originalName} ${originalWatched ? "(✓)" : "(✗)"}:</b> <i>"${originalComment}"</i>
-        <button class="edit-button" onclick="editEntry(${entryId})">Edit</button>
+        <button class="edit-button" onclick="editEntry(1)">Edit</button>
         <button class="delete-button" onclick="deleteEntry(1)">Delete</button>
     `;
 }
@@ -93,6 +93,17 @@ function deleteEntry(entryId) {
         const entry = document.getElementById(`entry-${entryId}`);
         entry.remove();
         alert('Entry deleted successfully!');
+    })
+    .then(() => {
+        const feedbackList = document.querySelector('#feedback-list');
+        const formBox = document.querySelector('.form-box');
+
+        if (feedbackList && formBox) {
+            const hasRemainingEntries = feedbackList.children.length > 0;
+            if (!hasRemainingEntries) {
+                formBox.classList.remove('hidden');
+            }
+        }
     })
     .catch(error => {
         console.error('Error deleting the entry:', error);
