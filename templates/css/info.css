@@ -398,3 +398,7 @@ img {
 .feedback-box textarea {
     resize: vertical;
 }
+
+.hidden {
+    display: none;
+}

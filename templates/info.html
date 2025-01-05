@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/static/css/error.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org"></script>
-    <script src="/static/scripts/newinfo.js"></script>
+    <script src="/static/scripts/golist.js"></script>
 
 </head>
 <body>
@@ -52,11 +52,11 @@
                 </ul>
             </div>
 
-            <div class="feedback-box">
+            <div class="feedback-box" data-has-entries="{{if .Entries}}true{{else}}false{{end}}">
                 <h2>Notes</h2>
                 <ul id="feedback-list">
                     {{range $val := .Entries}}
-                    <li id="entry-1">
+                    <li id="entry-{{$val.ID}}">
                         <b>{{ $val.Name }}
                         {{if $val.Watched}}
                             (&#10003)
@@ -69,6 +69,7 @@
                     {{end}}
                 </ul>
             </div>
+
         </div>
 
         <div class="form-box">
