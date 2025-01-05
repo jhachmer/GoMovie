@@ -117,3 +117,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const feedbackBox = document.querySelector('.feedback-box');
+    const formBox = document.querySelector('.form-box');
+
+    if (feedbackBox && formBox) {
+        const hasEntries = feedbackBox.dataset.hasEntries === 'true';
+        if (hasEntries) {
+            formBox.classList.add('hidden');
+        }
+    }
+});
