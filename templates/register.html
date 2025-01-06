@@ -20,14 +20,14 @@
             </form>
             -->
             <div class="info">
-                <b>Login</b>
+                <b>Register</b>
             </div>
         </div>
 
         {{ template "error.html" . }}
 
         <div class="login-box">
-            <form action="/login" method="POST">
+            <form action="/register" method="POST">
                 <div class="label-container">
                     <label for="username">Username:</label>
                 </div>
@@ -39,10 +39,9 @@
                     <input type="password" id="password" name="password" placeholder="Your password..." required>
                     </br >
             <div class="button-container">
-                <button type="submit">Login</button>
+                <button type="submit">Register</button>
             </div>
             </form>
-            <a href="/register"><h3>Register</h3></a>
         </div>
     </body>
 </html>

@@ -10,8 +10,7 @@ import (
 )
 
 func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	data := types.LoginData{}
-	renderTemplate(w, "index", data)
+	renderTemplate(w, "index", nil)
 }
 
 func (h *Handler) CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +24,9 @@ func (h *Handler) CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
 	var ok bool
 	ok, err = h.store.CheckCredentials(username, password)
 	if err != nil {
-		http.Error(w, "error while validating user", http.StatusInternalServerError)
+		//http.Error(w, "error while validating user", http.StatusInternalServerError)
+		data := types.LoginData{Error: fmt.Errorf("error while logging in: %w", err)}
+		renderTemplate(w, "index", data)
 		return
 	}
 	if !ok {
@@ -47,4 +48,25 @@ func (h *Handler) CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &cookie)
 	http.Redirect(w, r, "/overview", http.StatusSeeOther)
+}
+
+func (h *Handler) RegisterSiteHandler(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "register", nil)
+}
+
+func (h *Handler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "error parsing form", http.StatusInternalServerError)
+		return
+	}
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+	err = h.store.CreateUser(username, password)
+	if err != nil {
+		data := types.LoginData{Error: fmt.Errorf("error creating user %w", err)}
+		renderTemplate(w, "register", data)
+		return
+	}
+	http.Redirect(w, r, "login", http.StatusSeeOther)
 }
