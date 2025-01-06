@@ -30,18 +30,23 @@ who recommended the movie, if we already watched it and comments about the movie
   - Update Button for new movie info (poster, ratings)
     - especially recently announed movies have a placeholder image as poster and obviously no ratings, updating them should provide the ratings and poster at the time of updating
   - ~~Color Grading of rows, to show if they are watched~~
-  - checkbox to toggle showing only unwatched movies on overview
+  - ~~checkbox to toggle showing only unwatched movies on overview~~
+  - redirecting to overview when accessing login page with valid cookie
+  - more than one list per user, ability to invite users to a list
 
 ### Routes:
 - GET /health : returns healthy if server is running
+- GET / : redirects to login page
 - GET /login : displays login page
 - POST /login : checks credentials provided by form values of username and password
+- GET /register : open register page
+- POST /register : creates new useraccount
 - GET /overview : displays overview page of all movies in database
+- GET /search : searches for movie by imdb id
 - GET /films/{imdb} : returns info page for movie with imdb id
-- POST /films/{imdb} : posts a new entry for movie
-- PUT /films/{imdb} : changes the entry saved for that movie
-- DELETE /films/{imdb} : deletes entry belonging to movie (does not delete movie from db, maybe later)
-- GET /{$} : index page for root route (really basic atm)
+- POST /films/{imdb}/entry : posts a new entry for movie
+- PUT /films/{imdb}/entry : changes the entry saved for that movie
+- DELETE /films/{imdb}/entry : deletes entry belonging to movie (does not delete movie from db, maybe later)
 
 ## Setup
 Use either:
