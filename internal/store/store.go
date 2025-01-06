@@ -7,6 +7,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/jhachmer/gotocollection/internal/auth"
 	"github.com/jhachmer/gotocollection/internal/types"
 	"github.com/jhachmer/gotocollection/internal/util"
 	"golang.org/x/crypto/bcrypt"
@@ -19,6 +20,7 @@ type SQLiteStorage struct {
 // TODO: add UpdateMovie
 type Store interface {
 	InitDatabaseTables() error
+	CreateUser(string, string) error
 	CheckCredentials(string, string) (bool, error)
 	CreateEntry(*types.Entry, *types.Movie) (*types.Entry, error)
 	GetEntries(string) ([]*types.Entry, error)
@@ -53,7 +55,8 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 		CREATE TABLE IF NOT EXISTS useraccounts (
     	UserID INTEGER PRIMARY KEY AUTOINCREMENT,
     	Username TEXT NOT NULL UNIQUE,
-    	PasswordHash TEXT NOT NULL);
+    	PasswordHash TEXT NOT NULL,
+		Active INTEGER DEFAULT 0);
 		`)
 	if err != nil {
 		return err
@@ -142,12 +145,13 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 
 func (s *SQLiteStorage) CheckCredentials(username, password string) (bool, error) {
 	var hashedPassword string
+	var active bool
 
 	err := s.db.QueryRow( /*sql*/ `
-		SELECT PasswordHash
+		SELECT PasswordHash, Active
 		FROM UserAccounts
 		WHERE Username = ?
-		`, username).Scan(&hashedPassword)
+		`, username).Scan(&hashedPassword, &active)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return false, nil
@@ -158,7 +162,9 @@ func (s *SQLiteStorage) CheckCredentials(username, password string) (bool, error
 	if err != nil {
 		return false, nil
 	}
-
+	if !active {
+		return false, fmt.Errorf("user account not activated")
+	}
 	return true, nil
 }
 
@@ -615,4 +621,20 @@ func (s *SQLiteStorage) getActors(id string) (string, error) {
 		return "", err
 	}
 	return util.JoinIMDBStrings(actors), nil
+}
+
+func (s *SQLiteStorage) CreateUser(username, password string) error {
+	hashedPW, err := auth.HashPassword(password)
+	if err != nil {
+		return fmt.Errorf("unable to hash pw: %w", err)
+	}
+	_, err = s.db.Exec( /*sql*/ `
+		INSERT
+		INTO useraccounts (Username, PasswordHash)
+		VALUES (?, ?);
+	`, username, hashedPW)
+	if err != nil {
+		return fmt.Errorf("could not create useraccount: %w", err)
+	}
+	return nil
 }
