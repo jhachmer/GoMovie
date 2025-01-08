@@ -482,32 +482,6 @@ func (s *SQLiteStorage) createRatings(m *types.Movie) error {
 	return nil
 }
 
-func (s *SQLiteStorage) getRatings(id string) ([]types.Rating, error) {
-	rows, err := s.db.Query( /*sql*/ `
-		SELECT source, value
-		FROM ratings
-		WHERE movie_id = ?;
-		`, id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var ratings []types.Rating
-
-	for rows.Next() {
-		var rating types.Rating
-		if err := rows.Scan(&rating.Source, &rating.Value); err != nil {
-			return nil, err
-		}
-		ratings = append(ratings, rating)
-	}
-	if err = rows.Err(); err != nil {
-		return nil, err
-	}
-	return ratings, nil
-}
-
 func (s *SQLiteStorage) createGenres(m *types.Movie) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
@@ -537,32 +511,6 @@ func (s *SQLiteStorage) createGenres(m *types.Movie) error {
 		}
 	}
 	return nil
-}
-
-func (s *SQLiteStorage) getGenres(id string) (string, error) {
-	rows, err := s.db.Query( /*sql*/ `
-		SELECT g.name
-		FROM genres g
-		JOIN movies_genres mg ON g.id = mg.genre_id
-		WHERE mg.movie_id = ?;
-		`, id)
-	if err != nil {
-		return "", err
-	}
-	defer rows.Close()
-	var genres []string
-
-	for rows.Next() {
-		var genre string
-		if err := rows.Scan(&genre); err != nil {
-			return "", err
-		}
-		genres = append(genres, genre)
-	}
-	if err = rows.Err(); err != nil {
-		return "", err
-	}
-	return util.JoinIMDBStrings(genres), nil
 }
 
 func (s *SQLiteStorage) createActors(m *types.Movie) error {
@@ -595,32 +543,6 @@ func (s *SQLiteStorage) createActors(m *types.Movie) error {
 		}
 	}
 	return nil
-}
-
-func (s *SQLiteStorage) getActors(id string) (string, error) {
-	rows, err := s.db.Query( /*sql*/ `
-		SELECT a.name
-		FROM actors a
-		JOIN movies_actors ma ON a.id = ma.actor_id
-		WHERE ma.movie_id = ?;
-		`, id)
-	if err != nil {
-		return "", err
-	}
-	defer rows.Close()
-	var actors []string
-
-	for rows.Next() {
-		var actor string
-		if err := rows.Scan(&actor); err != nil {
-			return "", err
-		}
-		actors = append(actors, actor)
-	}
-	if err = rows.Err(); err != nil {
-		return "", err
-	}
-	return util.JoinIMDBStrings(actors), nil
 }
 
 func (s *SQLiteStorage) CreateUser(username, password string) error {
