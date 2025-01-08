@@ -49,20 +49,15 @@ func NewOmdbTitleRequest(title, year string) (*OmdbTitleRequest, error) {
 
 // SendRequest returns movie data of movie in OmdbTitleRequest
 func (r OmdbTitleRequest) SendRequest() (*Movie, error) {
-	requestURL, err := makeRequestURL(r)
-	if err != nil {
-		return nil, err
-	}
-	var mov Movie
-	mov, err = decodeRequest(requestURL)
-	if err != nil {
-		return nil, err
-	}
-	return &mov, nil
+	return sendAndReturn(r)
 }
 
 // SendRequest returns movie data of movie in OmdbIDRequest
 func (r OmdbIDRequest) SendRequest() (*Movie, error) {
+	return sendAndReturn(r)
+}
+
+func sendAndReturn(r OmdbRequest) (*Movie, error) {
 	requestURL, err := makeRequestURL(r)
 	if err != nil {
 		return nil, err
@@ -73,7 +68,7 @@ func (r OmdbIDRequest) SendRequest() (*Movie, error) {
 		return nil, err
 	}
 	if mov.Response == "False" {
-		return nil, fmt.Errorf("could not find movie with id %s", r.imdbID)
+		return nil, fmt.Errorf("could not find movie with id %s", mov.Response)
 	}
 	return &mov, nil
 }
