@@ -38,11 +38,11 @@ func (svr *Server) setupRoutes(mux *http.ServeMux) {
 
 	mux.Handle("GET /{$}", http.RedirectHandler("/login", http.StatusSeeOther))
 
-	mux.HandleFunc("GET /login", Chain(svr.Handler.LoginHandler, Logging(svr.Logger)))
-	mux.HandleFunc("POST /login", Chain(svr.Handler.CheckLoginHandler, Logging(svr.Logger)))
+	mux.HandleFunc("GET /login", Chain(svr.Handler.LoginHandler, RedirectWhenLoggedIn(), Logging(svr.Logger)))
+	mux.HandleFunc("POST /login", Chain(svr.Handler.CheckLoginHandler, RedirectWhenLoggedIn(), Logging(svr.Logger)))
 
-	mux.HandleFunc("GET /register", Chain(svr.Handler.RegisterSiteHandler, Logging(svr.Logger)))
-	mux.HandleFunc("POST /register", Chain(svr.Handler.RegisterHandler, Logging(svr.Logger)))
+	mux.HandleFunc("GET /register", Chain(svr.Handler.RegisterSiteHandler, RedirectWhenLoggedIn(), Logging(svr.Logger)))
+	mux.HandleFunc("POST /register", Chain(svr.Handler.RegisterHandler, RedirectWhenLoggedIn(), Logging(svr.Logger)))
 
 	mux.HandleFunc("GET /films/{imdb}", Chain(svr.Handler.InfoIDHandler, Authenticate(), Logging(svr.Logger)))
 

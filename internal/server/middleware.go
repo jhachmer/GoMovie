@@ -67,3 +67,20 @@ func Authenticate() Middleware {
 		}
 	}
 }
+
+func RedirectWhenLoggedIn() Middleware {
+	return func(handlerFunc http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			cookie, err := r.Cookie("golist")
+			if err == nil {
+				_, err = auth.VerifyToken(cookie.Value)
+				if err == nil {
+					http.Redirect(w, r, "/overview", http.StatusSeeOther)
+					return
+				}
+			}
+
+			handlerFunc(w, r)
+		}
+	}
+}

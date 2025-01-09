@@ -31,7 +31,7 @@ who recommended the movie, if we already watched it and comments about the movie
     - especially recently announed movies have a placeholder image as poster and obviously no ratings, updating them should provide the ratings and poster at the time of updating
   - ~~Color Grading of rows, to show if they are watched~~
   - ~~checkbox to toggle showing only unwatched movies on overview~~
-  - redirecting to overview when accessing login page with valid cookie
+  - ~~redirecting to overview when accessing login page with valid cookie~~
   - more than one list per user, ability to invite users to a list
 
 ### Routes:
