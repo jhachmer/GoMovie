@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -96,7 +95,6 @@ func TestFindValidFiles(t *testing.T) {
 				return
 			}
 			less := func(a, b string) bool { return len(a) < len(b) }
-			fmt.Println("Diff:", cmp.Diff(got, tt.want, cmpopts.SortSlices(less)))
 			if cmp.Diff(got, tt.want, cmpopts.SortSlices(less)) != "" {
 				t.Errorf("FindValidFiles() got = %v, want %v", got, tt.want)
 			}
@@ -211,6 +209,64 @@ func TestExtractTitleAndYearFromPath(t *testing.T) {
 			}
 			if got1 != tt.want1 {
 				t.Errorf("ExtractTitleAndYearFromPath() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func TestSplitIMDBString(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "Splitting",
+			args: args{s: "Max Mustermann, John Doe, Jane Doe"},
+			want: []string{"Max Mustermann", "John Doe", "Jane Doe"},
+		},
+		{
+			name: "One Actor",
+			args: args{s: "Max Mustermann"},
+			want: []string{"Max Mustermann"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := SplitIMDBString(tt.args.s); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("SplitIMDBString() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestJoinIMDBStrings(t *testing.T) {
+	type args struct {
+		s []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "3 Actors",
+			args: args{s: []string{"Max Mustermann", "John Doe", "Jane Doe"}},
+			want: "Max Mustermann, John Doe, Jane Doe",
+		},
+		{
+			name: "One Actor",
+			args: args{s: []string{"Max Mustermann"}},
+			want: "Max Mustermann",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := JoinIMDBStrings(tt.args.s); got != tt.want {
+				t.Errorf("JoinIMDBStrings() = %v, want %v", got, tt.want)
 			}
 		})
 	}
