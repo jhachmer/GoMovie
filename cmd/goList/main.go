@@ -26,12 +26,17 @@ func main() {
 }
 
 func run(ctx context.Context, w io.Writer, args []string) error {
+	_ = w
+	_ = args
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
 	logger := log.New(os.Stdout, "goto:", log.LstdFlags)
 
 	dbStore, err := setupDatabase()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	svr := setupServer(dbStore, logger)
 	err = svr.Serve(ctx)
