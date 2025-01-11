@@ -45,6 +45,7 @@ func (svr *Server) setupRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /register", Chain(svr.Handler.RegisterHandler, RedirectWhenLoggedIn(), Logging(svr.Logger)))
 
 	mux.HandleFunc("GET /films/{imdb}", Chain(svr.Handler.InfoIDHandler, Authenticate(), Logging(svr.Logger)))
+	mux.HandleFunc("PUT /films/{imdb}", Chain(svr.Handler.UpdateMovieHandler, Authenticate(), Logging(svr.Logger)))
 
 	mux.HandleFunc("POST /films/{imdb}/entry", Chain(svr.Handler.CreateEntryHandler, Authenticate(), Logging(svr.Logger)))
 	mux.HandleFunc("PUT /films/{imdb}/entry", Chain(svr.Handler.UpdateEntryHandler, Authenticate(), Logging(svr.Logger)))

@@ -22,12 +22,13 @@
             <b>{{.Movie.Title}} ({{.Movie.Year}})</b>
             <span><a href="https://www.imdb.com/de/title/{{ .Movie.ImdbID }}"><i> </br >ID:{{.Movie.ImdbID}}</i></a></span>
         </div>
+        <button id="update-button">Update Movie Info</button>
     </div>
 
     {{ template "error.html" .}}
 
 <div class="container">
-    <img src="{{.Movie.Poster}}" alt="Movie Poster">
+    <img class="movie-poster" src="{{.Movie.Poster}}" alt="Movie Poster">
     <div class="content-box">
         <div class="info-box">
             <h2>Info</h2>

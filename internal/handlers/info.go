@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/jhachmer/gotocollection/internal/types"
@@ -37,6 +38,29 @@ func (h *Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Entries = entries
 	renderTemplate(w, "info", data)
+}
+
+func (h *Handler) UpdateMovieHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("imdb")
+	if !validPath.MatchString(id) {
+		http.Error(w, "not a valid id", http.StatusBadRequest)
+		h.logger.Println("could not match id:", id)
+		return
+	}
+	updatedMovie, err := types.NewMovieFromID(id)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error getting movie: %s", err.Error()), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+	_, err = h.store.UpdateMovie(updatedMovie)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error getting movie: %s", err.Error()), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+	h.movCache.Delete(id)
+	h.movCache.Set(id, updatedMovie)
 }
 
 func (h *Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {

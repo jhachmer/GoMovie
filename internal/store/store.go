@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 
 	"github.com/jhachmer/gotocollection/internal/auth"
@@ -27,6 +28,7 @@ type Store interface {
 	UpdateEntry(string, string, string, bool) (*types.Entry, error)
 	DeleteEntry(string) error
 	CreateMovie(*types.Movie) (*types.Movie, error)
+	UpdateMovie(*types.Movie) (*types.Movie, error)
 	GetMovieByID(string) (*types.Movie, error)
 	GetAllMovies() ([]*types.MovieOverviewData, error)
 	SearchMovie(types.SearchParams) ([]*types.MovieOverviewData, error)
@@ -287,6 +289,178 @@ func (s *SQLiteStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
 		return nil, err
 	}
 	return m, nil
+}
+
+func (s *SQLiteStorage) UpdateMovie(m *types.Movie) (*types.Movie, error) {
+	_, err := s.db.Exec( /*sql*/ `
+	UPDATE movies
+	SET title = ?, year = ?, director = ?, runtime = ?, rated = ?, released = ?, plot = ?, poster = ?
+	WHERE id = ?;
+	`, m.Title, m.Year, m.Director, m.Runtime, m.Rated, m.Released, m.Plot, m.Poster, m.ImdbID)
+	if err != nil {
+		return nil, err
+	}
+	err = s.updateRatings(m)
+	if err != nil {
+		return nil, err
+	}
+	err = s.updateGenres(m)
+	if err != nil {
+		return nil, err
+	}
+	err = s.updateActors(m)
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (s *SQLiteStorage) updateRatings(m *types.Movie) error {
+	for _, rating := range m.Ratings {
+		_, err := s.db.Exec( /*sql*/ `
+			UPDATE ratings
+			SET value = ?
+			WHERE movie_id = ? AND source = ?;
+			`, rating.Value, m.ImdbID, rating.Source)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *SQLiteStorage) updateGenres(m *types.Movie) error {
+	genres := util.SplitIMDBString(m.Genre)
+
+	rows, err := s.db.Query( /*sql*/ `
+	SELECT g.name
+	FROM genres g
+	INNER JOIN movies_genres mg ON g.id = mg.genre_id
+	WHERE mg.movie_id = ?`, m.ImdbID)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var genresFromDB []string
+	for rows.Next() {
+		var genre string
+		if err := rows.Scan(&genre); err != nil {
+			return err
+		}
+		genresFromDB = append(genresFromDB, genre)
+	}
+
+	for _, g := range genresFromDB {
+		if !slices.Contains(genres, g) {
+			_, err := s.db.Exec( /*sql*/ `
+			DELETE FROM movies_genres
+			WHERE
+			movie_id = ?
+			AND
+			genre_id = (SELECT id FROM genres WHERE name = ?);
+			`, m.ImdbID, g)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	for _, genre := range genres {
+		var genreID int64
+		err := s.db.QueryRow( /*sql*/ `
+			SELECT id
+			FROM genres
+			WHERE name = ?;
+			`, genre).Scan(&genreID)
+		if errors.Is(err, sql.ErrNoRows) {
+			res, err := s.db.Exec( /*sql*/ `
+				INSERT OR IGNORE
+       			INTO genres (name)
+       			VALUES (?);
+       			`, genre)
+			if err != nil {
+				return err
+			}
+			genreID, _ = res.LastInsertId()
+		}
+		_, err = s.db.Exec( /*sql*/ `
+			INSERT OR IGNORE
+       		INTO movies_genres (movie_id, genre_id)
+       		VALUES (?, ?);
+       		`, m.ImdbID, genreID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *SQLiteStorage) updateActors(m *types.Movie) error {
+	actors := util.SplitIMDBString(m.Actors)
+
+	rows, err := s.db.Query( /*sql*/ `
+	SELECT a.name
+	FROM actors a
+	INNER JOIN movies_actors ma ON a.id = ma.actor_id
+	WHERE ma.movie_id = ?`, m.ImdbID)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	var actorsFromDB []string
+	for rows.Next() {
+		var actor string
+		if err := rows.Scan(&actor); err != nil {
+			return err
+		}
+		actorsFromDB = append(actorsFromDB, actor)
+	}
+
+	for _, a := range actorsFromDB {
+		if !slices.Contains(actors, a) {
+			_, err := s.db.Exec( /*sql*/ `
+			DELETE FROM movies_actors
+			WHERE
+			movie_id = ?
+			AND
+			actor_id = (SELECT id FROM actors WHERE name = ?);
+			`, m.ImdbID, a)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	for _, actor := range actors {
+		var actorID int64
+		err := s.db.QueryRow( /*sql*/ `
+			SELECT id
+			FROM actors
+			WHERE name = ?;
+			`, actor).Scan(&actorID)
+		if errors.Is(err, sql.ErrNoRows) {
+			res, err := s.db.Exec( /*sql*/ `
+				INSERT OR IGNORE
+       			INTO actors (name)
+       			VALUES (?);
+       			`, actor)
+			if err != nil {
+				return err
+			}
+			actorID, _ = res.LastInsertId()
+		}
+		_, err = s.db.Exec( /*sql*/ `
+			INSERT OR IGNORE
+       		INTO movies_actors (movie_id, actor_id)
+       		VALUES (?, ?);
+       		`, m.ImdbID, actorID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *SQLiteStorage) GetMovieByID(movieID string) (*types.Movie, error) {

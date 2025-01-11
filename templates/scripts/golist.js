@@ -43,30 +43,30 @@ function saveEntry(event, entryId) {
         },
         body: JSON.stringify(payload)
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to update the entry');
-        }
-        return response.json();
-    })
-    .then(updatedData => {
-        const entry = document.getElementById(`entry-1`);
-        entry.innerHTML = `
-            <b>${updatedData.name} ${updatedData.watched ? "(✓)" : "(✗)"}:</b> <i>"${updatedData.comment}"</i>
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to update the entry');
+            }
+            return response.json();
+        })
+        .then(updatedData => {
+            const entry = document.getElementById(`entry-1`);
+            entry.innerHTML = `
+            <b>${updatedData.name} ${updatedData.watched ? "(✓)" : "(✗)"}:</b> <i>"${updatedData.comment}"</i></br >
             <button class="edit-button" onclick="editEntry(1)">Edit</button>
             <button class="delete-button" onclick="deleteEntry(1)">Delete</button>
         `;
-    })
-    .catch(error => {
-        console.error('Error updating the entry:', error);
-        alert('Failed to save changes. Please try again.');
-    });
+        })
+        .catch(error => {
+            console.error('Error updating the entry:', error);
+            alert('Failed to save changes. Please try again.');
+        });
 }
 
 function cancelEdit(entryId, originalName, originalComment, originalWatched) {
     const entry = document.getElementById(`entry-1`);
     entry.innerHTML = `
-        <b>${originalName} ${originalWatched ? "(✓)" : "(✗)"}:</b> <i>"${originalComment}"</i>
+        <b>${originalName} ${originalWatched ? "(✓)" : "(✗)"}:</b> <i>"${originalComment}"</i></br >
         <button class="edit-button" onclick="editEntry(1)">Edit</button>
         <button class="delete-button" onclick="deleteEntry(1)">Delete</button>
     `;
@@ -83,32 +83,32 @@ function deleteEntry(entryId) {
     fetch(`/films/${movieId}/entry`, {
         method: 'DELETE'
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to delete the entry');
-        }
-        return response.text();
-    })
-    .then(() => {
-        const entry = document.getElementById(`entry-${entryId}`);
-        entry.remove();
-        alert('Entry deleted successfully!');
-    })
-    .then(() => {
-        const feedbackList = document.querySelector('#feedback-list');
-        const formBox = document.querySelector('.form-box');
-
-        if (feedbackList && formBox) {
-            const hasRemainingEntries = feedbackList.children.length > 0;
-            if (!hasRemainingEntries) {
-                formBox.classList.remove('hidden');
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete the entry');
             }
-        }
-    })
-    .catch(error => {
-        console.error('Error deleting the entry:', error);
-        alert('Failed to delete the entry. Please try again.');
-    });
+            return response.text();
+        })
+        .then(() => {
+            const entry = document.getElementById(`entry-${entryId}`);
+            entry.remove();
+            alert('Entry deleted successfully!');
+        })
+        .then(() => {
+            const feedbackList = document.querySelector('#feedback-list');
+            const formBox = document.querySelector('.form-box');
+
+            if (feedbackList && formBox) {
+                const hasRemainingEntries = feedbackList.children.length > 0;
+                if (!hasRemainingEntries) {
+                    formBox.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting the entry:', error);
+            alert('Failed to delete the entry. Please try again.');
+        });
 }
 
 // EventListener for upper left IMDb search
@@ -128,6 +128,33 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('update-button').addEventListener('click', async () => {
+        const currentUrl = window.location.href;
+        const url = currentUrl
+        try {
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+            });
+
+            if (response.ok) {
+                alert('Film updated successfully!');
+                location.reload()
+            } else {
+                alert(`Failed to update film. Status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error updating film:', error);
+            alert('An error occurred while updating the film.');
+        }
+    });
+});
+
 
 document.addEventListener("DOMContentLoaded", function () {
     const feedbackBox = document.querySelector('.feedback-box');

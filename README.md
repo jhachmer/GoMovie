@@ -27,8 +27,8 @@ who recommended the movie, if we already watched it and comments about the movie
   - ~~Delete Entries~~
   - ~~Split Genres and Actors~~
     - ~~separate db tables for them~~
-  - Update Button for new movie info (poster, ratings)
-    - especially recently announed movies have a placeholder image as poster and obviously no ratings, updating them should provide the ratings and poster at the time of updating
+  - ~~Update Button for new movie info (poster, ratings)~~
+    - ~~especially recently announed movies have a placeholder image as poster and obviously no ratings, updating them should provide the ratings and poster at the time of updating~~
   - ~~Color Grading of rows, to show if they are watched~~
   - ~~checkbox to toggle showing only unwatched movies on overview~~
   - ~~redirecting to overview when accessing login page with valid cookie~~
@@ -44,6 +44,7 @@ who recommended the movie, if we already watched it and comments about the movie
 - GET /overview : displays overview page of all movies in database
 - GET /search : searches for movie by imdb id
 - GET /films/{imdb} : returns info page for movie with imdb id
+- PUT /films/{imdb} : updates movie info with newly fetched api data
 - POST /films/{imdb}/entry : posts a new entry for movie
 - PUT /films/{imdb}/entry : changes the entry saved for that movie
 - DELETE /films/{imdb}/entry : deletes entry belonging to movie (does not delete movie from db, maybe later)
@@ -53,7 +54,7 @@ Use either:
 - Taskfile
   - you will need [go-task](https://taskfile.dev/) for this
   ```shell
-    # be sure to provide an OMDb API key
+    # be sure to provide an OMDb API key and a JWT secret
     # either as environment variable or via .env file
     # cd into project root
     cd goList
@@ -73,6 +74,6 @@ Use either:
     # build docker image e.g.
     docker build --tag docker-golist .
     # spin up the container
-    # remember to pass your omdb api key as a env variable
-    docker run -d --publish 8080:8080 -e OMDB_KEY=your_key docker-golist
+    # remember to pass your omdb api key and a JWT secret as a env variable
+    docker run -d --publish 8080:8080 -e OMDB_KEY=your_key -e GOLIST_JWT=jwt_secret docker-golist
   ```

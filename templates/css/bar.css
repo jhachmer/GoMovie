@@ -35,6 +35,22 @@
     text-decoration: underline;
 }
 
+.top-bar button {
+    padding: 5px 15px;
+    margin-left: 5px;
+    font-size: 16px;
+    background-color: #2980b9;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.top-bar button:hover {
+    background-color: #1a5980;
+}
+
 .menu-search-bar {
     display: flex;
     align-items: center;
