@@ -32,6 +32,7 @@ who recommended the movie, if we already watched it and comments about the movie
   - ~~Color Grading of rows, to show if they are watched~~
   - ~~checkbox to toggle showing only unwatched movies on overview~~
   - ~~redirecting to overview when accessing login page with valid cookie~~
+  - use transactions for DB interactions
   - more than one list per user, ability to invite users to a list
 
 ### Routes:
