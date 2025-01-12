@@ -11,6 +11,9 @@ import (
 
 var secretKey string
 
+// InitAuth reads relevant environment variables used by auth package
+// required variables are: "GOLIST:JWT"
+// if no env variable is provided will return error
 func InitAuth() error {
 	secretKey = config.GetEnv("GOLIST_JWT", "")
 	if secretKey == "" {
@@ -19,6 +22,8 @@ func InitAuth() error {
 	return nil
 }
 
+// CreateToken creates JWT token used in cookie
+// claims include username, issuer and time of issue and expiration
 func CreateToken(username string) (string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": username,
@@ -34,6 +39,7 @@ func CreateToken(username string) (string, error) {
 	return tokenString, nil
 }
 
+// VerifyToken verifies token retrieved from cookie for validity
 func VerifyToken(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
