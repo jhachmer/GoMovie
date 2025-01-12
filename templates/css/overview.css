@@ -61,6 +61,7 @@ body {
 .container {
     max-width: 95%;
     margin: 20px auto;
+    margin-bottom: 30px;
     padding: 20px;
     background-color: #ecf0f1;
     border-radius: 8px;
@@ -74,11 +75,15 @@ h1 {
 }
 
 .movies-table {
-    width: 95%;
+    width: 99%;
     max-width: 100%;
     margin: 0 auto;
+    margin-bottom: 20px;
     border-collapse: collapse;
     table-layout: auto;
+    border: 2px solid #2c3e50;
+    border-radius: 8px;
+    box-shadow: 0 6px 8px rgb(36, 36, 36);
 }
 
 .movies-table th, .movies-table td {

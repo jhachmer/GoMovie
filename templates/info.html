@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <title>{{.Movie.Title}} ({{.Movie.Year}}) - GoTo</title>
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
@@ -11,82 +12,87 @@
     <script src="/static/scripts/golist.js"></script>
 
 </head>
+
 <body>
     <div class="top-bar">
-        <a href="/overview"><img src="/static/images/gopher.png" alt="Logo"></a>
-        <form id="menu-search-bar" class="menu-search-bar">
-            <input type="text" id="search-input" name="q" placeholder="Input IMDb ID...">
-            <button type="submit" id="submit-button">Go To!</button>
-        </form>
+        <div class="left-container">
+            <a href="/overview"><img src="/static/images/gopher.png" alt="Logo"></a>
+            <form id="menu-search-bar" class="menu-search-bar">
+                <input type="text" id="search-input" name="q" placeholder="Input IMDb ID...">
+                <button type="submit" id="submit-button">Go To!</button>
+            </form>
+        </div>
         <div class="info">
             <b>{{.Movie.Title}} ({{.Movie.Year}})</b>
-            <span><a href="https://www.imdb.com/de/title/{{ .Movie.ImdbID }}"><i> </br >ID:{{.Movie.ImdbID}}</i></a></span>
+            <span><a href="https://www.imdb.com/de/title/{{ .Movie.ImdbID }}"><i>
+                        </br>ID:{{.Movie.ImdbID}}</i></a></span>
         </div>
         <button id="update-button">Update Movie Info</button>
     </div>
 
     {{ template "error.html" .}}
 
-<div class="container">
-    <img class="movie-poster" src="{{.Movie.Poster}}" alt="Movie Poster">
-    <div class="content-box">
-        <div class="info-box">
-            <h2>Info</h2>
-            <ul class="details-list">
-                <li><b>Genres:</b> {{ .Movie.Genre }}</li>
-                <li><b>Actors:</b> {{ .Movie.Actors }}</li>
-                <li><b>Director:</b> {{ .Movie.Director }}</li>
-                <li><b>Runtime:</b> {{ .Movie.Runtime }}</li>
-                <li><b>Rated:</b> {{ .Movie.Rated }}</li>
-                <li><b>Released on:</b> {{ .Movie.Released }}</li>
-                <li class="plot"><b>Plot:</b> {{ .Movie.Plot }}</li>
-            </ul>
-        </div>
+    <div class="container">
+        <img class="movie-poster" src="{{.Movie.Poster}}" alt="Movie Poster">
+        <div class="content-box">
+            <div class="info-box">
+                <h2>Info</h2>
+                <ul class="details-list">
+                    <li><b>Genres:</b> {{ .Movie.Genre }}</li>
+                    <li><b>Actors:</b> {{ .Movie.Actors }}</li>
+                    <li><b>Director:</b> {{ .Movie.Director }}</li>
+                    <li><b>Runtime:</b> {{ .Movie.Runtime }}</li>
+                    <li><b>Rated:</b> {{ .Movie.Rated }}</li>
+                    <li><b>Released on:</b> {{ .Movie.Released }}</li>
+                    <li class="plot"><b>Plot:</b> {{ .Movie.Plot }}</li>
+                </ul>
+            </div>
 
-        <div class="center-box">
-            <div class="ratings-box">
-                <h2>Ratings</h2>
-                <ul>
-                    {{range $val := .Movie.Ratings}}
+            <div class="center-box">
+                <div class="ratings-box">
+                    <h2>Ratings</h2>
+                    <ul>
+                        {{range $val := .Movie.Ratings}}
                         <li><b>{{ $val.Source }}:</b> {{ $val.Value }}</li>
-                    {{end}}
-                </ul>
+                        {{end}}
+                    </ul>
+                </div>
+
+                <div class="feedback-box" data-has-entries="{{if .Entries}}true{{else}}false{{end}}">
+                    <h2>Notes</h2>
+                    <ul id="feedback-list">
+                        {{range $val := .Entries}}
+                        <li id="entry-1">
+                            <b>{{ $val.Name }}
+                                {{if $val.Watched}}
+                                (&#10003)
+                                {{else}}
+                                (&#10006)
+                                {{end}}:</b> <i class="comment">"{{ printf "%s" $val.Comment }}"</i></br>
+                            <button class="edit-button" onclick="editEntry(1)">Edit</button>
+                            <button class="delete-button" onclick="deleteEntry(1)">Delete</button>
+                        </li>
+                        {{end}}
+                    </ul>
+                </div>
             </div>
+            <div class="form-box">
+                <h2>Your Feedback</h2>
+                <form action="/films/{{ .Movie.ImdbID }}/entry" method="POST">
+                    <label for="name">Your Name:</label>
+                    <input type="text" id="name" name="name" required>
 
-            <div class="feedback-box" data-has-entries="{{if .Entries}}true{{else}}false{{end}}">
-                <h2>Notes</h2>
-                <ul id="feedback-list">
-                    {{range $val := .Entries}}
-                    <li id="entry-1">
-                        <b>{{ $val.Name }}
-                        {{if $val.Watched}}
-                            (&#10003)
-                        {{else}}
-                            (&#10006)
-                        {{end}}:</b> <i class="comment">"{{ printf "%s" $val.Comment }}"</i></br >
-                        <button class="edit-button" onclick="editEntry(1)">Edit</button>
-                        <button class="delete-button" onclick="deleteEntry(1)">Delete</button>
-                    </li>
-                    {{end}}
-                </ul>
+                    <label for="watched">Did you watch the movie?</label>
+                    <input type="checkbox" id="watched" name="watched">
+
+                    <label for="comment">Your Comment:</label>
+                    <textarea id="comment" name="comment" rows="4" required></textarea>
+
+                    <button type="submit">Submit Feedback</button>
+                </form>
             </div>
-        </div>
-        <div class="form-box">
-            <h2>Your Feedback</h2>
-            <form action="/films/{{ .Movie.ImdbID }}/entry" method="POST">
-                <label for="name">Your Name:</label>
-                <input type="text" id="name" name="name" required>
-
-                <label for="watched">Did you watch the movie?</label>
-                <input type="checkbox" id="watched" name="watched">
-
-                <label for="comment">Your Comment:</label>
-                <textarea id="comment" name="comment" rows="4" required></textarea>
-
-                <button type="submit">Submit Feedback</button>
-            </form>
         </div>
     </div>
-</div>
 </body>
+
 </html>
