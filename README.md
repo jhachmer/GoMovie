@@ -34,6 +34,8 @@ who recommended the movie, if we already watched it and comments about the movie
   - ~~redirecting to overview when accessing login page with valid cookie~~
   - use transactions for DB interactions
   - more than one list per user, ability to invite users to a list
+  - display statistics
+    - watched/unwatched ratio, how many movies of X genre, which actors are featured often etc.
 
 ### Routes:
 - GET /health : returns healthy if server is running
