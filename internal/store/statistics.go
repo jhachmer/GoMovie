@@ -1,13 +1,9 @@
 package store
 
-type WatchStats struct {
-	NumOfWatched   int
-	NumOfUnwatched int
-	TotalMovies    int
-}
+import "github.com/jhachmer/gotocollection/internal/types"
 
-func (s *SQLiteStorage) GetWatchCounts() (*WatchStats, error) {
-	var stats WatchStats
+func (s *SQLiteStorage) GetWatchCounts() (*types.WatchStats, error) {
+	var stats types.WatchStats
 	row := s.db.QueryRow( /*sql*/ `
 	SELECT
     SUM(CASE WHEN watched = 1 THEN 1 ELSE 0 END) AS watched_count,

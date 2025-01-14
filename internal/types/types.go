@@ -143,3 +143,9 @@ type YearSearch struct {
 	StartYear string
 	EndYear   string
 }
+
+type WatchStats struct {
+	NumOfWatched   int
+	NumOfUnwatched int
+	TotalMovies    int
+}
