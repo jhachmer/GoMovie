@@ -21,9 +21,24 @@
             <td>{{ $val.Movie.Year }}</td>
             <td>{{ $val.Movie.Runtime }}</td>
             <td class="title-left">{{ $val.Movie.Genre }}</td>
+
+            {{ $imdbRating := "N/A" }}
+            {{ $rtRating := "N/A" }}
+            {{ $metacriticRating := "N/A" }}
+
             {{ range $rating := $val.Movie.Ratings }}
-                <td>{{ $rating }}</td>
-            {{end}}
+                {{ if eq $rating.Source "Internet Movie Database" }}
+                    {{ $imdbRating = $rating.Value }}
+                {{ else if eq $rating.Source "Rotten Tomatoes" }}
+                    {{ $rtRating = $rating.Value }}
+                {{ else if eq $rating.Source "Metacritic" }}
+                    {{ $metacriticRating = $rating.Value }}
+                {{ end }}
+            {{ end }}
+
+            <td>{{ $imdbRating }}</td>
+            <td>{{ $rtRating }}</td>
+            <td>{{ $metacriticRating }}</td>
         </tr>
         {{end}}
     </tbody>
