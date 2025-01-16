@@ -1,7 +1,15 @@
-<label class="watchcheckbox">
-    <input type="checkbox" id="filterNotWatched"> Show only unwatched
-</label>
-
+<div
+    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; margin-left: 15px;">
+    <label class="watchcheckbox">
+        <input type="checkbox" id="filterNotWatched"> Show only unwatched
+    </label>
+    <div style="display: flex; gap: 15px; font-size: 0.9rem; margin-right: 15px;">
+        <span><strong>Legend:</strong></span>
+        <span style="background-color: #ffc2c2; padding: 0px 5px; border-radius: 3px;">Unwatched</span>
+        <span style="background-color: #c3ffc3; padding: 0px 5px; border-radius: 3px;">Watched</span>
+        <span style="background-color: #f0f8ff; padding: 0px 5px; border-radius: 3px;">No Entry</span>
+    </div>
+</div>
 <table class="movies-table" id="moviesTable">
     <thead>
         <tr>
@@ -16,7 +24,7 @@
     </thead>
     <tbody>
         {{range $val := .Movies}}
-        <tr class="{{if and $val.Entry (index $val.Entry 0).Watched}}watched{{else}}not-watched{{end}}">
+        <tr class="{{if not $val.Entry}}nil-entry{{else if (index $val.Entry 0).Watched}}watched{{else}}not-watched{{end}}">
             <td class="title-left"><a href="/films/{{$val.Movie.ImdbID}}">{{ $val.Movie.Title }}</a></td>
             <td>{{ $val.Movie.Year }}</td>
             <td>{{ $val.Movie.Runtime }}</td>
@@ -27,13 +35,13 @@
             {{ $metacriticRating := "N/A" }}
 
             {{ range $rating := $val.Movie.Ratings }}
-                {{ if eq $rating.Source "Internet Movie Database" }}
-                    {{ $imdbRating = $rating.Value }}
-                {{ else if eq $rating.Source "Rotten Tomatoes" }}
-                    {{ $rtRating = $rating.Value }}
-                {{ else if eq $rating.Source "Metacritic" }}
-                    {{ $metacriticRating = $rating.Value }}
-                {{ end }}
+            {{ if eq $rating.Source "Internet Movie Database" }}
+            {{ $imdbRating = $rating.Value }}
+            {{ else if eq $rating.Source "Rotten Tomatoes" }}
+            {{ $rtRating = $rating.Value }}
+            {{ else if eq $rating.Source "Metacritic" }}
+            {{ $metacriticRating = $rating.Value }}
+            {{ end }}
             {{ end }}
 
             <td>{{ $imdbRating }}</td>

@@ -86,7 +86,8 @@ h1 {
     box-shadow: 0 6px 8px rgb(36, 36, 36);
 }
 
-.movies-table th, .movies-table td {
+.movies-table th,
+.movies-table td {
     padding: 10px;
     text-align: center;
     border: 1px solid #ddd;
@@ -129,6 +130,7 @@ th:hover {
     padding-left: 30px;
     width: auto;
 }
+
 .movies-table td:nth-child(4) {
     text-align: left;
     padding-left: 30px;
@@ -142,30 +144,60 @@ th:hover {
     background-color: #ffc2c2;
 }
 
+.nil-entry {
+    background-color: #f0f8ff;
+}
 
 .movies-table td:nth-child(5) {
     max-width: 150px;
 }
+
 .movies-table td:nth-child(6) {
     max-width: 150px;
 
-}.movies-table td:nth-child(7) {
+}
+
+.movies-table td:nth-child(7) {
     max-width: 150px;
 }
+
 .movies-table th:nth-child(5) {
     max-width: 150px;
 }
+
 .movies-table th:nth-child(6) {
     max-width: 150px;
 
-}.movies-table th:nth-child(7) {
+}
+
+.movies-table th:nth-child(7) {
     max-width: 150px;
 }
 
+/*
 .watchcheckbox {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 20%;
     margin-bottom: 20px;
+}
+*/
+.stats-link {
+    text-decoration: none;
+    color: #3498db;
+    font-weight: bold;
+    padding: 10px 15px;
+    background-color: #ecf0f1;
+    border: 2px solid #34495e;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin-left: 15px;
+}
+
+.stats-link:hover {
+    background-color: #3498db;
+    color: #ffffff;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }

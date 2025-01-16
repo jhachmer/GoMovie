@@ -1,5 +1,5 @@
-
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -99,7 +99,8 @@ img {
     padding: 1px;
     border-radius: 8px;
     box-shadow: 0 14px 16px rgb(36, 36, 36);
-    border: 4px solid #333;}
+    border: 4px solid #333;
+}
 
 .ratings-box h2 {
     text-align: center;
@@ -281,7 +282,8 @@ img {
     max-width: 50%;
 }
 
-.ratings-box, .feedback-box {
+.ratings-box,
+.feedback-box {
     background-color: #ecf0f1;
     padding: 15px;
     border-radius: 8px;
@@ -289,26 +291,30 @@ img {
     border: 4px solid #333;
 }
 
-.ratings-box h2, .feedback-box h2 {
+.ratings-box h2,
+.feedback-box h2 {
     text-align: center;
     color: #2c3e50;
     margin: 0 0 15px;
 }
 
-.ratings-box ul, .feedback-box ul {
+.ratings-box ul,
+.feedback-box ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-.ratings-box li, .feedback-box li {
+.ratings-box li,
+.feedback-box li {
     padding: 10px;
     border-bottom: 1px solid #ddd;
     background-color: #f1f8ff;
     color: #34495e;
 }
 
-.ratings-box li:nth-child(odd), .feedback-box li:nth-child(odd) {
+.ratings-box li:nth-child(odd),
+.feedback-box li:nth-child(odd) {
     background-color: #d6eaf8;
 }
 
@@ -370,6 +376,7 @@ img {
 .feedback-box button:hover {
     background-color: #2980b9;
 }
+
 .feedback-box {
     flex: 1;
     background-color: #ecf0f1;
@@ -378,6 +385,7 @@ img {
     box-shadow: 0 14px 16px rgb(36, 36, 36);
     border: 4px solid #333;
 }
+
 .feedback-box h2 {
     text-align: center;
     color: #2c3e50;
