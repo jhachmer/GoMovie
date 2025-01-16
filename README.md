@@ -4,7 +4,7 @@
 ## About
 GoList is a basic web app I build for personal use.
 Someday it is supposed to be an app to manage a watchlist in the browser, saving data regarding
-who recommended the movie, if we already watched it and comments about the movie in a SQLite database.\
+who recommended the movie, if we already watched it and comments about the movie in a SQLite database.
 
 ### Example Overview
 ![overview](assets/overview.png)
