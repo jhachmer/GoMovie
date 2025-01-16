@@ -9,6 +9,9 @@ function sortTable(columnIndex) {
         const cellB = b.cells[columnIndex].textContent.trim();
 
         const parseValue = (value) => {
+            if (value === "N/A") {
+                return 0;
+            }
             if (value.includes('%')) {
                 return parseFloat(value.replace('%', ''));
             }
