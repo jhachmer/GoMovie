@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Movies Overview - GoTo</title>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <link rel="stylesheet" href="/static/css/overview.css">
+    <link rel="stylesheet" href="/static/css/bar.css">
+    <link rel="stylesheet" href="/static/css/error.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org"></script>
+    <script src="/static/scripts/golist.js"></script>
+    <script src="/static/scripts/table.js"></script>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="left-container">
+        <a href="/overview"><img src="/static/images/gopher.png" alt="Logo"></a>
+        <form id="menu-search-bar" class="menu-search-bar">
+            <input type="text" id="search-input" name="q" placeholder="Input IMDb ID...">
+            <button type="submit" id="submit-button">Go To!</button>
+        </form>
+    </div>
+        <div class="info">
+            <b>Movies Overview</b>
+        </div>
+    </div>
+
+    {{ template "error.html" . }}
+
+    <div class="container">
+        <h2>Watch Stats</h2>
+        <ul>
+            <li><b>Total Movies: </b>{{ .WatchStats.TotalMovies }} </li>
+            <li><b>Watched: </b> {{ .WatchStats.NumOfWatched }} </li>
+            <li><b>Unwatched: </b> {{ .WatchStats.NumOfUnwatched }} </li>
+            <li><b>Percentage Watched/Unwatched: </b> {{ perc .WatchStats.NumOfWatched .WatchStats.TotalMovies }}%</div></li>
+        </ul>
+    </div>
+
+</body>
+</html>

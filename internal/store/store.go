@@ -18,7 +18,6 @@ type SQLiteStorage struct {
 	db *sql.DB
 }
 
-// TODO: add UpdateMovie
 type Store interface {
 	InitDatabaseTables() error
 	CreateUser(string, string) error
@@ -32,6 +31,8 @@ type Store interface {
 	GetMovieByID(string) (*types.Movie, error)
 	GetAllMovies() ([]*types.MovieOverviewData, error)
 	SearchMovie(types.SearchParams) ([]*types.MovieOverviewData, error)
+
+	GetWatchCounts() (*types.WatchStats, error)
 }
 
 func NewStore(db *sql.DB) *SQLiteStorage {
