@@ -86,6 +86,9 @@ func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 // genre:horror,thriller;actors:Hans Albers, Keeanu Reeves
 func parseSearchQuery(query string) (types.SearchParams, error) {
 	var sp types.SearchParams
+	if query == "" {
+		return sp, fmt.Errorf("search query must not be empty")
+	}
 	subQueries := strings.Split(query, ";")
 	for i := range subQueries {
 		subQueries[i] = strings.TrimSpace(subQueries[i])
