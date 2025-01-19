@@ -81,3 +81,11 @@ Use either:
     # remember to pass your omdb api key and a JWT secret as a env variable
     docker run -d --publish 8080:8080 -e OMDB_KEY=your_key -e GOLIST_JWT=jwt_secret docker-golist
   ```
+
+- or the classic way
+  ```shell
+    # compile
+    go build cmd/goList/main.go
+    # run
+    ./main
+  ```
