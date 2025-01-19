@@ -69,6 +69,7 @@ Use either:
     # execute file
     ./bin/golist_svr
   ```
+
 - Docker
   ```shell
     # Run Docker client
