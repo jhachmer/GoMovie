@@ -33,7 +33,7 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 
 	logger := log.New(os.Stdout, "goto:", log.LstdFlags)
 
-	dbStore, err := setupDatabase()
+	dbStore, err := store.SetupDatabase()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,20 +41,6 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 	svr := setupServer(dbStore, logger)
 	err = svr.Serve(ctx)
 	return err
-}
-
-func setupDatabase() (*store.SQLiteStorage, error) {
-	db, err := store.NewSQLiteStorage(config.Envs)
-	if err != nil {
-		return nil, err
-	}
-	dbStore := store.NewStore(db)
-	dbStore.TestDBConnection()
-	err = dbStore.InitDatabaseTables()
-	if err != nil {
-		return nil, err
-	}
-	return dbStore, nil
 }
 
 func setupServer(store store.Store, logger *log.Logger) *server.Server {
