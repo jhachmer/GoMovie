@@ -5,7 +5,10 @@ vars:
   dir: ./bin/
   app_name_windows: golist_svr.exe
   app_name_unix: golist_svr
-  main_file: ./cmd/goList/main.go
+  parser_name_windows: golist_parser.exe
+  parser_name_unix: golist_parser
+  server_file: ./cmd/goList/golist.go
+  parser_file: ./cmd/parse/parse_cli.go
 
 tasks:
   default:
@@ -18,7 +21,7 @@ tasks:
       - task: tidy
       - task: mod
       - task: test
-      - task: build
+      - task: build_all
 
   setup:
     desc: Sets up required directories etc.
@@ -32,10 +35,32 @@ tasks:
     desc: Builds the application
     deps: [clean]
     cmds:
-      - cmd: go build -v -o {{.dir}}{{.app_name_windows}} {{.main_file}}
+      - cmd: go build -v -o {{.dir}}{{.app_name_windows}} {{.server_file}}
         platforms: [windows]
-      - cmd: go build -v -o {{.dir}}{{.app_name_unix}} {{.main_file}}
+      - cmd: go build -v -o {{.dir}}{{.app_name_unix}} {{.server_file}}
         platforms: [darwin, linux]
+
+  build_parser:
+        desc: Builds the application
+        deps: [clean]
+        cmds:
+          - cmd: go build -v -o {{.dir}}{{.parser_name_windows}} {{.parser_file}}
+            platforms: [windows]
+          - cmd: go build -v -o {{.dir}}{{.parser_name_unix}} {{.parser_file}}
+            platforms: [darwin, linux]
+
+  build_all:
+        desc: Builds the application
+        deps: [clean]
+        cmds:
+          - cmd: go build -v -o {{.dir}}{{.parser_name_windows}} {{.parser_file}}
+            platforms: [windows]
+          - cmd: go build -v -o {{.dir}}{{.app_name_windows}} {{.server_file}}
+            platforms: [windows]
+          - cmd: go build -v -o {{.dir}}{{.parser_name_unix}} {{.parser_file}}
+            platforms: [darwin, linux]
+          - cmd: go build -v -o {{.dir}}{{.app_name_unix}} {{.server_file}}
+            platforms: [darwin, linux]
 
   test:
     desc: Runs tests for the application
