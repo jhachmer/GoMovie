@@ -15,3 +15,17 @@ func NewSQLiteStorage(cfg config.Config) (*sql.DB, error) {
 	}
 	return db, nil
 }
+
+func SetupDatabase() (*SQLiteStorage, error) {
+	db, err := NewSQLiteStorage(config.Envs)
+	if err != nil {
+		return nil, err
+	}
+	dbStore := NewStore(db)
+	dbStore.TestDBConnection()
+	err = dbStore.InitDatabaseTables()
+	if err != nil {
+		return nil, err
+	}
+	return dbStore, nil
+}
