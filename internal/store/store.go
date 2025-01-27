@@ -15,7 +15,7 @@ import (
 )
 
 type SQLiteStorage struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
 type Store interface {
@@ -37,16 +37,16 @@ type Store interface {
 
 func NewStore(db *sql.DB) *SQLiteStorage {
 	return &SQLiteStorage{
-		db: db,
+		DB: db,
 	}
 }
 
 func (s *SQLiteStorage) Close() {
-	s.db.Close()
+	s.DB.Close()
 }
 
 func (s *SQLiteStorage) TestDBConnection() {
-	err := s.db.Ping()
+	err := s.DB.Ping()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func (s *SQLiteStorage) TestDBConnection() {
 }
 
 func (s *SQLiteStorage) InitDatabaseTables() error {
-	_, err := s.db.Exec( /*sql*/ `
+	_, err := s.DB.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS useraccounts (
     	UserID INTEGER PRIMARY KEY AUTOINCREMENT,
     	Username TEXT NOT NULL UNIQUE,
@@ -64,7 +64,7 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.db.Exec( /*sql*/ `
+	_, err = s.DB.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS movies (
 		id VARCHAR(9) NOT NULL,
 		title VARCHAR(255) NOT NULL,
@@ -81,7 +81,7 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.db.Exec( /*sql*/ `
+	_, err = s.DB.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS ratings (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		movie_id VARCHAR(9) NOT NULL,
@@ -93,7 +93,7 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.db.Exec( /*sql*/ `
+	_, err = s.DB.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS entries (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name VARCHAR(255) NOT NULL,
@@ -105,7 +105,7 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.db.Exec( /*sql*/ `
+	_, err = s.DB.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS genres (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name VARCHAR(255) NOT NULL UNIQUE);
@@ -113,7 +113,7 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.db.Exec( /*sql*/ `
+	_, err = s.DB.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS actors (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name VARCHAR(255) NOT NULL UNIQUE);
@@ -121,7 +121,7 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.db.Exec( /*sql*/ `
+	_, err = s.DB.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS movies_genres (
 		movie_id VARCHAR(9) NOT NULL,
 		genre_id INTEGER NOT NULL,
@@ -132,7 +132,7 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.db.Exec( /*sql*/ `
+	_, err = s.DB.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS movies_actors (
 		movie_id VARCHAR(9) NOT NULL,
 		actor_id INTEGER NOT NULL,
@@ -150,7 +150,7 @@ func (s *SQLiteStorage) CheckCredentials(username, password string) (bool, error
 	var hashedPassword string
 	var active bool
 
-	err := s.db.QueryRow( /*sql*/ `
+	err := s.DB.QueryRow( /*sql*/ `
 		SELECT PasswordHash, Active
 		FROM UserAccounts
 		WHERE Username = ?
@@ -173,7 +173,7 @@ func (s *SQLiteStorage) CheckCredentials(username, password string) (bool, error
 
 func (s *SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, error) {
 	var exists bool
-	row := s.db.QueryRow( /*sql*/ `
+	row := s.DB.QueryRow( /*sql*/ `
 		SELECT EXISTS(SELECT movies.title
 		FROM movies
 		WHERE movies.id = ?);
@@ -191,7 +191,7 @@ func (s *SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.En
 	if e.Watched {
 		watchedInt = 1
 	}
-	res, err := s.db.Exec( /*sql*/ `
+	res, err := s.DB.Exec( /*sql*/ `
 		INSERT INTO entries
 		(name, watched, comment, movie_id)
 		VALUES (?, ?, ?, ?);
@@ -211,7 +211,7 @@ func (s *SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool)
 	if watched {
 		watchedInt = 1
 	}
-	res, err := s.db.Exec( /*sql*/ `
+	res, err := s.DB.Exec( /*sql*/ `
 		UPDATE entries
 		SET name = ?, comment = ?, watched = ?
 		WHERE movie_id = ?
@@ -233,7 +233,7 @@ func (s *SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool)
 }
 
 func (s *SQLiteStorage) DeleteEntry(imdbId string) error {
-	_, err := s.db.Exec( /*sql*/ `
+	_, err := s.DB.Exec( /*sql*/ `
 		DELETE FROM entries
 		WHERE movie_id = ?
 	`, imdbId)
@@ -244,7 +244,7 @@ func (s *SQLiteStorage) DeleteEntry(imdbId string) error {
 }
 
 func (s *SQLiteStorage) GetEntries(id string) ([]*types.Entry, error) {
-	rows, err := s.db.Query( /*sql*/ `
+	rows, err := s.DB.Query( /*sql*/ `
 		SELECT id, name, watched, comment
 		FROM entries
 		WHERE movie_id = ?;
@@ -270,7 +270,7 @@ func (s *SQLiteStorage) GetEntries(id string) ([]*types.Entry, error) {
 }
 
 func (s *SQLiteStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
-	_, err := s.db.Exec( /*sql*/ `
+	_, err := s.DB.Exec( /*sql*/ `
 		INSERT INTO movies (id, title, year, director, runtime, rated, released, plot, poster)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 		`, m.ImdbID, m.Title, m.Year, m.Director, m.Runtime, m.Rated, m.Released, m.Plot, m.Poster)
@@ -293,7 +293,7 @@ func (s *SQLiteStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
 }
 
 func (s *SQLiteStorage) UpdateMovie(m *types.Movie) (*types.Movie, error) {
-	_, err := s.db.Exec( /*sql*/ `
+	_, err := s.DB.Exec( /*sql*/ `
 	UPDATE movies
 	SET title = ?, year = ?, director = ?, runtime = ?, rated = ?, released = ?, plot = ?, poster = ?
 	WHERE id = ?;
@@ -318,7 +318,7 @@ func (s *SQLiteStorage) UpdateMovie(m *types.Movie) (*types.Movie, error) {
 
 func (s *SQLiteStorage) updateRatings(m *types.Movie) error {
 	for _, rating := range m.Ratings {
-		_, err := s.db.Exec( /*sql*/ `
+		_, err := s.DB.Exec( /*sql*/ `
 			UPDATE ratings
 			SET value = ?
 			WHERE movie_id = ? AND source = ?;
@@ -333,7 +333,7 @@ func (s *SQLiteStorage) updateRatings(m *types.Movie) error {
 func (s *SQLiteStorage) updateGenres(m *types.Movie) error {
 	genres := util.SplitIMDBString(m.Genre)
 
-	rows, err := s.db.Query( /*sql*/ `
+	rows, err := s.DB.Query( /*sql*/ `
 	SELECT g.name
 	FROM genres g
 	INNER JOIN movies_genres mg ON g.id = mg.genre_id
@@ -354,7 +354,7 @@ func (s *SQLiteStorage) updateGenres(m *types.Movie) error {
 
 	for _, g := range genresFromDB {
 		if !slices.Contains(genres, g) {
-			_, err := s.db.Exec( /*sql*/ `
+			_, err := s.DB.Exec( /*sql*/ `
 			DELETE FROM movies_genres
 			WHERE
 			movie_id = ?
@@ -369,13 +369,13 @@ func (s *SQLiteStorage) updateGenres(m *types.Movie) error {
 
 	for _, genre := range genres {
 		var genreID int64
-		err := s.db.QueryRow( /*sql*/ `
+		err := s.DB.QueryRow( /*sql*/ `
 			SELECT id
 			FROM genres
 			WHERE name = ?;
 			`, genre).Scan(&genreID)
 		if errors.Is(err, sql.ErrNoRows) {
-			res, err := s.db.Exec( /*sql*/ `
+			res, err := s.DB.Exec( /*sql*/ `
 				INSERT OR IGNORE
        			INTO genres (name)
        			VALUES (?);
@@ -385,7 +385,7 @@ func (s *SQLiteStorage) updateGenres(m *types.Movie) error {
 			}
 			genreID, _ = res.LastInsertId()
 		}
-		_, err = s.db.Exec( /*sql*/ `
+		_, err = s.DB.Exec( /*sql*/ `
 			INSERT OR IGNORE
        		INTO movies_genres (movie_id, genre_id)
        		VALUES (?, ?);
@@ -400,7 +400,7 @@ func (s *SQLiteStorage) updateGenres(m *types.Movie) error {
 func (s *SQLiteStorage) updateActors(m *types.Movie) error {
 	actors := util.SplitIMDBString(m.Actors)
 
-	rows, err := s.db.Query( /*sql*/ `
+	rows, err := s.DB.Query( /*sql*/ `
 	SELECT a.name
 	FROM actors a
 	INNER JOIN movies_actors ma ON a.id = ma.actor_id
@@ -421,7 +421,7 @@ func (s *SQLiteStorage) updateActors(m *types.Movie) error {
 
 	for _, a := range actorsFromDB {
 		if !slices.Contains(actors, a) {
-			_, err := s.db.Exec( /*sql*/ `
+			_, err := s.DB.Exec( /*sql*/ `
 			DELETE FROM movies_actors
 			WHERE
 			movie_id = ?
@@ -436,13 +436,13 @@ func (s *SQLiteStorage) updateActors(m *types.Movie) error {
 
 	for _, actor := range actors {
 		var actorID int64
-		err := s.db.QueryRow( /*sql*/ `
+		err := s.DB.QueryRow( /*sql*/ `
 			SELECT id
 			FROM actors
 			WHERE name = ?;
 			`, actor).Scan(&actorID)
 		if errors.Is(err, sql.ErrNoRows) {
-			res, err := s.db.Exec( /*sql*/ `
+			res, err := s.DB.Exec( /*sql*/ `
 				INSERT OR IGNORE
        			INTO actors (name)
        			VALUES (?);
@@ -452,7 +452,7 @@ func (s *SQLiteStorage) updateActors(m *types.Movie) error {
 			}
 			actorID, _ = res.LastInsertId()
 		}
-		_, err = s.db.Exec( /*sql*/ `
+		_, err = s.DB.Exec( /*sql*/ `
 			INSERT OR IGNORE
        		INTO movies_actors (movie_id, actor_id)
        		VALUES (?, ?);
@@ -467,7 +467,7 @@ func (s *SQLiteStorage) updateActors(m *types.Movie) error {
 func (s *SQLiteStorage) GetMovieByID(movieID string) (*types.Movie, error) {
 	var movie types.Movie
 
-	err := s.db.QueryRow( /*sql*/ `
+	err := s.DB.QueryRow( /*sql*/ `
         SELECT
             id, title, year, rated, released, runtime, plot, poster, director
         FROM movies
@@ -478,7 +478,7 @@ func (s *SQLiteStorage) GetMovieByID(movieID string) (*types.Movie, error) {
 		return nil, err
 	}
 
-	rows, err := s.db.Query( /*sql*/ `
+	rows, err := s.DB.Query( /*sql*/ `
         SELECT g.name
         FROM genres g
         INNER JOIN movies_genres mg ON g.id = mg.genre_id
@@ -498,7 +498,7 @@ func (s *SQLiteStorage) GetMovieByID(movieID string) (*types.Movie, error) {
 	}
 	movie.Genre = strings.Join(genres, ", ")
 
-	rows, err = s.db.Query( /*sql*/ `
+	rows, err = s.DB.Query( /*sql*/ `
         SELECT a.name
         FROM actors a
         INNER JOIN movies_actors ma ON a.id = ma.actor_id
@@ -518,7 +518,7 @@ func (s *SQLiteStorage) GetMovieByID(movieID string) (*types.Movie, error) {
 	}
 	movie.Actors = strings.Join(actors, ", ")
 
-	rows, err = s.db.Query( /*sql*/ `
+	rows, err = s.DB.Query( /*sql*/ `
         SELECT source, value
         FROM ratings
         WHERE movie_id = ?`, movieID)
@@ -542,7 +542,7 @@ func (s *SQLiteStorage) GetMovieByID(movieID string) (*types.Movie, error) {
 
 func (s *SQLiteStorage) GetAllMovies() ([]*types.MovieOverviewData, error) {
 	var movies []*types.MovieOverviewData
-	rows, err := s.db.Query( /*sql*/ `
+	rows, err := s.DB.Query( /*sql*/ `
         SELECT id
         FROM movies
 		`)
@@ -614,7 +614,7 @@ func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieOv
 		query += "WHERE " + strings.Join(filters, " AND ")
 	}
 
-	rows, err := s.db.Query(query, args...)
+	rows, err := s.DB.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
@@ -646,7 +646,7 @@ func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieOv
 
 func (s *SQLiteStorage) createRatings(m *types.Movie) error {
 	for _, rating := range m.Ratings {
-		_, err := s.db.Exec( /*sql*/ `
+		_, err := s.DB.Exec( /*sql*/ `
 			INSERT INTO ratings (movie_id, source, value)
 			VALUES (?, ?, ?);
 			`, m.ImdbID, rating.Source, rating.Value)
@@ -661,13 +661,13 @@ func (s *SQLiteStorage) createGenres(m *types.Movie) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
 		var genreID int64
-		err := s.db.QueryRow( /*sql*/ `
+		err := s.DB.QueryRow( /*sql*/ `
 			SELECT id
 			FROM genres
 			WHERE name = ?;
 			`, genre).Scan(&genreID)
 		if errors.Is(err, sql.ErrNoRows) {
-			res, err := s.db.Exec( /*sql*/ `
+			res, err := s.DB.Exec( /*sql*/ `
 				INSERT OR IGNORE
        			INTO genres (name)
        			VALUES (?);
@@ -677,7 +677,7 @@ func (s *SQLiteStorage) createGenres(m *types.Movie) error {
 			}
 			genreID, _ = res.LastInsertId()
 		}
-		_, err = s.db.Exec( /*sql*/ `INSERT OR IGNORE
+		_, err = s.DB.Exec( /*sql*/ `INSERT OR IGNORE
        		INTO movies_genres (movie_id, genre_id)
        		VALUES (?, ?);
        		`, m.ImdbID, genreID)
@@ -692,13 +692,13 @@ func (s *SQLiteStorage) createActors(m *types.Movie) error {
 	actors := util.SplitIMDBString(m.Actors)
 	for _, actor := range actors {
 		var actorID int64
-		err := s.db.QueryRow( /*sql*/ `
+		err := s.DB.QueryRow( /*sql*/ `
 			SELECT id
 			FROM actors
 			WHERE name = ?;
 			`, actor).Scan(&actorID)
 		if errors.Is(err, sql.ErrNoRows) {
-			res, err := s.db.Exec( /*sql*/ `
+			res, err := s.DB.Exec( /*sql*/ `
 				INSERT OR IGNORE
        			INTO actors (name)
        			VALUES (?);
@@ -708,7 +708,7 @@ func (s *SQLiteStorage) createActors(m *types.Movie) error {
 			}
 			actorID, _ = res.LastInsertId()
 		}
-		_, err = s.db.Exec( /*sql*/ `
+		_, err = s.DB.Exec( /*sql*/ `
 			INSERT OR IGNORE
        		INTO movies_actors (movie_id, actor_id)
        		VALUES (?, ?);
@@ -725,7 +725,7 @@ func (s *SQLiteStorage) CreateUser(username, password string) error {
 	if err != nil {
 		return fmt.Errorf("unable to hash pw: %w", err)
 	}
-	_, err = s.db.Exec( /*sql*/ `
+	_, err = s.DB.Exec( /*sql*/ `
 		INSERT
 		INTO useraccounts (Username, PasswordHash)
 		VALUES (?, ?);
