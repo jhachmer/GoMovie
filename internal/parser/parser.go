@@ -3,6 +3,8 @@ package parser
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -12,6 +14,7 @@ import (
 )
 
 type FileParser struct {
+	l      Logging
 	file   *os.File
 	reader *csv.Reader
 	db     *store.SQLiteStorage
@@ -31,6 +34,23 @@ type MovieAndEntry struct {
 	entry *types.Entry
 }
 
+type Logging struct {
+	log *log.Logger
+	f   *os.File
+}
+
+func setupLogging() (*Logging, error) {
+	f, err := os.OpenFile("failed.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		return nil, err
+	}
+	logger := log.New(f, "GoList Parser:", log.LstdFlags)
+	return &Logging{
+		log: logger,
+		f:   f,
+	}, nil
+}
+
 func DBForParsedContents() *store.SQLiteStorage {
 	db, err := store.SetupDatabase()
 	if err != nil {
@@ -42,6 +62,12 @@ func DBForParsedContents() *store.SQLiteStorage {
 
 // ParseCSV parses a CSV file and stores its contents into the database.
 func ParseCSV(args *ParseArgs) error {
+	logger, err := setupLogging()
+	if err != nil {
+		return fmt.Errorf("failed to setup logger: %w", err)
+	}
+	defer logger.f.Close()
+
 	if !strings.HasSuffix(args.Path, ".csv") {
 		return fmt.Errorf("file parser currently only supports csv files")
 	}
@@ -55,15 +81,12 @@ func ParseCSV(args *ParseArgs) error {
 	defer f.Close()
 
 	fp := FileParser{
+		l:         *logger,
 		file:      f,
 		db:        DBForParsedContents(),
 		ParseArgs: args,
 	}
-	contents, err := fp.readCSVContents()
-	if err != nil {
-		return err
-	}
-	mae := fp.readMoviesAndEntries(contents)
+	mae := fp.readMoviesAndEntries()
 	err = fp.addContentsToDB(mae)
 	if err != nil {
 
@@ -95,16 +118,25 @@ func (fp *FileParser) addContentsToDB(mae []*MovieAndEntry) error {
 	return nil
 }
 
-func (fp *FileParser) readMoviesAndEntries(contents [][]string) []*MovieAndEntry {
+func (fp *FileParser) readMoviesAndEntries() []*MovieAndEntry {
 	parsedMovies := make([]*MovieAndEntry, 0)
-	for _, row := range contents {
+	for {
+		row, err := fp.reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil
+		}
 		next, err := fp.processRow(row)
 		if err != nil {
 			fmt.Printf("%v\n", err)
+			fp.l.log.Printf("%v\n", err)
 			continue
 		}
 		parsedMovies = append(parsedMovies, next)
 	}
+
 	return parsedMovies
 }
 
