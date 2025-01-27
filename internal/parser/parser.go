@@ -40,6 +40,7 @@ func DBForParsedContents() *store.SQLiteStorage {
 	return db
 }
 
+// ParseCSV parses a CSV file and stores its contents into the database.
 func ParseCSV(args *ParseArgs) error {
 	if !strings.HasSuffix(args.Path, ".csv") {
 		return fmt.Errorf("file parser currently only supports csv files")
@@ -97,27 +98,33 @@ func (fp *FileParser) addContentsToDB(mae []*MovieAndEntry) error {
 func (fp *FileParser) readMoviesAndEntries(contents [][]string) []*MovieAndEntry {
 	parsedMovies := make([]*MovieAndEntry, 0)
 	for _, row := range contents {
-		title := row[fp.TitleIndex]
-		year := row[fp.YearIndex]
-		mov, err := types.NewMovieFromTitleAndYear(title, year)
+		next, err := fp.processRow(row)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to fetch movie %s (%s)\n", title, year)
+			fmt.Printf("%v\n", err)
 			continue
 		}
-		watched, err := strconv.ParseBool(row[fp.WatchedIndex])
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to read bool %s\n", row[fp.WatchedIndex])
-			watched = false
-		}
-		entry := types.Entry{
-			Name:    row[fp.RecommenderIndex],
-			Watched: watched,
-		}
-		mae := MovieAndEntry{
-			mov:   mov,
-			entry: &entry,
-		}
-		parsedMovies = append(parsedMovies, &mae)
+		parsedMovies = append(parsedMovies, next)
 	}
 	return parsedMovies
+}
+
+func (fp *FileParser) processRow(row []string) (*MovieAndEntry, error) {
+	title := row[fp.TitleIndex]
+	year := row[fp.YearIndex]
+	mov, err := types.NewMovieFromTitleAndYear(title, year)
+	if err != nil {
+		return nil, fmt.Errorf("unable to fetch movie: %s (%s)\n%w", title, year, err)
+	}
+
+	watched, err := strconv.ParseBool(row[fp.WatchedIndex])
+	if err != nil {
+		watched = false
+	}
+
+	entry := types.Entry{
+		Name:    row[fp.RecommenderIndex],
+		Watched: watched,
+	}
+
+	return &MovieAndEntry{mov: mov, entry: &entry}, nil
 }
