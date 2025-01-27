@@ -89,7 +89,7 @@ func ParseCSV(args *ParseArgs) error {
 	mae := fp.readMoviesAndEntries()
 	err = fp.addContentsToDB(mae)
 	if err != nil {
-
+		return fmt.Errorf("error adding to db: %w", err)
 	}
 	return nil
 }
@@ -136,7 +136,6 @@ func (fp *FileParser) readMoviesAndEntries() []*MovieAndEntry {
 		}
 		parsedMovies = append(parsedMovies, next)
 	}
-
 	return parsedMovies
 }
 
