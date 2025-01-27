@@ -15,7 +15,7 @@ type StatsPage struct {
 func newStatsPage(h *Handler) (*StatsPage, error) {
 	watchStats, err := h.store.GetWatchCounts()
 	if err != nil {
-		return nil, err
+		return &StatsPage{}, err
 	}
 	return &StatsPage{
 		WatchStats: watchStats,
@@ -24,10 +24,9 @@ func newStatsPage(h *Handler) (*StatsPage, error) {
 }
 
 func (h *Handler) StatsHandler(w http.ResponseWriter, r *http.Request) {
-	var statsPage *StatsPage
 	statsPage, err := newStatsPage(h)
 	if err != nil {
-		statsPage.Error = fmt.Errorf("could not fetch statistics: %w", err)
+		statsPage.Error = fmt.Errorf("could not fetch statistics add some movies first: %w", err)
 		renderTemplate(w, "stats", statsPage)
 		return
 	}

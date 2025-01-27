@@ -30,6 +30,7 @@
 
     {{ template "error.html" . }}
 
+    {{ if .WatchStats }}
     <div class="container">
         <div class="stats-container">
             <h2>Watch Stats</h2>
@@ -42,6 +43,7 @@
             </ul>
         </div>
     </div>
-
+    {{end}}
 </body>
+
 </html>
