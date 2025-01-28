@@ -206,6 +206,41 @@ func (s *SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.En
 	return e, nil
 }
 
+func (s *SQLiteStorage) CreateEntryTx(tx *sql.Tx, e *types.Entry, mov *types.Movie) (*types.Entry, error) {
+	var exists bool
+	row := tx.QueryRow( /*sql*/ `
+		SELECT EXISTS(SELECT movies.title
+		FROM movies
+		WHERE movies.id = ?);
+		`, mov.ImdbID)
+	if err := row.Scan(&exists); err != nil {
+		log.Println("movie exists:", exists)
+		return nil, err
+	} else if !exists {
+		_, err := s.CreateMovieTx(tx, mov)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var watchedInt = 0
+	if e.Watched {
+		watchedInt = 1
+	}
+	res, err := tx.Exec( /*sql*/ `
+		INSERT INTO entries
+		(name, watched, comment, movie_id)
+		VALUES (?, ?, ?, ?);
+		`, e.Name, watchedInt, e.Comment, mov.ImdbID)
+	if err != nil {
+		return nil, err
+	}
+	e.ID, err = res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	return e, nil
+}
+
 func (s *SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool) (*types.Entry, error) {
 	var watchedInt = 0
 	if watched {
@@ -286,6 +321,29 @@ func (s *SQLiteStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
 		return nil, err
 	}
 	err = s.createActors(m)
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (s *SQLiteStorage) CreateMovieTx(tx *sql.Tx, m *types.Movie) (*types.Movie, error) {
+	_, err := tx.Exec( /*sql*/ `
+		INSERT INTO movies (id, title, year, director, runtime, rated, released, plot, poster)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+		`, m.ImdbID, m.Title, m.Year, m.Director, m.Runtime, m.Rated, m.Released, m.Plot, m.Poster)
+	if err != nil {
+		return nil, err
+	}
+	err = s.createRatingsTx(tx, m)
+	if err != nil {
+		return nil, err
+	}
+	err = s.createGenresTx(tx, m)
+	if err != nil {
+		return nil, err
+	}
+	err = s.createActorsTx(tx, m)
 	if err != nil {
 		return nil, err
 	}
@@ -657,6 +715,19 @@ func (s *SQLiteStorage) createRatings(m *types.Movie) error {
 	return nil
 }
 
+func (s *SQLiteStorage) createRatingsTx(tx *sql.Tx, m *types.Movie) error {
+	for _, rating := range m.Ratings {
+		_, err := tx.Exec( /*sql*/ `
+			INSERT INTO ratings (movie_id, source, value)
+			VALUES (?, ?, ?);
+			`, m.ImdbID, rating.Source, rating.Value)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *SQLiteStorage) createGenres(m *types.Movie) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
@@ -688,6 +759,37 @@ func (s *SQLiteStorage) createGenres(m *types.Movie) error {
 	return nil
 }
 
+func (s *SQLiteStorage) createGenresTx(tx *sql.Tx, m *types.Movie) error {
+	genres := util.SplitIMDBString(m.Genre)
+	for _, genre := range genres {
+		var genreID int64
+		err := tx.QueryRow( /*sql*/ `
+			SELECT id
+			FROM genres
+			WHERE name = ?;
+			`, genre).Scan(&genreID)
+		if errors.Is(err, sql.ErrNoRows) {
+			res, err := tx.Exec( /*sql*/ `
+				INSERT OR IGNORE
+       			INTO genres (name)
+       			VALUES (?);
+       			`, genre)
+			if err != nil {
+				return err
+			}
+			genreID, _ = res.LastInsertId()
+		}
+		_, err = tx.Exec( /*sql*/ `INSERT OR IGNORE
+       		INTO movies_genres (movie_id, genre_id)
+       		VALUES (?, ?);
+       		`, m.ImdbID, genreID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *SQLiteStorage) createActors(m *types.Movie) error {
 	actors := util.SplitIMDBString(m.Actors)
 	for _, actor := range actors {
@@ -709,6 +811,38 @@ func (s *SQLiteStorage) createActors(m *types.Movie) error {
 			actorID, _ = res.LastInsertId()
 		}
 		_, err = s.DB.Exec( /*sql*/ `
+			INSERT OR IGNORE
+       		INTO movies_actors (movie_id, actor_id)
+       		VALUES (?, ?);
+			`, m.ImdbID, actorID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *SQLiteStorage) createActorsTx(tx *sql.Tx, m *types.Movie) error {
+	actors := util.SplitIMDBString(m.Actors)
+	for _, actor := range actors {
+		var actorID int64
+		err := tx.QueryRow( /*sql*/ `
+			SELECT id
+			FROM actors
+			WHERE name = ?;
+			`, actor).Scan(&actorID)
+		if errors.Is(err, sql.ErrNoRows) {
+			res, err := tx.Exec( /*sql*/ `
+				INSERT OR IGNORE
+       			INTO actors (name)
+       			VALUES (?);
+       			`, actor)
+			if err != nil {
+				return err
+			}
+			actorID, _ = res.LastInsertId()
+		}
+		_, err = tx.Exec( /*sql*/ `
 			INSERT OR IGNORE
        		INTO movies_actors (movie_id, actor_id)
        		VALUES (?, ?);

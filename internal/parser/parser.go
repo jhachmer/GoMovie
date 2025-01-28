@@ -17,7 +17,7 @@ type FileParser struct {
 	l      Logging
 	file   *os.File
 	reader *csv.Reader
-	db     *store.SQLiteStorage
+	store  *store.SQLiteStorage
 	*ParseArgs
 }
 
@@ -83,9 +83,11 @@ func ParseCSV(args *ParseArgs) error {
 	fp := FileParser{
 		l:         *logger,
 		file:      f,
-		db:        DBForParsedContents(),
+		store:     DBForParsedContents(),
 		ParseArgs: args,
 	}
+	fp.reader = csv.NewReader(fp.file)
+	fp.reader.FieldsPerRecord = -1
 	mae := fp.readMoviesAndEntries()
 	err = fp.addContentsToDB(mae)
 	if err != nil {
@@ -105,15 +107,27 @@ func (fp *FileParser) readCSVContents() ([][]string, error) {
 }
 
 func (fp *FileParser) addContentsToDB(mae []*MovieAndEntry) error {
+	tx, err := fp.store.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	// Perform all inserts
 	for _, e := range mae {
-		_, err := fp.db.CreateMovie(e.mov)
+		_, err := fp.store.CreateMovieTx(tx, e.mov)
 		if err != nil {
-			return fmt.Errorf("error adding to db movie: %s (%s)\n%w", e.mov.Title, e.mov.Year, err)
+			return err
 		}
-		_, err = fp.db.CreateEntry(e.entry, e.mov)
+		_, err = fp.store.CreateEntryTx(tx, e.entry, e.mov)
 		if err != nil {
-			return fmt.Errorf("error creating entry for movie: %s (%s)\n%w", e.mov.Title, e.mov.Year, err)
+			return err
 		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
 	}
 	return nil
 }
