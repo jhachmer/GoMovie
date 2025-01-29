@@ -2,9 +2,10 @@
 ![gopher](assets/gopher_small.png "https://gopherize.me/")
 
 ## About
-GoList is a basic web app I build for personal use.
-Someday it is supposed to be an app to manage a watchlist in the browser, saving data regarding
-who recommended the movie, if we already watched it and comments about the movie in a SQLite database.
+GoList is a simple web app to keep track of your favorite movies, you already watched or still want to watch. Its goal is to help manage a watchlist directly in the browser.
+Data for every movie is pulled from [OMDB](https://www.omdbapi.com/), so to use this yourself you will a API key for the site.
+Information presented includes Title, Year, Genres, Actors, Directors, and Ratings from various sources, if available.
+The app stores details such as who recommended the movie, whether it has been watched, and personal comments about the movie in a SQLite database.
 
 ### Example Overview
 ![overview](assets/overview.png)
@@ -12,12 +13,24 @@ who recommended the movie, if we already watched it and comments about the movie
 ![info](assets/info.png)
 
 
-
-
 ### To build yourself you'll need:
   - Go (developed with 1.23)
     -  [go-task](https://taskfile.dev/) if you want to use Taskfile to build
   - [OMDB](https://www.omdbapi.com/) API key
+
+### Environment Variables
+ this app expects the following env variables to be set:
+ - OMDB_KEY
+    - API key for OMDb
+ - GOLIST_JWT
+    - secret key for JSON Web Token
+
+either set them in your os, pass them when running the server, or use a .env file like this:
+```shell
+# Environment Variables for App
+OMDB_KEY=<verysecretkey>
+GOLIST_JWT=<somekey>
+```
 
 ### TODO:
   - ~~Index Page~~
