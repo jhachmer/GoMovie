@@ -42,6 +42,7 @@ func (svr *Server) setupRoutes() {
 	svr.Mux.HandleFunc("GET /register", Chain(svr.Handler.RegisterSiteHandler, RedirectWhenLoggedIn(), Logging(svr.Logger)))
 	svr.Mux.HandleFunc("POST /register", Chain(svr.Handler.RegisterHandler, RedirectWhenLoggedIn(), Logging(svr.Logger)))
 	svr.Mux.HandleFunc("GET /films/{imdb}", Chain(svr.Handler.InfoIDHandler, Authenticate(), Logging(svr.Logger)))
+	svr.Mux.HandleFunc("POST /films/{imdb}", Chain(svr.Handler.CreateMovieHandler, Authenticate(), Logging(svr.Logger)))
 	svr.Mux.HandleFunc("PUT /films/{imdb}", Chain(svr.Handler.UpdateMovieHandler, Authenticate(), Logging(svr.Logger)))
 	svr.Mux.HandleFunc("DELETE /films/{imdb}", Chain(svr.Handler.DeleteMovieHandler, Authenticate(), Logging(svr.Logger)))
 	svr.Mux.HandleFunc("POST /films/{imdb}/entry", Chain(svr.Handler.CreateEntryHandler, Authenticate(), Logging(svr.Logger)))

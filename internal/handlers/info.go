@@ -40,6 +40,33 @@ func (h *Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "info", data)
 }
 
+func (h *Handler) CreateMovieHandler(w http.ResponseWriter, r *http.Request) {
+	data := types.InfoPage{}
+	id := r.PathValue("imdb")
+	mov, err := h.getMovie(id)
+	if err != nil {
+		//http.Error(w, err.Error(), http.StatusInternalServerError)
+		data.Error = fmt.Errorf("error getting movie: %w", err)
+		h.logger.Println(err.Error())
+		renderTemplate(w, "info", data)
+	}
+	_, err = h.store.CreateMovie(mov)
+	if err != nil {
+		//http.Error(w, err.Error(), http.StatusInternalServerError)
+		data.Error = fmt.Errorf("error saving movie: %w", err)
+		h.logger.Println(err.Error())
+		renderTemplate(w, "info", data)
+	}
+	http.Redirect(w, r, fmt.Sprintf("/films/%s", id), http.StatusSeeOther)
+
+}
+
+func (h *Handler) ContainsMovieHandler(w http.ResponseWriter, r *http.Request) {
+	imdbID := r.PathValue("imdb")
+	_, err := h.store.GetMovieByID(imdbID)
+	json.NewEncoder(w).Encode(map[string]bool{"exists": err == nil})
+}
+
 func (h *Handler) UpdateMovieHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("imdb")
 	if !validPath.MatchString(id) {
