@@ -55,10 +55,6 @@ func (svr *Server) setupRoutes() {
 // Serve calls setup functions and spins up the Server
 func (svr *Server) Serve(ctx context.Context) error {
 	handlers.InitTemplates()
-	err := auth.InitAuth()
-	if err != nil {
-		svr.Logger.Fatal(err)
-	}
 	svr.setupRoutes()
 
 	server := &http.Server{

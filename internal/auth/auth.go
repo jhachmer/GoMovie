@@ -9,18 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var secretKey string
-
-// InitAuth reads relevant environment variables used by auth package
-// required variables are: "GOLIST:JWT"
-// if no env variable is provided will return error
-func InitAuth() error {
-	secretKey = config.GetEnv("GOLIST_JWT", "")
-	if secretKey == "" {
-		return fmt.Errorf("no jwt env variable")
-	}
-	return nil
-}
+var secretKey = config.Envs.JWT_key
 
 // CreateToken creates JWT token used in cookie
 // claims include username, issuer and time of issue and expiration

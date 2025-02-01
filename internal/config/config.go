@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Addr       string
 	OmdbApiKey string
+	JWT_key    string
 }
 
 var Envs = initConfig()
@@ -19,6 +20,7 @@ func initConfig() Config {
 	return Config{
 		Addr:       GetEnv("ADDR", ":8080"),
 		OmdbApiKey: GetEnv("OMDB_KEY", ""),
+		JWT_key:    GetEnv("GOLIST_JWT", ""),
 	}
 }
 

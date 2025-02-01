@@ -5,44 +5,14 @@ import (
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jhachmer/gotocollection/internal/config"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func TestInitAuth(t *testing.T) {
-	t.Run("EnvVarSet", func(t *testing.T) {
-		expectedSecret := "mysecret"
-		os.Setenv("GOLIST_JWT", expectedSecret)
-		defer os.Unsetenv("GOLIST_JWT")
-
-		err := InitAuth()
-		if err != nil {
-			t.Fatalf("expected no error, got %v", err)
-		}
-
-		if secretKey != expectedSecret {
-			t.Fatalf("expected secretKey to be %s, got %s", expectedSecret, secretKey)
-		}
-	})
-
-	t.Run("EnvVarNotSet", func(t *testing.T) {
-		os.Unsetenv("GOLIST_JWT")
-
-		err := InitAuth()
-		if err == nil {
-			t.Fatalf("expected error, got nil")
-		}
-
-		expectedError := "no jwt env variable"
-		if err.Error() != expectedError {
-			t.Fatalf("expected error message to be %s, got %s", expectedError, err.Error())
-		}
-	})
-}
-
 func TestCreateToken(t *testing.T) {
 	os.Setenv("GOLIST_JWT", "mysecret")
+	config.Envs.JWT_key = "mysecret"
 	defer os.Unsetenv("GOLIST_JWT")
-	InitAuth()
 
 	t.Run("ValidToken", func(t *testing.T) {
 		username := "testuser"
@@ -75,8 +45,8 @@ func TestCreateToken(t *testing.T) {
 
 func TestVerifyToken(t *testing.T) {
 	os.Setenv("GOLIST_JWT", "mysecret")
+	config.Envs.JWT_key = "mysecret"
 	defer os.Unsetenv("GOLIST_JWT")
-	InitAuth()
 
 	t.Run("ValidToken", func(t *testing.T) {
 		username := "testuser"
