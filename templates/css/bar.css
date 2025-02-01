@@ -91,3 +91,10 @@
 .menu-search-bar button:hover {
     background-color: #1a5980;
 }
+
+
+.bar-buttons {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}

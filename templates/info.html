@@ -27,7 +27,10 @@
             <span><a href="https://www.imdb.com/de/title/{{ .Movie.ImdbID }}"><i>
                         </br>ID:{{.Movie.ImdbID}}</i></a></span>
         </div>
-        <button id="update-button">Update Movie Info</button>
+        <div class="bar-buttons">
+            <button id="add-without-entry-button">Add Movie without Entry</button>
+            <button id="update-button">Update Movie Info</button>
+        </div>
     </div>
 
     {{ template "error.html" .}}
