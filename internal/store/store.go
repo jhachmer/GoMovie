@@ -28,6 +28,7 @@ type Store interface {
 	DeleteEntry(string) error
 	CreateMovie(*types.Movie) (*types.Movie, error)
 	UpdateMovie(*types.Movie) (*types.Movie, error)
+	DeleteMovie(string) error
 	GetMovieByID(string) (*types.Movie, error)
 	GetAllMovies() ([]*types.MovieOverviewData, error)
 	SearchMovie(types.SearchParams) ([]*types.MovieOverviewData, error)
@@ -372,6 +373,16 @@ func (s *SQLiteStorage) UpdateMovie(m *types.Movie) (*types.Movie, error) {
 		return nil, err
 	}
 	return m, nil
+}
+
+func (s *SQLiteStorage) DeleteMovie(imdbId string) error {
+	_, err := s.DB.Exec( /*sql*/ `
+	DELETE FROM movies WHERE id = ?;
+	`, imdbId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *SQLiteStorage) updateRatings(m *types.Movie) error {

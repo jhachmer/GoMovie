@@ -63,6 +63,17 @@ func (h *Handler) UpdateMovieHandler(w http.ResponseWriter, r *http.Request) {
 	h.movCache.Set(id, updatedMovie)
 }
 
+func (h *Handler) DeleteMovieHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("imdb")
+	err := h.store.DeleteMovie(id)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("error deleting movie: %s", err.Error()), http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+	h.movCache.Delete(id)
+}
+
 func (h *Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {
 	data := types.InfoPage{}
 	err := r.ParseForm()

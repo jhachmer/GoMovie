@@ -201,3 +201,22 @@ th:hover {
     color: #ffffff;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
+
+.delete-button {
+    padding: 3px 6px;
+    font-size: 12px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+.delete-button:hover {
+    background-color: #c0392b; /* Darker red on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+.delete-button:active {
+    background-color: #a93226; /* Even darker red when clicked */
+    transform: scale(0.95); /* Slight shrink effect on click */
+}

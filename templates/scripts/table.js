@@ -54,3 +54,29 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".delete-button").forEach(button => {
+        button.addEventListener("click", function () {
+            const imdbID = this.getAttribute("data-imdbid");
+
+            if (confirm("Are you sure you want to delete this movie?")) {
+                fetch(`/films/${imdbID}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            this.closest("tr").remove(); // Remove row from table
+                        } else {
+                            return response.json().then(data => { throw new Error(data.message || "Delete failed"); });
+                        }
+                    })
+                    .catch(error => alert("Error: " + error.message));
+            }
+        });
+    });
+});

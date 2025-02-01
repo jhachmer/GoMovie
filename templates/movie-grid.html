@@ -24,8 +24,13 @@
     </thead>
     <tbody>
         {{range $val := .Movies}}
-        <tr class="{{if not $val.Entry}}nil-entry{{else if (index $val.Entry 0).Watched}}watched{{else}}not-watched{{end}}">
-            <td class="title-left"><a href="/films/{{$val.Movie.ImdbID}}">{{ $val.Movie.Title }}</a></td>
+        <tr
+            class="{{if not $val.Entry}}nil-entry{{else if (index $val.Entry 0).Watched}}watched{{else}}not-watched{{end}}">
+            <td class="title-left"><a href="/films/{{$val.Movie.ImdbID}}">{{ $val.Movie.Title }}</a>
+                {{ if not $val.Entry }}
+                <button class="delete-button" data-imdbid="{{ $val.Movie.ImdbID }}">Delete</button>
+                {{ end }}
+            </td>
             <td>{{ $val.Movie.Year }}</td>
             <td>{{ $val.Movie.Runtime }}</td>
             <td class="title-left">{{ $val.Movie.Genre }}</td>
