@@ -52,6 +52,11 @@ func (svr *Server) setupRoutes() {
 	svr.Mux.HandleFunc("GET /search", Chain(svr.Handler.SearchHandler, Authenticate(), Logging(svr.Logger)))
 	svr.Mux.HandleFunc("GET /stats", Chain(svr.Handler.StatsHandler, Authenticate(), Logging(svr.Logger)))
 	svr.Mux.HandleFunc("GET /check/{imdb}", Chain(svr.Handler.ContainsMovieHandler, Authenticate(), Logging(svr.Logger)))
+
+	svr.Mux.HandleFunc("GET /admin", Chain(svr.Handler.AdminHandler, Logging(svr.Logger)))
+	svr.Mux.HandleFunc("POST /admin_login", Chain(svr.Handler.AdminLoginHandler, Logging(svr.Logger)))
+	svr.Mux.HandleFunc("GET /get_users", Chain(svr.Handler.GetUsersHandler, Logging(svr.Logger)))
+	svr.Mux.HandleFunc("PUT /toggle_active", Chain(svr.Handler.ToggleActiveHandler, Logging(svr.Logger)))
 }
 
 // Serve calls setup functions and spins up the Server
