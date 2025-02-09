@@ -34,6 +34,10 @@ type Store interface {
 	SearchMovie(types.SearchParams) ([]*types.MovieOverviewData, error)
 
 	GetWatchCounts() (*types.WatchStats, error)
+
+	AdminLoginQuery(string) (string, error)
+	GetUsers() (*sql.Rows, error)
+	ToggleUserActive(int, int) error
 }
 
 func NewStore(db *sql.DB) *SQLiteStorage {
@@ -54,13 +58,30 @@ func (s *SQLiteStorage) TestDBConnection() {
 	log.Println("connected to DB...")
 }
 
+func (s *SQLiteStorage) CreateAdminAccount(name, pw string) error {
+	hashedPW, err := auth.HashPassword(pw)
+	if err != nil {
+		log.Fatal("error creating admin account")
+		return err
+	}
+	_, err = s.DB.Exec( /*sql*/ `
+	INSERT OR IGNORE INTO useraccounts (Username, PasswordHash, Active, IsAdmin)
+	VALUES (?, ?, ?, ?)
+	`, name, hashedPW, 1, 1)
+	if err != nil {
+		return fmt.Errorf("error inserting admin acc %w", err)
+	}
+	return nil
+}
+
 func (s *SQLiteStorage) InitDatabaseTables() error {
 	_, err := s.DB.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS useraccounts (
     	UserID INTEGER PRIMARY KEY AUTOINCREMENT,
     	Username TEXT NOT NULL UNIQUE,
     	PasswordHash TEXT NOT NULL,
-		Active INTEGER DEFAULT 0);
+		Active INTEGER DEFAULT 0,
+		IsAdmin INTEGER DEFAULT 0);
 		`)
 	if err != nil {
 		return err

@@ -27,5 +27,9 @@ func SetupDatabase() (*SQLiteStorage, error) {
 	if err != nil {
 		return nil, err
 	}
+	err = dbStore.CreateAdminAccount(config.Envs.AdminName, config.Envs.AdminPW)
+	if err != nil {
+		return nil, err
+	}
 	return dbStore, nil
 }
