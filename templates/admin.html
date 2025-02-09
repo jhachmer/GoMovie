@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <script>
+        async function login() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            const response = await fetch('/admin_login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('userManagement').style.display = 'block';
+                fetchUsers();
+            } else {
+                alert('Invalid login credentials');
+            }
+        }
+
+        async function toggleActive(userId, currentStatus) {
+            const newStatus = currentStatus === 1 ? 0 : 1;
+            const response = await fetch('/toggle_active', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId, active: newStatus })
+            });
+
+            if (response.ok) {
+                document.getElementById(`status-${userId}`).innerText = newStatus ? 'Active' : 'Inactive';
+                document.getElementById(`btn-${userId}`).innerText = newStatus ? 'Deactivate' : 'Activate';
+            } else {
+                alert('Failed to update user status');
+            }
+        }
+
+        async function fetchUsers() {
+            const response = await fetch('/get_users');
+            const users = await response.json();
+            const userTable = document.getElementById('userTable');
+            userTable.innerHTML = '';
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.UserID}</td>
+                    <td>${user.Username}</td>
+                    <td id="status-${user.UserID}">${user.Active ? 'Active' : 'Inactive'}</td>
+                    <td>
+                        <button id="btn-${user.UserID}" onclick="toggleActive(${user.UserID}, ${user.Active})">
+                            ${user.Active ? 'Deactivate' : 'Activate'}
+                        </button>
+                    </td>
+                `;
+                userTable.appendChild(row);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Admin Login</h1>
+    <div id="loginForm">
+        <input type="text" id="adminUsername" placeholder="Username" required>
+        <input type="password" id="adminPassword" placeholder="Password" required>
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div id="userManagement" style="display: none;">
+        <h1>User Accounts</h1>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Username</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="userTable"></tbody>
+        </table>
+    </div>
+</body>
+</html>

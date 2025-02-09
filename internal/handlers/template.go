@@ -17,6 +17,7 @@ func InitTemplates() {
 		"./templates/movie-grid.html",
 		"./templates/error.html",
 		"./templates/register.html",
+		"./templates/admin.html",
 		"./templates/stats.html"))
 }
 
