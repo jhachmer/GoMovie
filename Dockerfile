@@ -36,4 +36,4 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
 
 EXPOSE 8080
 
-CMD ["bin/golist_svr"]
+CMD ["bin/gomovie_svr"]

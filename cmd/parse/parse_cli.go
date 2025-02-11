@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/jhachmer/gotocollection/internal/parser"
+	"github.com/jhachmer/gomovie/internal/parser"
 )
 
 func main() {
@@ -59,7 +59,7 @@ func parseArgs() (*parser.ParseArgs, error) {
 
 func printUsage() {
 	fmt.Println("Usage:")
-	fmt.Println("  golist_parser <path> <titleIndex> <yearIndex> <watchedIndex> <recommenderIndex>")
+	fmt.Println("  gomovie_parser <path> <titleIndex> <yearIndex> <watchedIndex> <recommenderIndex>")
 	fmt.Println()
 	fmt.Println("Arguments:")
 	fmt.Println("  <path>             The path to the input file.")
@@ -69,5 +69,5 @@ func printUsage() {
 	fmt.Println("  <recommenderIndex> The index of the recommender column in the input.")
 	fmt.Println()
 	fmt.Println("Example:")
-	fmt.Println("  golist_parser data.csv 0 1 2 3")
+	fmt.Println("  gomovie_parser data.csv 0 1 2 3")
 }

@@ -9,12 +9,12 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/jhachmer/gotocollection/internal/cache"
-	"github.com/jhachmer/gotocollection/internal/config"
-	"github.com/jhachmer/gotocollection/internal/handlers"
-	"github.com/jhachmer/gotocollection/internal/server"
-	"github.com/jhachmer/gotocollection/internal/store"
-	"github.com/jhachmer/gotocollection/internal/types"
+	"github.com/jhachmer/gomovie/internal/cache"
+	"github.com/jhachmer/gomovie/internal/config"
+	"github.com/jhachmer/gomovie/internal/handlers"
+	"github.com/jhachmer/gomovie/internal/server"
+	"github.com/jhachmer/gomovie/internal/store"
+	"github.com/jhachmer/gomovie/internal/types"
 )
 
 func main() {
@@ -31,7 +31,7 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	logger := log.New(os.Stdout, "goto:", log.LstdFlags)
+	logger := log.New(os.Stdout, "gomovie:", log.LstdFlags)
 
 	dbStore, err := store.SetupDatabase()
 	if err != nil {

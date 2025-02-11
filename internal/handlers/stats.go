@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/jhachmer/gotocollection/internal/types"
+	"github.com/jhachmer/gomovie/internal/types"
 )
 
 type StatsPage struct {

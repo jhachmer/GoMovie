@@ -1,6 +1,6 @@
 package store
 
-import "github.com/jhachmer/gotocollection/internal/types"
+import "github.com/jhachmer/gomovie/internal/types"
 
 func (s *SQLiteStorage) GetWatchCounts() (*types.WatchStats, error) {
 	var stats types.WatchStats

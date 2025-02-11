@@ -22,7 +22,7 @@ func initConfig() Config {
 	return Config{
 		Addr:       GetEnv("ADDR", ":8080"),
 		OmdbApiKey: GetEnv("OMDB_KEY", ""),
-		JWT_key:    GetEnv("GOLIST_JWT", ""),
+		JWT_key:    GetEnv("gomovie_JWT", ""),
 		AdminName:  GetEnv("ADMIN_NAME", ""),
 		AdminPW:    GetEnv("ADMIN_PW", ""),
 	}

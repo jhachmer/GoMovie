@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jhachmer/gotocollection/internal/handlers"
+	"github.com/jhachmer/gomovie/internal/handlers"
 )
 
 // Server struct with Address and Logger fields

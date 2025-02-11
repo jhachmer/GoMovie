@@ -3,7 +3,7 @@ package types
 import (
 	"testing"
 
-	"github.com/jhachmer/gotocollection/internal/config"
+	"github.com/jhachmer/gomovie/internal/config"
 )
 
 func TestMain(m *testing.M) {

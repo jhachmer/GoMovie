@@ -1,8 +1,8 @@
-# GoList
+# GoMovie
 ![gopher](assets/gopher_small.png "https://gopherize.me/")
 
 ## About
-GoList is a simple web app to keep track of your favorite movies, you already watched or still want to watch. Its goal is to help manage a watchlist directly in the browser.
+GoMovie is a simple web app to keep track of your favorite movies, you already watched or still want to watch. Its goal is to help manage a watchlist directly in the browser.
 Data for every movie is pulled from [OMDB](https://www.omdbapi.com/), so to use this yourself you will need a API key for the site.
 Information presented includes Title, Year, Genres, Actors, Directors, and Ratings from various sources, if available.
 The app stores details such as who recommended the movie, whether it has been watched, and personal comments about the movie in a SQLite database.
@@ -22,14 +22,14 @@ The app stores details such as who recommended the movie, whether it has been wa
  this app expects the following env variables to be set:
  - OMDB_KEY
     - API key for OMDb
- - GOLIST_JWT
+ - gomovie_JWT
     - secret key for JSON Web Token
 
 either set them in your os, pass them when running the server, or use a .env file like this:
 ```shell
 # Environment Variables for App
 OMDB_KEY=<verysecretkey>
-GOLIST_JWT=<somekey>
+gomovie_JWT=<somekey>
 ```
 
 ### TODO:
@@ -73,32 +73,32 @@ Use either:
     # be sure to provide an OMDb API key and a JWT secret
     # either as environment variable or via .env file
     # cd into project root
-    cd goList
+    cd gomovie
     # run task with default build target (no args) to setup, test and build the application
     task
     # you can also run every task independently (test, clean, ...)
     # - task test
     # - task clean
     # execute file
-    ./bin/golist_svr
+    ./bin/gomovie_svr
   ```
 
 - Docker
   ```shell
     # Run Docker client
     # cd into project root
-    cd goList
+    cd gomovie
     # build docker image e.g.
-    docker build --tag docker-golist .
+    docker build --tag docker-gomovie .
     # spin up the container
     # remember to pass your omdb api key and a JWT secret as a env variable
-    docker run -d --publish 8080:8080 -e OMDB_KEY=your_key -e GOLIST_JWT=jwt_secret docker-golist
+    docker run -d --publish 8080:8080 -e OMDB_KEY=your_key -e gomovie_JWT=jwt_secret docker-gomovie
   ```
 
 - or the classic way
   ```shell
     # compile
-    go build cmd/goList/main.go
+    go build cmd/gomovie/main.go
     # run
     ./main
   ```

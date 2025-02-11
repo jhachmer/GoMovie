@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jhachmer/gotocollection/internal/config"
+	"github.com/jhachmer/gomovie/internal/config"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func TestCreateToken(t *testing.T) {
-	os.Setenv("GOLIST_JWT", "mysecret")
+	os.Setenv("gomovie_JWT", "mysecret")
 	config.Envs.JWT_key = "mysecret"
-	defer os.Unsetenv("GOLIST_JWT")
+	defer os.Unsetenv("gomovie_JWT")
 
 	t.Run("ValidToken", func(t *testing.T) {
 		username := "testuser"
@@ -44,9 +44,9 @@ func TestCreateToken(t *testing.T) {
 }
 
 func TestVerifyToken(t *testing.T) {
-	os.Setenv("GOLIST_JWT", "mysecret")
+	os.Setenv("gomovie_JWT", "mysecret")
 	config.Envs.JWT_key = "mysecret"
-	defer os.Unsetenv("GOLIST_JWT")
+	defer os.Unsetenv("gomovie_JWT")
 
 	t.Run("ValidToken", func(t *testing.T) {
 		username := "testuser"

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jhachmer/gotocollection/internal/config"
+	"github.com/jhachmer/gomovie/internal/config"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,7 +16,7 @@ var secretKey = config.Envs.JWT_key
 func CreateToken(username string) (string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": username,
-		"iss": "golist",
+		"iss": "gomovie",
 		"exp": time.Now().Add(time.Hour).Unix(),
 		"iat": time.Now(),
 	},

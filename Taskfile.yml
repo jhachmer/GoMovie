@@ -3,11 +3,11 @@ version: 3
 
 vars:
   dir: ./bin/
-  app_name_windows: golist_svr.exe
-  app_name_unix: golist_svr
-  parser_name_windows: golist_parser.exe
-  parser_name_unix: golist_parser
-  server_file: ./cmd/goList/golist.go
+  app_name_windows: gomovie_svr.exe
+  app_name_unix: gomovie_svr
+  parser_name_windows: gomovie_parser.exe
+  parser_name_unix: gomovie_parser
+  server_file: ./cmd/gomovie/gomovie.go
   parser_file: ./cmd/parse/parse_cli.go
 
 tasks:

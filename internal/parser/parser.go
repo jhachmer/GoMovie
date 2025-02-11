@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jhachmer/gotocollection/internal/store"
-	"github.com/jhachmer/gotocollection/internal/types"
+	"github.com/jhachmer/gomovie/internal/store"
+	"github.com/jhachmer/gomovie/internal/types"
 )
 
 type FileParser struct {
@@ -44,7 +44,7 @@ func setupLogging() (*Logging, error) {
 	if err != nil {
 		return nil, err
 	}
-	logger := log.New(f, "GoList Parser:", log.LstdFlags)
+	logger := log.New(f, "gomovie Parser:", log.LstdFlags)
 	return &Logging{
 		log: logger,
 		f:   f,

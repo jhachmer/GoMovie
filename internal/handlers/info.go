@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jhachmer/gotocollection/internal/types"
+	"github.com/jhachmer/gomovie/internal/types"
 )
 
 func (h *Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {

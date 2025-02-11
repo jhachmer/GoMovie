@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jhachmer/gotocollection/internal/auth"
+	"github.com/jhachmer/gomovie/internal/auth"
 )
 
 type Middleware func(handlerFunc http.HandlerFunc) http.HandlerFunc
@@ -51,7 +51,7 @@ func Logging(logger *log.Logger) Middleware {
 func Authenticate() Middleware {
 	return func(handlerFunc http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie("golist")
+			cookie, err := r.Cookie("gomovie")
 			if err != nil {
 				log.Println("cookie missing", err)
 				http.Redirect(w, r, "/login", http.StatusUnauthorized)
@@ -71,7 +71,7 @@ func Authenticate() Middleware {
 func RedirectWhenLoggedIn() Middleware {
 	return func(handlerFunc http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie("golist")
+			cookie, err := r.Cookie("gomovie")
 			if err == nil {
 				_, err = auth.VerifyToken(cookie.Value)
 				if err == nil {

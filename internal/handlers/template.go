@@ -10,7 +10,7 @@ var templates *template.Template
 
 func InitTemplates() {
 	funcMap := template.FuncMap{"perc": perc}
-	templates = template.Must(template.New("").Funcs(funcMap).ParseFiles(
+	templates = template.Must(template.New("gomovie").Funcs(funcMap).ParseFiles(
 		"./templates/index.html",
 		"./templates/info.html",
 		"./templates/overview.html",

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jhachmer/gotocollection/internal/auth"
-	"github.com/jhachmer/gotocollection/internal/types"
+	"github.com/jhachmer/gomovie/internal/auth"
+	"github.com/jhachmer/gomovie/internal/types"
 )
 
 func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,11 +40,14 @@ func (h *Handler) CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cookie := http.Cookie{
-		Name:    "golist",
-		Value:   tokenString,
-		Path:    "/",
-		Domain:  "localhost",
-		Expires: time.Now().Add(1 * time.Hour),
+		Name:  "gomovie",
+		Value: tokenString,
+		Path:  "/",
+		//Domain:  "localhost",
+		Expires:  time.Now().Add(1 * time.Hour),
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
 	}
 	http.SetCookie(w, &cookie)
 	http.Redirect(w, r, "/overview", http.StatusSeeOther)

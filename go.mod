@@ -1,4 +1,4 @@
-module github.com/jhachmer/gotocollection
+module github.com/jhachmer/gomovie
 
 go 1.23
 

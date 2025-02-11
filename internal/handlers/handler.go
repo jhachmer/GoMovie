@@ -5,9 +5,9 @@ import (
 	"log"
 	"regexp"
 
-	"github.com/jhachmer/gotocollection/internal/cache"
-	"github.com/jhachmer/gotocollection/internal/store"
-	"github.com/jhachmer/gotocollection/internal/types"
+	"github.com/jhachmer/gomovie/internal/cache"
+	"github.com/jhachmer/gomovie/internal/store"
+	"github.com/jhachmer/gomovie/internal/types"
 )
 
 var validPath = regexp.MustCompile(`^tt\d{7,8}$`)

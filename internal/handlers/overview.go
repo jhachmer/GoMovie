@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/jhachmer/gotocollection/internal/types"
-	"github.com/jhachmer/gotocollection/internal/util"
+	"github.com/jhachmer/gomovie/internal/types"
+	"github.com/jhachmer/gomovie/internal/util"
 )
 
 // HealthHandler handles requestes to /health route
