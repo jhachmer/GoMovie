@@ -8,7 +8,7 @@ import (
 
 type Cache[K comparable, V any] struct {
 	mutex         sync.RWMutex
-	cacheMap      map[K]*CacheItem[V]
+	cacheMap      map[K]*Item[V]
 	cacheDuration time.Duration
 	cleanInterval time.Duration
 	cleanTicker   *time.Ticker
@@ -16,7 +16,7 @@ type Cache[K comparable, V any] struct {
 	cleanFunc     func(V)
 }
 
-type CacheItem[V any] struct {
+type Item[V any] struct {
 	value        V
 	lastAccessed time.Time
 }
@@ -29,7 +29,7 @@ type CacheItem[V any] struct {
 // cleanFunc sets a function which is called, when values get cleaned up (e.g. closing of resources)
 func NewCache[K comparable, V any](cleanInterval, cacheDuration time.Duration, cleanFunc func(V)) *Cache[K, V] {
 	cache := &Cache[K, V]{
-		cacheMap:      make(map[K]*CacheItem[V]),
+		cacheMap:      make(map[K]*Item[V]),
 		cacheDuration: cacheDuration,
 		cleanInterval: cleanInterval,
 		cleanTicker:   time.NewTicker(cleanInterval),
@@ -95,7 +95,7 @@ func (c *Cache[K, V]) Set(key K, value V) {
 		item.value = value
 		item.lastAccessed = time.Now()
 	} else {
-		c.cacheMap[key] = &CacheItem[V]{
+		c.cacheMap[key] = &Item[V]{
 			value:        value,
 			lastAccessed: time.Now(),
 		}
