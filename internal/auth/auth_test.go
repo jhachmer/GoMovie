@@ -11,7 +11,7 @@ import (
 
 func TestCreateToken(t *testing.T) {
 	os.Setenv("gomovie_JWT", "mysecret")
-	config.Envs.JWT_key = "mysecret"
+	config.Envs.JwtKey = "mysecret"
 	defer os.Unsetenv("gomovie_JWT")
 
 	t.Run("ValidToken", func(t *testing.T) {
@@ -45,7 +45,7 @@ func TestCreateToken(t *testing.T) {
 
 func TestVerifyToken(t *testing.T) {
 	os.Setenv("gomovie_JWT", "mysecret")
-	config.Envs.JWT_key = "mysecret"
+	config.Envs.JwtKey = "mysecret"
 	defer os.Unsetenv("gomovie_JWT")
 
 	t.Run("ValidToken", func(t *testing.T) {

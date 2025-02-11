@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var secretKey = config.Envs.JWT_key
+var secretKey = config.Envs.JwtKey
 
 // CreateToken creates JWT token used in cookie
 // claims include username, issuer and time of issue and expiration
