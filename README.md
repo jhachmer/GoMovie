@@ -3,7 +3,7 @@
 
 ## About
 GoMovie is a simple web app to keep track of your favorite movies, you already watched or still want to watch. Its goal is to help manage a watchlist directly in the browser.
-Data for every movie is pulled from [OMDB](https://www.omdbapi.com/), so to use this yourself you will need a API key for the site.
+Data for every movie is pulled from [OMDB](https://www.omdbapi.com/), so to use this yourself you will need an API key for the site.
 Information presented includes Title, Year, Genres, Actors, Directors, and Ratings from various sources, if available.
 The app stores details such as who recommended the movie, whether it has been watched, and personal comments about the movie in a SQLite database.
 
