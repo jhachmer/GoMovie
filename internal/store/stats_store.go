@@ -2,6 +2,10 @@ package store
 
 import "github.com/jhachmer/gomovie/internal/types"
 
+type StatsStore interface {
+	GetWatchCounts() (*types.WatchStats, error)
+}
+
 func (s *SQLiteStorage) GetWatchCounts() (*types.WatchStats, error) {
 	var stats types.WatchStats
 	row := s.DB.QueryRow( /*sql*/ `
