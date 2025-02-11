@@ -98,7 +98,7 @@ Use either:
 - or the classic way
   ```shell
     # compile
-    go build cmd/gomovie/main.go
+    go build cmd/gomovie/gomovie.go
     # run
     ./main
   ```
