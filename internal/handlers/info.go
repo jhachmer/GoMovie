@@ -74,7 +74,7 @@ func (h *Handler) UpdateMovieHandler(w http.ResponseWriter, r *http.Request) {
 		h.logger.Println("could not match id:", id)
 		return
 	}
-	updatedMovie, err := types.NewMovieFromID(id)
+	updatedMovie, err := types.MovieFromID(id)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("error getting movie: %s", err.Error()), http.StatusInternalServerError)
 		log.Println(err)

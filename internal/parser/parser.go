@@ -156,7 +156,7 @@ func (fp *FileParser) readMoviesAndEntries() []*MovieAndEntry {
 func (fp *FileParser) processRow(row []string) (*MovieAndEntry, error) {
 	title := row[fp.TitleIndex]
 	year := row[fp.YearIndex]
-	mov, err := types.NewMovieFromTitleAndYear(title, year)
+	mov, err := types.MovieFromTitleAndYear(title, year)
 	if err != nil {
 		return nil, fmt.Errorf("unable to fetch movie: %s (%s)\n%w", title, year, err)
 	}

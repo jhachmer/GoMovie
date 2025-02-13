@@ -42,7 +42,7 @@ func (h *Handler) getMovie(id string) (*types.Movie, error) {
 		h.movCache.Set(id, mov)
 		return mov, nil
 	}
-	if mov, err := types.NewMovieFromID(id); err == nil {
+	if mov, err := types.MovieFromID(id); err == nil {
 		h.logger.Printf("got movie with id %s from api", id)
 		h.movCache.Set(id, mov)
 		return mov, nil
