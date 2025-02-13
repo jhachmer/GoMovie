@@ -1,6 +1,8 @@
 package types
 
 import (
+	"net/url"
+	"reflect"
 	"testing"
 
 	"github.com/jhachmer/gomovie/internal/config"
@@ -14,7 +16,7 @@ func TestMain(m *testing.M) {
 type OmdbMock struct {
 }
 
-func (r OmdbMock) SendRequest() (*Movie, error) {
+func (r OmdbMock) SendRequest() (any, error) {
 	return &Movie{}, nil
 }
 
@@ -22,9 +24,9 @@ func (r OmdbMock) Validate() error {
 	return nil
 }
 
-func Test_makeRequestURL(t *testing.T) {
+func Test_buildRequestURL(t *testing.T) {
 	type args struct {
-		r OmdbRequest
+		r MediaRequest
 	}
 	tests := []struct {
 		name    string
@@ -34,19 +36,19 @@ func Test_makeRequestURL(t *testing.T) {
 	}{
 		{
 			name: "ID",
-			args: args{r: OmdbIDRequest{
+			args: args{r: MovieIDRequest{
 				imdbID: "tt1234567",
 			}},
-			want:    "http://www.omdbapi.com/?apikey=TESTKEY&i=tt1234567",
+			want:    "http://www.omdbapi.com/?apikey=TESTKEY&type=movie&i=tt1234567",
 			wantErr: false,
 		},
 		{
 			name: "Title and Year",
-			args: args{r: OmdbTitleRequest{
+			args: args{r: MovieTitleRequest{
 				title: "TestMovie",
 				year:  "1984",
 			}},
-			want:    "http://www.omdbapi.com/?apikey=TESTKEY&t=TestMovie&y=1984",
+			want:    "http://www.omdbapi.com/?apikey=TESTKEY&type=movie&t=TestMovie&y=1984",
 			wantErr: false,
 		},
 		{
@@ -58,18 +60,39 @@ func Test_makeRequestURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := makeRequestURL(tt.args.r)
+			got, err := buildRequestURL(tt.args.r)
+
+			// Check if error status matches expectation
 			if (err != nil) != tt.wantErr {
-				t.Errorf("makeRequestURL() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("buildRequestURL() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("makeRequestURL() got = %v, want %v", got, tt.want)
+
+			// If an error is expected, no need to check further
+			if tt.wantErr {
+				return
+			}
+
+			// Parse URLs to compare query parameters in a normalized way
+			gotURL, err := url.Parse(got)
+			if err != nil {
+				t.Fatalf("Failed to parse got URL: %v", err)
+			}
+			wantURL, err := url.Parse(tt.want)
+			if err != nil {
+				t.Fatalf("Failed to parse want URL: %v", err)
+			}
+
+			// Compare query parameters independently of order
+			gotQuery, _ := url.ParseQuery(gotURL.RawQuery)
+			wantQuery, _ := url.ParseQuery(wantURL.RawQuery)
+
+			if !reflect.DeepEqual(gotQuery, wantQuery) {
+				t.Errorf("buildRequestURL() query mismatch\ngot:  %v\nwant: %v", gotQuery, wantQuery)
 			}
 		})
 	}
 }
-
 func TestOmdbTitleRequest_Validate(t *testing.T) {
 	type fields struct {
 		title string
@@ -115,7 +138,7 @@ func TestOmdbTitleRequest_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := OmdbTitleRequest{
+			r := MovieTitleRequest{
 				title: tt.fields.title,
 				year:  tt.fields.year,
 			}
@@ -173,7 +196,7 @@ func TestOmdbIDRequest_Validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := OmdbIDRequest{
+			r := MovieIDRequest{
 				imdbID: tt.fields.imdbID,
 			}
 			if err := r.Validate(); (err != nil) != tt.wantErr {
