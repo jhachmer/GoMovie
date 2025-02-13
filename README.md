@@ -41,7 +41,7 @@ gomovie_JWT=<somekey>
   - ~~Split Genres and Actors~~
     - ~~separate db tables for them~~
   - ~~Update Button for new movie info (poster, ratings)~~
-    - ~~especially recently announed movies have a placeholder image as poster and obviously no ratings, updating them should provide the ratings and poster at the time of updating~~
+    - ~~especially recently announced movies have a placeholder image as poster and obviously no ratings, updating them should provide the ratings and poster at the time of updating~~
   - ~~Color Grading of rows, to show if they are watched~~
   - ~~checkbox to toggle showing only unwatched movies on overview~~
   - ~~redirecting to overview when accessing login page with valid cookie~~
@@ -56,7 +56,7 @@ gomovie_JWT=<somekey>
 - GET /login : displays login page
 - POST /login : checks credentials provided by form values of username and password
 - GET /register : open register page
-- POST /register : creates new useraccount
+- POST /register : creates new user account
 - GET /overview : displays overview page of all movies in database
 - GET /search : searches for movie by imdb id
 - GET /films/{imdb} : returns info page for movie with imdb id
