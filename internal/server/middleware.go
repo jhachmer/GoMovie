@@ -12,11 +12,11 @@ type Middleware func(handlerFunc http.HandlerFunc) http.HandlerFunc
 
 // Chain is called with an HandlerFunc and one or more Middleware functions
 // wraps HandlerFunc f around one or more middleware functions
-func Chain(f http.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
+func Chain(handlerFunc http.HandlerFunc, middlewares ...Middleware) http.HandlerFunc {
 	for _, m := range middlewares {
-		f = m(f)
+		handlerFunc = m(handlerFunc)
 	}
-	return f
+	return handlerFunc
 }
 
 // LogMessage holds data contained in log messages
@@ -27,7 +27,7 @@ type LogMessage struct {
 }
 
 // NewLogMessage returns pointer to a new LogMessage instance
-func NewLogMessage(r *http.Request, startTime time.Time) *LogMessage {
+func NewLogMessage(r *http.Request) *LogMessage {
 	return &LogMessage{
 		Path:   r.URL.EscapedPath(),
 		Method: r.Method,
@@ -40,7 +40,7 @@ func Logging(logger *log.Logger) Middleware {
 	return func(handlerFunc http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
-				message := NewLogMessage(r, time.Now())
+				message := NewLogMessage(r)
 				logger.Println(message.Method, message.Path, time.Since(message.Time).String())
 			}()
 			handlerFunc(w, r)
@@ -79,7 +79,6 @@ func RedirectWhenLoggedIn() Middleware {
 					return
 				}
 			}
-
 			handlerFunc(w, r)
 		}
 	}
