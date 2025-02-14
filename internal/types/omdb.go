@@ -71,11 +71,7 @@ func (r MovieTitleRequest) SendRequest() (any, error) {
 // Title must not be empty
 // Year must be 4 digits
 func (r MovieTitleRequest) Validate() error {
-	err := validateTitle(r.title, r.year)
-	if err != nil {
-		return err
-	}
-	return nil
+	return validateTitle(r.title, r.year)
 }
 
 type SeriesIDRequest struct {
@@ -88,8 +84,7 @@ func (s SeriesIDRequest) SendRequest() (any, error) {
 }
 
 func (s SeriesIDRequest) Validate() error {
-	//TODO implement me
-	panic("implement me")
+	return validateID(s.imdbID)
 }
 
 type SeriesTitleRequest struct {
@@ -102,11 +97,7 @@ func (s SeriesTitleRequest) SendRequest() (any, error) {
 }
 
 func (s SeriesTitleRequest) Validate() error {
-	err := validateTitle(s.title, s.year)
-	if err != nil {
-		return err
-	}
-	return nil
+	return validateTitle(s.title, s.year)
 }
 
 func validateTitle(title, year string) error {
@@ -119,7 +110,14 @@ func validateTitle(title, year string) error {
 	return nil
 }
 
-func sendAndReturn[M Media](r MediaRequest) (*M, error) {
+func validateID(id string) error {
+	if !regexp.MustCompile(`^tt\d{7,8}$`).MatchString(id) {
+		return fmt.Errorf("id %s is not a valid id", id)
+	}
+	return nil
+}
+
+func sendAndReturn[M MediaType](r MediaRequest) (*M, error) {
 	var m M
 	requestURL, err := buildRequestURL(r)
 	if err != nil {
@@ -183,7 +181,7 @@ func buildRequestURL(r MediaRequest) (string, error) {
 	}
 }
 
-func decodeMedia[M Media](requestURL string) (M, error) {
+func decodeMedia[M MediaType](requestURL string) (M, error) {
 	var media M
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
