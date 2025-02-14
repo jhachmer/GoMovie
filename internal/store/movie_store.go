@@ -16,8 +16,8 @@ type MovieStore interface {
 	UpdateMovie(movie *types.Movie) (*types.Movie, error)
 	DeleteMovie(movieID string) error
 	GetMovieByID(movieID string) (*types.Movie, error)
-	GetAllMovies() ([]*types.MovieOverviewData, error)
-	SearchMovie(params types.SearchParams) ([]*types.MovieOverviewData, error)
+	GetAllMovies() ([]*types.MovieInfoData, error)
+	SearchMovie(params types.SearchParams) ([]*types.MovieInfoData, error)
 }
 
 func (s *SQLiteStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
@@ -28,15 +28,15 @@ func (s *SQLiteStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = s.createRatings(m)
+	err = s.createMovieRatings(m)
 	if err != nil {
 		return nil, err
 	}
-	err = s.createGenres(m)
+	err = s.createMovieGenres(m)
 	if err != nil {
 		return nil, err
 	}
-	err = s.createActors(m)
+	err = s.createMovieActors(m)
 	if err != nil {
 		return nil, err
 	}
@@ -51,11 +51,11 @@ func (s *SQLiteStorage) CreateMovieTx(tx *sql.Tx, m *types.Movie) (*types.Movie,
 	if err != nil {
 		return nil, err
 	}
-	err = s.createRatingsTx(tx, m)
+	err = s.createMovieRatingsTx(tx, m)
 	if err != nil {
 		return nil, err
 	}
-	err = s.createGenresTx(tx, m)
+	err = s.createMovieGenresTx(tx, m)
 	if err != nil {
 		return nil, err
 	}
@@ -324,8 +324,8 @@ func (s *SQLiteStorage) GetMovieByID(movieID string) (*types.Movie, error) {
 	return &movie, nil
 }
 
-func (s *SQLiteStorage) GetAllMovies() ([]*types.MovieOverviewData, error) {
-	var movies []*types.MovieOverviewData
+func (s *SQLiteStorage) GetAllMovies() ([]*types.MovieInfoData, error) {
+	var movies []*types.MovieInfoData
 	rows, err := s.DB.Query( /*sql*/ `
         SELECT id
         FROM movies
@@ -352,13 +352,13 @@ func (s *SQLiteStorage) GetAllMovies() ([]*types.MovieOverviewData, error) {
 		if err != nil {
 			return nil, err
 		}
-		data := types.MovieOverviewData{Movie: movie, Entry: entries}
+		data := types.MovieInfoData{Movie: movie, Entry: entries}
 		movies = append(movies, &data)
 	}
 	return movies, nil
 }
 
-func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieOverviewData, error) {
+func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieInfoData, error) {
 	filters := []string{}
 	args := []any{}
 
@@ -404,7 +404,7 @@ func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieOv
 	}
 	defer rows.Close()
 
-	results := []*types.MovieOverviewData{}
+	results := []*types.MovieInfoData{}
 	for rows.Next() {
 		var id string
 		if err := rows.Scan(&id); err != nil {
@@ -418,7 +418,7 @@ func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieOv
 		if err != nil {
 			return nil, err
 		}
-		results = append(results, &types.MovieOverviewData{Movie: mov, Entry: entry})
+		results = append(results, &types.MovieInfoData{Movie: mov, Entry: entry})
 	}
 
 	if err := rows.Err(); err != nil {
@@ -428,7 +428,7 @@ func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieOv
 	return results, nil
 }
 
-func (s *SQLiteStorage) createRatings(m *types.Movie) error {
+func (s *SQLiteStorage) createMovieRatings(m *types.Movie) error {
 	for _, rating := range m.Ratings {
 		_, err := s.DB.Exec( /*sql*/ `
 			INSERT INTO ratings (movie_id, source, value)
@@ -441,7 +441,7 @@ func (s *SQLiteStorage) createRatings(m *types.Movie) error {
 	return nil
 }
 
-func (s *SQLiteStorage) createRatingsTx(tx *sql.Tx, m *types.Movie) error {
+func (s *SQLiteStorage) createMovieRatingsTx(tx *sql.Tx, m *types.Movie) error {
 	for _, rating := range m.Ratings {
 		_, err := tx.Exec( /*sql*/ `
 			INSERT INTO ratings (movie_id, source, value)
@@ -454,7 +454,7 @@ func (s *SQLiteStorage) createRatingsTx(tx *sql.Tx, m *types.Movie) error {
 	return nil
 }
 
-func (s *SQLiteStorage) createGenres(m *types.Movie) error {
+func (s *SQLiteStorage) createMovieGenres(m *types.Movie) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
 		var genreID int64
@@ -485,7 +485,7 @@ func (s *SQLiteStorage) createGenres(m *types.Movie) error {
 	return nil
 }
 
-func (s *SQLiteStorage) createGenresTx(tx *sql.Tx, m *types.Movie) error {
+func (s *SQLiteStorage) createMovieGenresTx(tx *sql.Tx, m *types.Movie) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
 		var genreID int64
@@ -516,7 +516,7 @@ func (s *SQLiteStorage) createGenresTx(tx *sql.Tx, m *types.Movie) error {
 	return nil
 }
 
-func (s *SQLiteStorage) createActors(m *types.Movie) error {
+func (s *SQLiteStorage) createMovieActors(m *types.Movie) error {
 	actors := util.SplitIMDBString(m.Actors)
 	for _, actor := range actors {
 		var actorID int64

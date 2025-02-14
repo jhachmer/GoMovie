@@ -16,8 +16,8 @@ func (r Rating) String() string {
 	return fmt.Sprint(r.Value)
 }
 
-// Media struct holds data acquired from omdb api
-type Media interface {
+// MediaType struct holds data acquired from omdb api
+type MediaType interface {
 	Movie | Series
 	checkResponse() bool
 }
@@ -72,11 +72,11 @@ func MovieFromID(imdbID string) (*Movie, error) {
 	if err != nil {
 		return nil, err
 	}
-	mov, ok := res.(Movie)
+	mov, ok := res.(*Movie)
 	if !ok {
 		return nil, fmt.Errorf("type assertion for id %s failed", imdbID)
 	}
-	return &mov, nil
+	return mov, nil
 }
 
 // MovieFromTitleAndYear returns pointer to a new movie instance
@@ -90,9 +90,9 @@ func MovieFromTitleAndYear(title, year string) (*Movie, error) {
 	if err != nil {
 		return nil, err
 	}
-	mov, ok := res.(Movie)
+	mov, ok := res.(*Movie)
 	if !ok {
 		return nil, fmt.Errorf("type assertion for id %s (%s) failed", title, year)
 	}
-	return &mov, nil
+	return mov, nil
 }

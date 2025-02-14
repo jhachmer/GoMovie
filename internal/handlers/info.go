@@ -10,7 +10,7 @@ import (
 )
 
 func (h *Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {
-	data := types.InfoPage{}
+	data := types.MovieInfoPage{}
 	id := r.PathValue("imdb")
 	if !validPath.MatchString(id) {
 		http.Error(w, "not a valid id", http.StatusBadRequest)
@@ -41,7 +41,7 @@ func (h *Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateMovieHandler(w http.ResponseWriter, r *http.Request) {
-	data := types.InfoPage{}
+	data := types.MovieInfoPage{}
 	id := r.PathValue("imdb")
 	mov, err := h.getMovie(id)
 	if err != nil {
@@ -102,7 +102,7 @@ func (h *Handler) DeleteMovieHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {
-	data := types.InfoPage{}
+	data := types.MovieInfoPage{}
 	err := r.ParseForm()
 	if err != nil {
 		//http.Error(w, "error parsing form", http.StatusInternalServerError)
