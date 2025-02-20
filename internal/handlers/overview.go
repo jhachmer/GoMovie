@@ -24,7 +24,7 @@ func (h *Handler) HealthHandler(w http.ResponseWriter, r *http.Request) {
 // lists all movies retrieved from database on the overview page
 // movies retrieved get sorted before being passed to tempalte render
 func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
-	data := types.HomeData{}
+	data := types.MovieOverviewData{}
 	movies, err := h.store.GetAllMovies()
 	types.SortMovieSlice(movies)
 	data.Movies = movies
@@ -42,12 +42,12 @@ func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
 // SearchParams are used in DB query
 //
 // Allowed search types are: Genre, Actors and Year
-// Different search types must be separated by a semi-colon
+// Different search types must be separated by a semicolon
 // Search values are separated from the search type by colons
 // Example string:
 // genre:horror,thriller;actors:Hans Albers, Keeanu Reeves
 func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
-	data := types.HomeData{}
+	data := types.MovieOverviewData{}
 	err := r.ParseForm()
 	if err != nil {
 		//http.Error(w, "error parsing form", http.StatusInternalServerError)

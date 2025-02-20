@@ -18,9 +18,9 @@ type EntryStore interface {
 func (s *SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, error) {
 	var exists bool
 	row := s.DB.QueryRow( /*sql*/ `
-		SELECT EXISTS(SELECT movies.title
-		FROM movies
-		WHERE movies.id = ?);
+		SELECT EXISTS(SELECT media.title
+		FROM media
+		WHERE media.id = ?);
 		`, mov.ImdbID)
 	if err := row.Scan(&exists); err != nil {
 		log.Println("movie exists:", exists)
@@ -37,7 +37,7 @@ func (s *SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.En
 	}
 	res, err := s.DB.Exec( /*sql*/ `
 		INSERT INTO entries
-		(name, watched, comment, movie_id)
+		(name, watched, comment, media_id)
 		VALUES (?, ?, ?, ?);
 		`, e.Name, watchedInt, e.Comment, mov.ImdbID)
 	if err != nil {
@@ -53,9 +53,9 @@ func (s *SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.En
 func (s *SQLiteStorage) CreateEntryTx(tx *sql.Tx, e *types.Entry, mov *types.Movie) (*types.Entry, error) {
 	var exists bool
 	row := tx.QueryRow( /*sql*/ `
-		SELECT EXISTS(SELECT movies.title
-		FROM movies
-		WHERE movies.id = ?);
+		SELECT EXISTS(SELECT media.title
+		FROM media
+		WHERE media.id = ?);
 		`, mov.ImdbID)
 	if err := row.Scan(&exists); err != nil {
 		log.Println("movie exists:", exists)
@@ -72,7 +72,7 @@ func (s *SQLiteStorage) CreateEntryTx(tx *sql.Tx, e *types.Entry, mov *types.Mov
 	}
 	res, err := tx.Exec( /*sql*/ `
 		INSERT INTO entries
-		(name, watched, comment, movie_id)
+		(name, watched, comment, media_id)
 		VALUES (?, ?, ?, ?);
 		`, e.Name, watchedInt, e.Comment, mov.ImdbID)
 	if err != nil {
@@ -93,7 +93,7 @@ func (s *SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool)
 	res, err := s.DB.Exec( /*sql*/ `
 		UPDATE entries
 		SET name = ?, comment = ?, watched = ?
-		WHERE movie_id = ?
+		WHERE media_id = ?
 	`, name, comment, watchedInt, movieId)
 	if err != nil {
 		return nil, err
@@ -114,7 +114,7 @@ func (s *SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool)
 func (s *SQLiteStorage) DeleteEntry(imdbId string) error {
 	_, err := s.DB.Exec( /*sql*/ `
 		DELETE FROM entries
-		WHERE movie_id = ?
+		WHERE media_id = ?
 	`, imdbId)
 	if err != nil {
 		return fmt.Errorf("error deleting entry for movie: %s\n%w", imdbId, err)
@@ -126,7 +126,7 @@ func (s *SQLiteStorage) GetEntries(id string) ([]*types.Entry, error) {
 	rows, err := s.DB.Query( /*sql*/ `
 		SELECT id, name, watched, comment
 		FROM entries
-		WHERE movie_id = ?;
+		WHERE media_id = ?;
 		`, id)
 	if err != nil {
 		return nil, err

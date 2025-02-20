@@ -18,12 +18,14 @@ type Handler struct {
 	logger   *log.Logger
 	store    store.Store
 	movCache *cache.Cache[string, *types.Movie]
+	serCache *cache.Cache[string, *types.Series]
 }
 
-func NewHandler(store store.Store, movC *cache.Cache[string, *types.Movie], logger *log.Logger) *Handler {
+func NewHandler(store store.Store, movC *cache.Cache[string, *types.Movie], serC *cache.Cache[string, *types.Series], logger *log.Logger) *Handler {
 	return &Handler{
 		store:    store,
 		movCache: movC,
+		serCache: serC,
 		logger:   logger,
 	}
 }

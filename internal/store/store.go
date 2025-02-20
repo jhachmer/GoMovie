@@ -14,7 +14,7 @@ type SQLiteStorage struct {
 
 type Store interface {
 	UserStore
-	MovieStore
+	MediaStore
 	EntryStore
 	StatsStore
 }
@@ -66,7 +66,7 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 		return err
 	}
 	_, err = s.DB.Exec( /*sql*/ `
-		CREATE TABLE IF NOT EXISTS movies (
+		CREATE TABLE IF NOT EXISTS media (
 		id VARCHAR(9) NOT NULL,
 		title VARCHAR(255) NOT NULL,
 		year VARCHAR(255) NOT NULL,
@@ -76,20 +76,23 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
     	released VARCHAR(500) NOT NULL,
     	plot TEXT NOT NULL,
     	poster VARCHAR(500) NOT NULL,
-
+		seasons VARCHAR(10),
+		media_type VARCHAR(255) NOT NULL,
+		
 		PRIMARY KEY (id));
 		`)
 	if err != nil {
 		return err
 	}
+
 	_, err = s.DB.Exec( /*sql*/ `
 		CREATE TABLE IF NOT EXISTS ratings (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		movie_id VARCHAR(9) NOT NULL,
+		media_id VARCHAR(9) NOT NULL,
 		source VARCHAR(255) NOT NULL,
 		value VARCHAR(50) NOT NULL,
 
-		FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE);
+		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE);
 		`)
 	if err != nil {
 		return err
@@ -100,8 +103,8 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 		name VARCHAR(255) NOT NULL,
 		watched INTEGER DEFAULT 0,
 		comment TEXT,
-		movie_id VARCHAR(9) NOT NULL UNIQUE,
-		FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE SET NULL);
+		media_id VARCHAR(9) NOT NULL UNIQUE,
+		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE SET NULL);
 		`)
 	if err != nil {
 		return err
@@ -123,22 +126,22 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 		return err
 	}
 	_, err = s.DB.Exec( /*sql*/ `
-		CREATE TABLE IF NOT EXISTS movies_genres (
-		movie_id VARCHAR(9) NOT NULL,
+		CREATE TABLE IF NOT EXISTS media_genres (
+		media_id VARCHAR(9) NOT NULL,
 		genre_id INTEGER NOT NULL,
-		PRIMARY KEY (movie_id, genre_id),
-		FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
+		PRIMARY KEY (media_id, genre_id),
+		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE,
 		FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE CASCADE);
 		`)
 	if err != nil {
 		return err
 	}
 	_, err = s.DB.Exec( /*sql*/ `
-		CREATE TABLE IF NOT EXISTS movies_actors (
-		movie_id VARCHAR(9) NOT NULL,
+		CREATE TABLE IF NOT EXISTS media_actors (
+		media_id VARCHAR(9) NOT NULL,
 		actor_id INTEGER NOT NULL,
-		PRIMARY KEY (movie_id, actor_id),
-		FOREIGN KEY (movie_id) REFERENCES movies(id) ON DELETE CASCADE,
+		PRIMARY KEY (media_id, actor_id),
+		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE,
 		FOREIGN KEY (actor_id) REFERENCES actors(id) ON DELETE CASCADE);
 		`)
 	if err != nil {

@@ -23,14 +23,19 @@ func NewEntry(name string, watched bool, comment string) *Entry {
 	}
 }
 
-type MovieOverviewData struct {
+type MovieInfoData struct {
 	Movie *Movie
 	Entry []*Entry
 }
 
+type SeriesInfoData struct {
+	Series *Series
+	Entry  []*Entry
+}
+
 // SortMovieSlice sorts slice of movies based on their title
-func SortMovieSlice(movies []*MovieOverviewData) {
-	slices.SortFunc(movies, func(a, b *MovieOverviewData) int {
+func SortMovieSlice(movies []*MovieInfoData) {
+	slices.SortFunc(movies, func(a, b *MovieInfoData) int {
 		if a.Movie.Title < b.Movie.Title {
 			return -1
 		}
@@ -41,15 +46,20 @@ func SortMovieSlice(movies []*MovieOverviewData) {
 	})
 }
 
-// InfoPage holds necessary data for the InfoHandler
-type InfoPage struct {
+// MovieInfoPage holds necessary data for the InfoHandler
+type MovieInfoPage struct {
 	Entries []*Entry
 	Movie   *Movie
 	Error   error
 }
 
-type HomeData struct {
-	Movies []*MovieOverviewData
+type MovieOverviewData struct {
+	Movies []*MovieInfoData
+	Error  error
+}
+
+type SeriesOverviewData struct {
+	Series []*SeriesInfoData
 	Error  error
 }
 

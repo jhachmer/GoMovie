@@ -16,10 +16,17 @@ func (r Rating) String() string {
 	return fmt.Sprint(r.Value)
 }
 
-// Media struct holds data acquired from omdb api
-type Media interface {
+// MediaType struct holds data acquired from omdb api
+type MediaType interface {
 	Movie | Series
 	checkResponse() bool
+}
+
+type Media interface {
+	GetActors() string
+	GetRatings() []Rating
+	GetGenres() string
+	GetID() string
 }
 
 type Movie struct {
@@ -48,6 +55,22 @@ type Movie struct {
 	Response   string   `json:"Response"`
 }
 
+func (m Movie) GetID() string {
+	return m.ImdbID
+}
+
+func (m Movie) GetActors() string {
+	return m.Actors
+}
+
+func (m Movie) GetRatings() []Rating {
+	return m.Ratings
+}
+
+func (m Movie) GetGenres() string {
+	return m.Genre
+}
+
 func (m Movie) checkResponse() bool {
 	return strings.ToLower(m.Response) == "true"
 }
@@ -55,6 +78,22 @@ func (m Movie) checkResponse() bool {
 type Series struct {
 	Movie
 	TotalSeasons string `json:"totalSeasons"`
+}
+
+func (s Series) GetID() string {
+	return s.ImdbID
+}
+
+func (s Series) GetActors() string {
+	return s.Actors
+}
+
+func (s Series) GetRatings() []Rating {
+	return s.Ratings
+}
+
+func (s Series) GetGenres() string {
+	return s.Genre
 }
 
 func (s Series) checkResponse() bool {
@@ -72,11 +111,11 @@ func MovieFromID(imdbID string) (*Movie, error) {
 	if err != nil {
 		return nil, err
 	}
-	mov, ok := res.(Movie)
+	mov, ok := res.(*Movie)
 	if !ok {
 		return nil, fmt.Errorf("type assertion for id %s failed", imdbID)
 	}
-	return &mov, nil
+	return mov, nil
 }
 
 // MovieFromTitleAndYear returns pointer to a new movie instance
@@ -90,9 +129,9 @@ func MovieFromTitleAndYear(title, year string) (*Movie, error) {
 	if err != nil {
 		return nil, err
 	}
-	mov, ok := res.(Movie)
+	mov, ok := res.(*Movie)
 	if !ok {
 		return nil, fmt.Errorf("type assertion for id %s (%s) failed", title, year)
 	}
-	return &mov, nil
+	return mov, nil
 }

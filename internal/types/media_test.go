@@ -34,27 +34,27 @@ func TestRating_String(t *testing.T) {
 func TestSortMovieSlice(t *testing.T) {
 	tests := []struct {
 		name   string
-		movies []*MovieOverviewData
-		want   []*MovieOverviewData
+		movies []*MovieInfoData
+		want   []*MovieInfoData
 	}{
 		{
 			name: "Test with unsorted movies",
-			movies: []*MovieOverviewData{
+			movies: []*MovieInfoData{
 				{Movie: &Movie{Title: "Z Movie"}},
 				{Movie: &Movie{Title: "A Movie"}},
 			},
-			want: []*MovieOverviewData{
+			want: []*MovieInfoData{
 				{Movie: &Movie{Title: "A Movie"}},
 				{Movie: &Movie{Title: "Z Movie"}},
 			},
 		},
 		{
 			name: "Test with already sorted movies",
-			movies: []*MovieOverviewData{
+			movies: []*MovieInfoData{
 				{Movie: &Movie{Title: "A Movie"}},
 				{Movie: &Movie{Title: "B Movie"}},
 			},
-			want: []*MovieOverviewData{
+			want: []*MovieInfoData{
 				{Movie: &Movie{Title: "A Movie"}},
 				{Movie: &Movie{Title: "B Movie"}},
 			},

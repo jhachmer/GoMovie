@@ -30,6 +30,8 @@ either set them in your os, pass them when running the server, or use a .env fil
 # Environment Variables for App
 OMDB_KEY=<verysecretkey>
 gomovie_JWT=<somekey>
+ADMIN_NAME=admin
+ADMIN_PW=adminpw
 ```
 
 ### TODO:
@@ -50,20 +52,6 @@ gomovie_JWT=<somekey>
   - display statistics
     - watched/unwatched ratio, how many movies of X genre, which actors are featured often etc.
 
-### Routes:
-- GET /health : returns healthy if server is running
-- GET / : redirects to login page
-- GET /login : displays login page
-- POST /login : checks credentials provided by form values of username and password
-- GET /register : open register page
-- POST /register : creates new user account
-- GET /overview : displays overview page of all movies in database
-- GET /search : searches for movie by imdb id
-- GET /films/{imdb} : returns info page for movie with imdb id
-- PUT /films/{imdb} : updates movie info with newly fetched api data
-- POST /films/{imdb}/entry : posts a new entry for movie
-- PUT /films/{imdb}/entry : changes the entry saved for that movie
-- DELETE /films/{imdb}/entry : deletes entry belonging to movie (does not delete movie from db, maybe later)
 
 ## Setup
 Use either:
@@ -92,7 +80,7 @@ Use either:
     docker build --tag docker-gomovie .
     # spin up the container
     # remember to pass your omdb api key and a JWT secret as a env variable
-    docker run -d --publish 8080:8080 -e OMDB_KEY=your_key -e gomovie_JWT=jwt_secret docker-gomovie
+    docker run -d --publish 8080:8080 -e OMDB_KEY=your_key -e GOLIST_JWT=jwt_secret -e ADMIN_NAME=admin -e ADMIN_PW=adminpw docker-gomovie
   ```
 
 - or the classic way
@@ -102,3 +90,17 @@ Use either:
     # run
     ./main
   ```
+### Routes:
+- GET /health : returns healthy if server is running
+- GET / : redirects to login page
+- GET /login : displays login page
+- POST /login : checks credentials provided by form values of username and password
+- GET /register : open register page
+- POST /register : creates new user account
+- GET /overview : displays overview page of all movies in database
+- GET /search : searches for movie by imdb id
+- GET /films/{imdb} : returns info page for movie with imdb id
+- PUT /films/{imdb} : updates movie info with newly fetched api data
+- POST /films/{imdb}/entry : posts a new entry for movie
+- PUT /films/{imdb}/entry : changes the entry saved for that movie
+- DELETE /films/{imdb}/entry : deletes entry belonging to movie (does not delete movie from db, maybe later)
