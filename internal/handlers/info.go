@@ -92,7 +92,7 @@ func (h *Handler) UpdateMovieHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) DeleteMovieHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("imdb")
-	err := h.store.DeleteMovie(id)
+	err := h.store.DeleteMedia(id)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("error deleting movie: %s", err.Error()), http.StatusInternalServerError)
 		log.Println(err)
