@@ -22,6 +22,13 @@ type MediaType interface {
 	checkResponse() bool
 }
 
+type Media interface {
+	GetActors() string
+	GetRatings() []Rating
+	GetGenres() string
+	GetID() string
+}
+
 type Movie struct {
 	Title      string   `json:"Title"`
 	Year       string   `json:"Year"`
@@ -48,6 +55,22 @@ type Movie struct {
 	Response   string   `json:"Response"`
 }
 
+func (m Movie) GetID() string {
+	return m.ImdbID
+}
+
+func (m Movie) GetActors() string {
+	return m.Actors
+}
+
+func (m Movie) GetRatings() []Rating {
+	return m.Ratings
+}
+
+func (m Movie) GetGenres() string {
+	return m.Genre
+}
+
 func (m Movie) checkResponse() bool {
 	return strings.ToLower(m.Response) == "true"
 }
@@ -55,6 +78,22 @@ func (m Movie) checkResponse() bool {
 type Series struct {
 	Movie
 	TotalSeasons string `json:"totalSeasons"`
+}
+
+func (s Series) GetID() string {
+	return s.ImdbID
+}
+
+func (s Series) GetActors() string {
+	return s.Actors
+}
+
+func (s Series) GetRatings() []Rating {
+	return s.Ratings
+}
+
+func (s Series) GetGenres() string {
+	return s.Genre
 }
 
 func (s Series) checkResponse() bool {
