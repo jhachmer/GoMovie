@@ -32,6 +32,8 @@ func NewHandler(store store.Store, movC *cache.Cache[string, *types.Movie], serC
 
 func (h *Handler) Close() {
 	h.movCache.Close()
+	h.serCache.Close()
+	h.store.Close()
 }
 
 func (h *Handler) getMovie(id string) (*types.Movie, error) {

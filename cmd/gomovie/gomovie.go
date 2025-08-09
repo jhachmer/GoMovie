@@ -44,8 +44,8 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 }
 
 func setupServer(store store.Store, logger *log.Logger) *server.Server {
-	movC := cache.NewCache[string, *types.Movie](time.Second*15, time.Second*60, nil)
-	serC := cache.NewCache[string, *types.Series](time.Second*15, time.Second*60, nil)
+	movC := cache.NewCache[string, *types.Movie](time.Second*15, time.Minute*60, nil)
+	serC := cache.NewCache[string, *types.Series](time.Second*15, time.Minute*60, nil)
 	handler := handlers.NewHandler(store, movC, serC, logger)
 
 	return server.NewServer(config.Envs.Addr, logger, handler)
