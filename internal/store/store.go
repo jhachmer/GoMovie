@@ -13,6 +13,7 @@ type SQLiteStorage struct {
 }
 
 type Store interface {
+	Close() error
 	UserStore
 	MediaStore
 	EntryStore
@@ -25,8 +26,11 @@ func NewStore(db *sql.DB) *SQLiteStorage {
 	}
 }
 
-func (s *SQLiteStorage) Close() {
-	s.DB.Close()
+func (s *SQLiteStorage) Close() error {
+	if err := s.DB.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *SQLiteStorage) TestDBConnection() {
