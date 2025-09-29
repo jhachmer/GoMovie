@@ -32,7 +32,7 @@ func TestGetEnv(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetEnv(tt.args.key, tt.args.fallback); got != tt.want {
+			if got, _ := GetEnv(tt.args.key, tt.args.fallback); got != tt.want {
 				t.Errorf("GetEnv() = %v, want %v", got, tt.want)
 			}
 		})
