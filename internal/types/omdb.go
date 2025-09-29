@@ -41,7 +41,8 @@ func (r MovieIDRequest) SendRequest() (any, error) {
 // - 7 or 8 digits
 // - two leading tt characters
 func (r MovieIDRequest) Validate() error {
-	if !regexp.MustCompile(`^tt\d{7,8}$`).MatchString(r.imdbID) {
+	var imdbIDregex = `^tt\d{7,8}$`
+	if !regexp.MustCompile(imdbIDregex).MatchString(r.imdbID) {
 		return fmt.Errorf("id %s is not a valid id", r.imdbID)
 	}
 	return nil
