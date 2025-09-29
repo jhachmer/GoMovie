@@ -42,12 +42,16 @@ func (s *SQLiteStorage) TestDBConnection() {
 }
 
 func (s *SQLiteStorage) CreateAdminAccount(name, pw string) error {
+	if name == "" || pw == "" {
+		log.Fatal("admin credentials are not properly set in config!")
+		return fmt.Errorf("admin credentials are not properly set in config!")
+	}
 	hashedPW, err := auth.HashPassword(pw)
 	if err != nil {
 		log.Fatal("error creating admin account")
 		return err
 	}
-	_, err = s.DB.Exec( /*sql*/ `
+	_, err = s.DB.Exec(`--sql
 	INSERT OR IGNORE INTO useraccounts (Username, PasswordHash, Active, IsAdmin)
 	VALUES (?, ?, ?, ?)
 	`, name, hashedPW, 1, 1)
