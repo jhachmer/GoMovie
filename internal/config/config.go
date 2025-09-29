@@ -2,6 +2,7 @@
 package config
 
 import (
+	"log"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -33,6 +34,10 @@ func initConfig() Config {
 func GetEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
+	}
+	if fallback == "" {
+		log.Fatalf("a value (%v) is missing from config!", key)
+		os.Exit(1)
 	}
 	return fallback
 }

@@ -36,6 +36,7 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 	dbStore, err := store.SetupDatabase()
 	if err != nil {
 		log.Fatal(err)
+		os.Exit(1)
 	}
 
 	svr := setupServer(dbStore, logger)
