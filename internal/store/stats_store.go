@@ -8,7 +8,7 @@ type StatsStore interface {
 
 func (s *SQLiteStorage) GetWatchCounts() (*types.WatchStats, error) {
 	var stats types.WatchStats
-	row := s.DB.QueryRow( /*sql*/ `
+	row := s.DB.QueryRow(`--sql
 	SELECT
     SUM(CASE WHEN watched = 1 THEN 1 ELSE 0 END) AS watched_count,
     SUM(CASE WHEN watched = 0 THEN 1 ELSE 0 END) AS unwatched_count,

@@ -74,7 +74,7 @@ func (s *SQLiteStorage) CreateMovieTx(tx *sql.Tx, m *types.Movie) (*types.Movie,
 }
 
 func (s *SQLiteStorage) UpdateMovie(m *types.Movie) (*types.Movie, error) {
-	_, err := s.DB.Exec( /*sql*/ `
+	_, err := s.DB.Exec(`--sql
 	UPDATE media
 	SET title = ?, year = ?, director = ?, runtime = ?, rated = ?, released = ?, plot = ?, poster = ?
 	WHERE id = ?;

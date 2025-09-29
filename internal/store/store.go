@@ -62,7 +62,8 @@ func (s *SQLiteStorage) CreateAdminAccount(name, pw string) error {
 }
 
 func (s *SQLiteStorage) InitDatabaseTables() error {
-	_, err := s.DB.Exec( /*sql*/ `
+	// User Accounts
+	_, err := s.DB.Exec(`--sql
 		CREATE TABLE IF NOT EXISTS useraccounts (
     	UserID INTEGER PRIMARY KEY AUTOINCREMENT,
     	Username TEXT NOT NULL UNIQUE,
@@ -73,7 +74,8 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.DB.Exec( /*sql*/ `
+	// Media
+	_, err = s.DB.Exec(`--sql
 		CREATE TABLE IF NOT EXISTS media (
 		id VARCHAR(9) NOT NULL,
 		title VARCHAR(255) NOT NULL,
@@ -92,20 +94,22 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-
-	_, err = s.DB.Exec( /*sql*/ `
+	// Ratings
+	_, err = s.DB.Exec(`--sql
 		CREATE TABLE IF NOT EXISTS ratings (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		media_id VARCHAR(9) NOT NULL,
 		source VARCHAR(255) NOT NULL,
 		value VARCHAR(50) NOT NULL,
+		timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
 		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE);
 		`)
 	if err != nil {
 		return err
 	}
-	_, err = s.DB.Exec( /*sql*/ `
+	// Entries
+	_, err = s.DB.Exec(`--sql
 		CREATE TABLE IF NOT EXISTS entries (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name VARCHAR(255) NOT NULL,
@@ -117,7 +121,8 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.DB.Exec( /*sql*/ `
+	// Genres
+	_, err = s.DB.Exec(`--sql
 		CREATE TABLE IF NOT EXISTS genres (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name VARCHAR(255) NOT NULL UNIQUE);
@@ -125,7 +130,8 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.DB.Exec( /*sql*/ `
+	// Actors
+	_, err = s.DB.Exec(`--sql
 		CREATE TABLE IF NOT EXISTS actors (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name VARCHAR(255) NOT NULL UNIQUE);
@@ -133,7 +139,8 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.DB.Exec( /*sql*/ `
+	// Media Genres MN
+	_, err = s.DB.Exec(`--sql
 		CREATE TABLE IF NOT EXISTS media_genres (
 		media_id VARCHAR(9) NOT NULL,
 		genre_id INTEGER NOT NULL,
@@ -144,7 +151,8 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	if err != nil {
 		return err
 	}
-	_, err = s.DB.Exec( /*sql*/ `
+	// Media Actors MN
+	_, err = s.DB.Exec(`--sql
 		CREATE TABLE IF NOT EXISTS media_actors (
 		media_id VARCHAR(9) NOT NULL,
 		actor_id INTEGER NOT NULL,
