@@ -18,6 +18,7 @@ import (
 )
 
 func main() {
+	checkForValidConfig()
 	ctx := context.Background()
 	if err := run(ctx, os.Stdout, os.Args); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
@@ -50,4 +51,10 @@ func setupServer(store store.Store, logger *log.Logger) *server.Server {
 	handler := handlers.NewHandler(store, movC, serC, logger)
 
 	return server.NewServer(config.Envs.Addr, logger, handler)
+}
+
+func checkForValidConfig() {
+	if !config.Envs.Valid {
+		log.Fatalln("Config is not valid! Check .env File for missing values")
+	}
 }
