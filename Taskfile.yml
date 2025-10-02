@@ -29,7 +29,7 @@ tasks:
       - cmd: mkdir {{.dir}}
         platforms: [darwin, linux]
       - cmd: powershell mkdir {{.dir}}
-        platforms: [ windows ]
+        platforms: [windows]
 
   build:
     desc: Builds the application
@@ -41,26 +41,26 @@ tasks:
         platforms: [darwin, linux]
 
   build_parser:
-        desc: Builds the application
-        deps: [clean]
-        cmds:
-          - cmd: go build -v -o {{.dir}}{{.parser_name_windows}} {{.parser_file}}
-            platforms: [windows]
-          - cmd: go build -v -o {{.dir}}{{.parser_name_unix}} {{.parser_file}}
-            platforms: [darwin, linux]
+    desc: Builds the application
+    deps: [clean]
+    cmds:
+      - cmd: go build -v -o {{.dir}}{{.parser_name_windows}} {{.parser_file}}
+        platforms: [windows]
+      - cmd: go build -v -o {{.dir}}{{.parser_name_unix}} {{.parser_file}}
+        platforms: [darwin, linux]
 
   build_all:
-        desc: Builds the application
-        deps: [clean]
-        cmds:
-          - cmd: go build -v -o {{.dir}}{{.parser_name_windows}} {{.parser_file}}
-            platforms: [windows]
-          - cmd: go build -v -o {{.dir}}{{.app_name_windows}} {{.server_file}}
-            platforms: [windows]
-          - cmd: go build -v -o {{.dir}}{{.parser_name_unix}} {{.parser_file}}
-            platforms: [darwin, linux]
-          - cmd: go build -v -o {{.dir}}{{.app_name_unix}} {{.server_file}}
-            platforms: [darwin, linux]
+    desc: Builds the application
+    deps: [clean]
+    cmds:
+      - cmd: go build -v -o {{.dir}}{{.parser_name_windows}} {{.parser_file}}
+        platforms: [windows]
+      - cmd: go build -v -o {{.dir}}{{.app_name_windows}} {{.server_file}}
+        platforms: [windows]
+      - cmd: go build -v -o {{.dir}}{{.parser_name_unix}} {{.parser_file}}
+        platforms: [darwin, linux]
+      - cmd: go build -v -o {{.dir}}{{.app_name_unix}} {{.server_file}}
+        platforms: [darwin, linux]
 
   test:
     desc: Runs tests for the application
@@ -78,7 +78,7 @@ tasks:
   clean:
     desc: Cleans up previously build binaries
     cmds:
-      - cmd: rm -rf {{.dir}}*
+      - cmd: rm -rf {{.dir}}
         platforms: [darwin, linux]
       - cmd: powershell -File ./scripts/clean.ps1
         platforms: [windows]
