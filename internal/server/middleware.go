@@ -3,9 +3,11 @@ package server
 import (
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/jhachmer/gomovie/internal/auth"
+	"github.com/jhachmer/gomovie/internal/rate"
 )
 
 type Middleware func(handlerFunc http.HandlerFunc) http.HandlerFunc
@@ -79,6 +81,24 @@ func RedirectWhenLoggedIn() Middleware {
 					return
 				}
 			}
+			handlerFunc(w, r)
+		}
+	}
+}
+
+func RateLimit(rl *rate.RateLimiter) Middleware {
+	return func(handlerFunc http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			ip := r.RemoteAddr
+			if idx := strings.LastIndex(ip, ":"); idx != -1 {
+				ip = ip[:idx]
+			}
+
+			if !rl.Allow(ip) {
+				http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
+				return
+			}
+
 			handlerFunc(w, r)
 		}
 	}
