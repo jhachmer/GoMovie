@@ -30,7 +30,7 @@ func CreateToken(username string) (string, error) {
 
 // VerifyToken verifies token retrieved from cookie for validity
 func VerifyToken(tokenString string) (*jwt.Token, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		return []byte(secretKey), nil
 	})
 	if err != nil {

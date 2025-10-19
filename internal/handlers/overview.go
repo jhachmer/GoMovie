@@ -80,7 +80,7 @@ func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 // which gets based to the database query
 //
 // Allowed search types are: Genre, Actors and Year
-// Different search types must be separated by a semi-colon
+// Different search types must be separated by a semicolon
 // Search values are separated from the search type by colons
 // Example string:
 // genre:horror,thriller;actors:Hans Albers, Keeanu Reeves
