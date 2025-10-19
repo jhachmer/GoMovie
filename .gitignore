@@ -1,6 +1,5 @@
 .env
 bin/*
-gomovie
 
 *.db
 *.csv
