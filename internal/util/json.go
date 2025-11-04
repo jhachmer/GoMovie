@@ -22,3 +22,7 @@ func Encode[T any](w http.ResponseWriter, r *http.Request, status int, v T) erro
 	}
 	return nil
 }
+
+func UnmarshalTo[T any](data []byte, v *T) error {
+	return json.Unmarshal(data, v)
+}
