@@ -23,7 +23,7 @@ func (h *Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {
 		// http.Error(w, err.Error(), http.StatusBadRequest)
 		data.Error = fmt.Errorf("error getting movie, %w", err)
 		data.Movie = &types.Movie{}
-		h.logger.Println("Hallo", err.Error())
+		h.logger.Println(err.Error())
 		renderTemplate(w, "info", data)
 		return
 	}
