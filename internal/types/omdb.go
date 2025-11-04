@@ -10,12 +10,16 @@ import (
 	"github.com/jhachmer/gomovie/internal/util"
 )
 
+type Validator interface {
+	Validate() error
+}
+
 // MediaRequest is an interface that defines the methods required for interacting with the OMDB API.
 // - SendRequest: Sends a request to the OMDB API and returns the corresponding movie details or an error.
 // - Validate: Performs validation on the request parameters to ensure they meet the requirements of the OMDB API.
 type MediaRequest interface {
 	SendRequest() (any, error)
-	Validate() error
+	Validator
 }
 
 // MovieIDRequest is a request using the movies IMDb ID
@@ -142,9 +146,6 @@ func sendAndReturn[M MediaType](r MediaRequest) (*M, error) {
 func buildRequestURL(r MediaRequest) (string, error) {
 	if err := r.Validate(); err != nil {
 		return "", fmt.Errorf("request not valid %w", err)
-	}
-	if config.Envs.OmdbApiKey == "" {
-		return "", fmt.Errorf("OMDb API is not set")
 	}
 	reqURL, err := url.Parse(fmt.Sprintf("http://www.omdbapi.com/?apikey=%s", config.Envs.OmdbApiKey))
 	if err != nil {
