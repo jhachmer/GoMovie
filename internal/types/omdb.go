@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -14,6 +15,20 @@ type Validator interface {
 	Validate() error
 }
 
+type MediaResponse interface {
+	Validator
+}
+type APIResponse struct {
+	Response string `json:"Response"`
+}
+
+func (a APIResponse) Validate() error {
+	if a.Response != "True" {
+		return fmt.Errorf("response value is false")
+	}
+	return nil
+}
+
 // MediaRequest is an interface that defines the methods required for interacting with the OMDB API.
 // - SendRequest: Sends a request to the OMDB API and returns the corresponding movie details or an error.
 // - Validate: Performs validation on the request parameters to ensure they meet the requirements of the OMDB API.
@@ -22,7 +37,7 @@ type MediaRequest interface {
 	Validator
 }
 
-// MovieIDRequest is a request using the movies IMDb ID
+// MovieIDRequest is a request using the movie IMDb ID
 type MovieIDRequest struct {
 	imdbID string
 }
@@ -52,7 +67,7 @@ func (r MovieIDRequest) Validate() error {
 	return nil
 }
 
-// MovieTitleRequest is a request using the movies title and year
+// MovieTitleRequest is a request using the movie title and year
 type MovieTitleRequest struct {
 	title string
 	year  string
@@ -193,13 +208,22 @@ func decodeMedia[M MediaType](requestURL string) (M, error) {
 	if err != nil {
 		return media, err
 	}
-
-	media, err = util.Decode[M](res)
+	defer res.Body.Close()
+	responseBody, err := io.ReadAll(res.Body)
 	if err != nil {
 		return media, err
 	}
-	if !media.checkResponse() {
-		return media, fmt.Errorf("response value is false")
+	var apiResponse APIResponse
+	err = util.UnmarshalTo[APIResponse](responseBody, &apiResponse)
+	if err != nil {
+		return media, err
+	}
+	if err := apiResponse.Validate(); err != nil {
+		return media, err
+	}
+	err = util.UnmarshalTo[M](responseBody, &media)
+	if err != nil {
+		return media, err
 	}
 	return media, nil
 }

@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"strings"
 )
 
 // Rating holds rating data, which are pairs of Source and the actual rating value
@@ -19,7 +18,6 @@ func (r Rating) String() string {
 // MediaType struct holds data acquired from omdb api
 type MediaType interface {
 	Movie | Series
-	checkResponse() bool
 }
 
 type Media interface {
@@ -52,7 +50,6 @@ type Movie struct {
 	Type       string   `json:"Type"`
 	BoxOffice  string   `json:"BoxOffice"`
 	Website    string   `json:"Website"`
-	Response   string   `json:"Response"`
 }
 
 func (m Movie) GetID() string {
@@ -69,10 +66,6 @@ func (m Movie) GetRatings() []Rating {
 
 func (m Movie) GetGenres() string {
 	return m.Genre
-}
-
-func (m Movie) checkResponse() bool {
-	return strings.ToLower(m.Response) == "true"
 }
 
 type Series struct {
@@ -94,10 +87,6 @@ func (s Series) GetRatings() []Rating {
 
 func (s Series) GetGenres() string {
 	return s.Genre
-}
-
-func (s Series) checkResponse() bool {
-	return strings.ToLower(s.Response) == "true"
 }
 
 // MovieFromID returns pointer to a new movie instance
