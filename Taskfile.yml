@@ -5,10 +5,7 @@ vars:
   dir: ./bin/
   app_name_windows: gomovie_svr.exe
   app_name_unix: gomovie_svr
-  parser_name_windows: gomovie_parser.exe
-  parser_name_unix: gomovie_parser
   server_file: ./cmd/gomovie/gomovie.go
-  parser_file: ./cmd/parse/parse_cli.go
 
 tasks:
   default:
@@ -40,14 +37,6 @@ tasks:
       - cmd: go build -v -o {{.dir}}{{.app_name_unix}} {{.server_file}}
         platforms: [darwin, linux]
 
-  build_parser:
-    desc: Builds the application
-    deps: [clean]
-    cmds:
-      - cmd: go build -v -o {{.dir}}{{.parser_name_windows}} {{.parser_file}}
-        platforms: [windows]
-      - cmd: go build -v -o {{.dir}}{{.parser_name_unix}} {{.parser_file}}
-        platforms: [darwin, linux]
 
   build_all:
     desc: Builds the application
