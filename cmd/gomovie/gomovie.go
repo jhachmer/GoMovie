@@ -32,9 +32,11 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
+	cfg := config.Envs
+
 	logger := log.New(os.Stdout, "gomovie:", log.LstdFlags)
 
-	dbStore, err := store.SetupDatabase()
+	dbStore, err := store.SetupDatabase(cfg)
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
