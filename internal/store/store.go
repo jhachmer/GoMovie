@@ -2,17 +2,15 @@ package store
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
 
-	"github.com/jhachmer/gomovie/internal/auth"
+	"github.com/jhachmer/gomovie/internal/config"
+	"github.com/jhachmer/gomovie/internal/types"
 )
 
-type SQLiteStorage struct {
-	DB *sql.DB
-}
-
 type Store interface {
+	TestDBConnection() error
+	InitDatabaseTables() error
+	CreateAdminAccount(config config.Config) error
 	Close() error
 	UserStore
 	MediaStore
@@ -20,148 +18,37 @@ type Store interface {
 	StatsStore
 }
 
-func NewStore(db *sql.DB) *SQLiteStorage {
-	return &SQLiteStorage{
-		DB: db,
-	}
+type UserStore interface {
+	CreateUser(username, password string) error
+	CheckCredentials(username, password string) (bool, error)
+	AdminLoginQuery(username string) (string, error)
+	GetUsers() (*sql.Rows, error)
+	ToggleUserActive(userID, status int) error
 }
 
-func (s *SQLiteStorage) Close() error {
-	if err := s.DB.Close(); err != nil {
-		return err
-	}
-	return nil
+type MediaStore interface {
+	CreateMovie(*types.Movie) (*types.Movie, error)
+	UpdateMovie(*types.Movie) (*types.Movie, error)
+	GetMovieByID(string) (*types.Movie, error)
+	GetAllMovies() ([]*types.MovieInfoData, error)
+
+	CreateSeries(*types.Series) (*types.Series, error)
+	UpdateSeries(*types.Series) (*types.Series, error)
+	//GetSeriesByID(string) (*types.Series, error)
+	//GetAllSeries() ([]*types.SeriesInfoData, error)
+
+	DeleteMedia(string) error
+
+	SearchMovie(types.SearchParams) ([]*types.MovieInfoData, error)
 }
 
-func (s *SQLiteStorage) TestDBConnection() {
-	err := s.DB.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("connected to DB...")
+type EntryStore interface {
+	CreateEntry(entry *types.Entry, movie *types.Movie) (*types.Entry, error)
+	GetEntries(userID string) ([]*types.Entry, error)
+	UpdateEntry(entryID, field, newValue string, watched bool) (*types.Entry, error)
+	DeleteEntry(entryID string) error
 }
 
-func (s *SQLiteStorage) CreateAdminAccount(name, pw string) error {
-	if name == "" || pw == "" {
-		log.Fatal("admin credentials are not properly set in config!")
-		return fmt.Errorf("admin credentials are not properly set in config!")
-	}
-	hashedPW, err := auth.HashPassword(pw)
-	if err != nil {
-		log.Fatal("error creating admin account")
-		return err
-	}
-	_, err = s.DB.Exec(`--sql
-	INSERT OR IGNORE INTO useraccounts (Username, PasswordHash, Active, IsAdmin)
-	VALUES (?, ?, ?, ?)
-	`, name, hashedPW, 1, 1)
-	if err != nil {
-		return fmt.Errorf("error inserting admin acc %w", err)
-	}
-	return nil
-}
-
-func (s *SQLiteStorage) InitDatabaseTables() error {
-	// User Accounts
-	_, err := s.DB.Exec(`--sql
-		CREATE TABLE IF NOT EXISTS useraccounts (
-    	UserID INTEGER PRIMARY KEY AUTOINCREMENT,
-    	Username TEXT NOT NULL UNIQUE,
-    	PasswordHash TEXT NOT NULL,
-		Active INTEGER DEFAULT 0,
-		IsAdmin INTEGER DEFAULT 0);
-		`)
-	if err != nil {
-		return err
-	}
-	// Media
-	_, err = s.DB.Exec(`--sql
-		CREATE TABLE IF NOT EXISTS media (
-		id VARCHAR(9) NOT NULL,
-		title VARCHAR(255) NOT NULL,
-		year VARCHAR(255) NOT NULL,
-    	director VARCHAR(500) NOT NULL,
-    	runtime VARCHAR(500) NOT NULL,
-    	rated VARCHAR(255) NOT NULL,
-    	released VARCHAR(500) NOT NULL,
-    	plot TEXT NOT NULL,
-    	poster VARCHAR(500) NOT NULL,
-		seasons VARCHAR(10),
-		media_type VARCHAR(255) NOT NULL,
-		
-		PRIMARY KEY (id));
-		`)
-	if err != nil {
-		return err
-	}
-	// Ratings
-	_, err = s.DB.Exec(`--sql
-		CREATE TABLE IF NOT EXISTS ratings (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		media_id VARCHAR(9) NOT NULL,
-		source VARCHAR(255) NOT NULL,
-		value VARCHAR(50) NOT NULL,
-		timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE);
-		`)
-	if err != nil {
-		return err
-	}
-	// Entries
-	_, err = s.DB.Exec(`--sql
-		CREATE TABLE IF NOT EXISTS entries (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name VARCHAR(255) NOT NULL,
-		watched INTEGER DEFAULT 0,
-		comment TEXT,
-		media_id VARCHAR(9) NOT NULL UNIQUE,
-		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE SET NULL);
-		`)
-	if err != nil {
-		return err
-	}
-	// Genres
-	_, err = s.DB.Exec(`--sql
-		CREATE TABLE IF NOT EXISTS genres (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name VARCHAR(255) NOT NULL UNIQUE);
-		`)
-	if err != nil {
-		return err
-	}
-	// Actors
-	_, err = s.DB.Exec(`--sql
-		CREATE TABLE IF NOT EXISTS actors (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name VARCHAR(255) NOT NULL UNIQUE);
-		`)
-	if err != nil {
-		return err
-	}
-	// Media Genres MN
-	_, err = s.DB.Exec(`--sql
-		CREATE TABLE IF NOT EXISTS media_genres (
-		media_id VARCHAR(9) NOT NULL,
-		genre_id INTEGER NOT NULL,
-		PRIMARY KEY (media_id, genre_id),
-		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE,
-		FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE CASCADE);
-		`)
-	if err != nil {
-		return err
-	}
-	// Media Actors MN
-	_, err = s.DB.Exec(`--sql
-		CREATE TABLE IF NOT EXISTS media_actors (
-		media_id VARCHAR(9) NOT NULL,
-		actor_id INTEGER NOT NULL,
-		PRIMARY KEY (media_id, actor_id),
-		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE,
-		FOREIGN KEY (actor_id) REFERENCES actors(id) ON DELETE CASCADE);
-		`)
-	if err != nil {
-		return err
-	}
-	return nil
+type StatsStore interface {
+	GetWatchCounts() (*types.WatchStats, error)
 }

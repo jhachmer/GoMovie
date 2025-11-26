@@ -4,27 +4,249 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"slices"
 	"strings"
 
+	"github.com/jhachmer/gomovie/internal/auth"
+	"github.com/jhachmer/gomovie/internal/config"
 	"github.com/jhachmer/gomovie/internal/types"
 	"github.com/jhachmer/gomovie/internal/util"
+	"golang.org/x/crypto/bcrypt"
 )
 
-type MediaStore interface {
-	CreateMovie(*types.Movie) (*types.Movie, error)
-	UpdateMovie(*types.Movie) (*types.Movie, error)
-	GetMovieByID(string) (*types.Movie, error)
-	GetAllMovies() ([]*types.MovieInfoData, error)
+type SQLiteStorage struct {
+	DB *sql.DB
+}
 
-	CreateSeries(*types.Series) (*types.Series, error)
-	UpdateSeries(*types.Series) (*types.Series, error)
-	//GetSeriesByID(string) (*types.Series, error)
-	//GetAllSeries() ([]*types.SeriesInfoData, error)
+func NewSQLiteStore(db *sql.DB) *SQLiteStorage {
+	return &SQLiteStorage{
+		DB: db,
+	}
+}
 
-	DeleteMedia(string) error
+func (s *SQLiteStorage) Close() error {
+	if err := s.DB.Close(); err != nil {
+		return err
+	}
+	return nil
+}
 
-	SearchMovie(types.SearchParams) ([]*types.MovieInfoData, error)
+func (s *SQLiteStorage) TestDBConnection() error {
+	err := s.DB.Ping()
+	if err != nil {
+		log.Default().Printf("Error pinging database: %v", err)
+		return err
+	}
+	log.Println("connected to DB...")
+	return nil
+}
+
+func (s *SQLiteStorage) CreateAdminAccount(config config.Config) error {
+	if config.AdminName == "" || config.AdminPW == "" {
+		log.Fatal("admin credentials are not properly set in config!")
+		return fmt.Errorf("admin credentials are not properly set in config!")
+	}
+	hashedPW, err := auth.HashPassword(config.AdminPW)
+	if err != nil {
+		log.Fatal("error creating admin account")
+		return err
+	}
+	_, err = s.DB.Exec(`--sql
+	INSERT OR IGNORE INTO useraccounts (Username, PasswordHash, Active, IsAdmin)
+	VALUES (?, ?, ?, ?)
+	`, config.AdminName, hashedPW, 1, 1)
+	if err != nil {
+		return fmt.Errorf("error inserting admin acc %w", err)
+	}
+	return nil
+}
+
+func (s *SQLiteStorage) InitDatabaseTables() error {
+	// User Accounts
+	_, err := s.DB.Exec(`--sql
+		CREATE TABLE IF NOT EXISTS useraccounts (
+    	UserID INTEGER PRIMARY KEY AUTOINCREMENT,
+    	Username TEXT NOT NULL UNIQUE,
+    	PasswordHash TEXT NOT NULL,
+		Active INTEGER DEFAULT 0,
+		IsAdmin INTEGER DEFAULT 0);
+		`)
+	if err != nil {
+		return err
+	}
+	// Media
+	_, err = s.DB.Exec(`--sql
+		CREATE TABLE IF NOT EXISTS media (
+		id VARCHAR(9) NOT NULL,
+		title VARCHAR(255) NOT NULL,
+		year VARCHAR(255) NOT NULL,
+    	director VARCHAR(500) NOT NULL,
+    	runtime VARCHAR(500) NOT NULL,
+    	rated VARCHAR(255) NOT NULL,
+    	released VARCHAR(500) NOT NULL,
+    	plot TEXT NOT NULL,
+    	poster VARCHAR(500) NOT NULL,
+		seasons VARCHAR(10),
+		media_type VARCHAR(255) NOT NULL,
+		
+		PRIMARY KEY (id));
+		`)
+	if err != nil {
+		return err
+	}
+	// Ratings
+	_, err = s.DB.Exec(`--sql
+		CREATE TABLE IF NOT EXISTS ratings (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		media_id VARCHAR(9) NOT NULL,
+		source VARCHAR(255) NOT NULL,
+		value VARCHAR(50) NOT NULL,
+		timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE);
+		`)
+	if err != nil {
+		return err
+	}
+	// Entries
+	_, err = s.DB.Exec(`--sql
+		CREATE TABLE IF NOT EXISTS entries (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name VARCHAR(255) NOT NULL,
+		watched INTEGER DEFAULT 0,
+		comment TEXT,
+		media_id VARCHAR(9) NOT NULL UNIQUE,
+		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE SET NULL);
+		`)
+	if err != nil {
+		return err
+	}
+	// Genres
+	_, err = s.DB.Exec(`--sql
+		CREATE TABLE IF NOT EXISTS genres (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name VARCHAR(255) NOT NULL UNIQUE);
+		`)
+	if err != nil {
+		return err
+	}
+	// Actors
+	_, err = s.DB.Exec(`--sql
+		CREATE TABLE IF NOT EXISTS actors (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name VARCHAR(255) NOT NULL UNIQUE);
+		`)
+	if err != nil {
+		return err
+	}
+	// Media Genres MN
+	_, err = s.DB.Exec(`--sql
+		CREATE TABLE IF NOT EXISTS media_genres (
+		media_id VARCHAR(9) NOT NULL,
+		genre_id INTEGER NOT NULL,
+		PRIMARY KEY (media_id, genre_id),
+		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE,
+		FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE CASCADE);
+		`)
+	if err != nil {
+		return err
+	}
+	// Media Actors MN
+	_, err = s.DB.Exec(`--sql
+		CREATE TABLE IF NOT EXISTS media_actors (
+		media_id VARCHAR(9) NOT NULL,
+		actor_id INTEGER NOT NULL,
+		PRIMARY KEY (media_id, actor_id),
+		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE CASCADE,
+		FOREIGN KEY (actor_id) REFERENCES actors(id) ON DELETE CASCADE);
+		`)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *SQLiteStorage) GetWatchCounts() (*types.WatchStats, error) {
+	var stats types.WatchStats
+	row := s.DB.QueryRow(`--sql
+	SELECT
+    SUM(CASE WHEN watched = 1 THEN 1 ELSE 0 END) AS watched_count,
+    SUM(CASE WHEN watched = 0 THEN 1 ELSE 0 END) AS unwatched_count,
+    COUNT(*) AS total_movies
+	FROM entries;
+	`)
+	err := row.Scan(&stats.NumOfWatched, &stats.NumOfUnwatched, &stats.TotalMovies)
+	if err != nil {
+		return nil, err
+	}
+	return &stats, nil
+}
+
+func (s *SQLiteStorage) CheckCredentials(username, password string) (bool, error) {
+	var hashedPassword string
+	var active bool
+
+	err := s.DB.QueryRow( /*sql*/ `
+		SELECT PasswordHash, Active
+		FROM UserAccounts
+		WHERE Username = ?
+		`, username).Scan(&hashedPassword, &active)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err != nil {
+		return false, nil
+	}
+	if !active {
+		return false, fmt.Errorf("user account not activated")
+	}
+	return true, nil
+}
+
+func (s *SQLiteStorage) CreateUser(username, password string) error {
+	hashedPW, err := auth.HashPassword(password)
+	if err != nil {
+		return fmt.Errorf("unable to hash pw: %w", err)
+	}
+	_, err = s.DB.Exec( /*sql*/ `
+		INSERT
+		INTO useraccounts (Username, PasswordHash)
+		VALUES (?, ?);
+	`, username, hashedPW)
+	if err != nil {
+		return fmt.Errorf("could not create useraccount: %w", err)
+	}
+	return nil
+}
+
+func (s *SQLiteStorage) AdminLoginQuery(username string) (string, error) {
+	var passwordHash string
+	err := s.DB.QueryRow("SELECT PasswordHash FROM useraccounts WHERE Username = ? AND IsAdmin = 1", username).Scan(&passwordHash)
+	if err != nil {
+		return "", err
+	}
+	return passwordHash, nil
+}
+
+func (s *SQLiteStorage) GetUsers() (*sql.Rows, error) {
+	rows, err := s.DB.Query("SELECT UserID, Username, Active FROM useraccounts")
+	if err != nil {
+		return nil, err
+	}
+	return rows, err
+}
+
+func (s *SQLiteStorage) ToggleUserActive(active, id int) error {
+	_, err := s.DB.Exec("UPDATE useraccounts SET Active = ? WHERE UserID = ?", active, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *SQLiteStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
@@ -711,4 +933,137 @@ func (s *SQLiteStorage) UpdateSeries(m *types.Series) (*types.Series, error) {
 		return nil, err
 	}
 	return m, nil
+}
+
+func (s SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, error) {
+	var exists bool
+	row := s.DB.QueryRow( /*sql*/ `
+		SELECT EXISTS(SELECT media.title
+		FROM media
+		WHERE media.id = ?);
+		`, mov.ImdbID)
+	if err := row.Scan(&exists); err != nil {
+		log.Println("movie exists:", exists)
+		return nil, err
+	} else if !exists {
+		_, err := s.CreateMovie(mov)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var watchedInt = 0
+	if e.Watched {
+		watchedInt = 1
+	}
+	res, err := s.DB.Exec( /*sql*/ `
+		INSERT INTO entries
+		(name, watched, comment, media_id)
+		VALUES (?, ?, ?, ?);
+		`, e.Name, watchedInt, e.Comment, mov.ImdbID)
+	if err != nil {
+		return nil, err
+	}
+	e.ID, err = res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	return e, nil
+}
+
+func (s SQLiteStorage) CreateEntryTx(tx *sql.Tx, e *types.Entry, mov *types.Movie) (*types.Entry, error) {
+	var exists bool
+	row := tx.QueryRow( /*sql*/ `
+		SELECT EXISTS(SELECT media.title
+		FROM media
+		WHERE media.id = ?);
+		`, mov.ImdbID)
+	if err := row.Scan(&exists); err != nil {
+		log.Println("movie exists:", exists)
+		return nil, err
+	} else if !exists {
+		_, err := s.CreateMovieTx(tx, mov)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var watchedInt = 0
+	if e.Watched {
+		watchedInt = 1
+	}
+	res, err := tx.Exec( /*sql*/ `
+		INSERT INTO entries
+		(name, watched, comment, media_id)
+		VALUES (?, ?, ?, ?);
+		`, e.Name, watchedInt, e.Comment, mov.ImdbID)
+	if err != nil {
+		return nil, err
+	}
+	e.ID, err = res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	return e, nil
+}
+
+func (s SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool) (*types.Entry, error) {
+	var watchedInt = 0
+	if watched {
+		watchedInt = 1
+	}
+	res, err := s.DB.Exec( /*sql*/ `
+		UPDATE entries
+		SET name = ?, comment = ?, watched = ?
+		WHERE media_id = ?
+	`, name, comment, watchedInt, movieId)
+	if err != nil {
+		return nil, err
+	}
+	resID, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	entry := types.Entry{
+		ID:      resID,
+		Name:    name,
+		Comment: []byte(comment),
+		Watched: watched,
+	}
+	return &entry, nil
+}
+
+func (s SQLiteStorage) DeleteEntry(imdbId string) error {
+	_, err := s.DB.Exec( /*sql*/ `
+		DELETE FROM entries
+		WHERE media_id = ?
+	`, imdbId)
+	if err != nil {
+		return fmt.Errorf("error deleting entry for movie: %s\n%w", imdbId, err)
+	}
+	return nil
+}
+
+func (s SQLiteStorage) GetEntries(id string) ([]*types.Entry, error) {
+	rows, err := s.DB.Query( /*sql*/ `
+		SELECT id, name, watched, comment
+		FROM entries
+		WHERE media_id = ?;
+		`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var entries []*types.Entry
+
+	for rows.Next() {
+		var entry types.Entry
+		if err := rows.Scan(&entry.ID, &entry.Name, &entry.Watched, &entry.Comment); err != nil {
+			return nil, err
+		}
+		entries = append(entries, &entry)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return entries, nil
 }
