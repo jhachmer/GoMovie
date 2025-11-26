@@ -145,7 +145,7 @@ func sendAndReturn[M MediaType](r MediaRequest) (*M, error) {
 	}
 	switch r.(type) {
 	case MovieIDRequest, MovieTitleRequest:
-		movie, err := decodeMedia[Movie](requestURL)
+		movie, err := GetMedia[Movie](requestURL)
 		if err != nil {
 			return nil, err
 		}
@@ -198,8 +198,9 @@ func buildRequestURL(r MediaRequest) (string, error) {
 	}
 }
 
-func decodeMedia[M MediaType](requestURL string) (M, error) {
-	var media M
+func GetMedia[MT MediaType](requestURL string) (MT, error) {
+	var media MT
+
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
 		return media, err
@@ -214,14 +215,14 @@ func decodeMedia[M MediaType](requestURL string) (M, error) {
 		return media, err
 	}
 	var apiResponse APIResponse
-	err = util.UnmarshalTo[APIResponse](responseBody, &apiResponse)
+	err = util.UnmarshalTo(responseBody, &apiResponse)
 	if err != nil {
 		return media, err
 	}
 	if err := apiResponse.Validate(); err != nil {
 		return media, err
 	}
-	err = util.UnmarshalTo[M](responseBody, &media)
+	err = util.UnmarshalTo(responseBody, &media)
 	if err != nil {
 		return media, err
 	}
