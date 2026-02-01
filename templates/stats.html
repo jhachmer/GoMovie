@@ -29,8 +29,10 @@
     </div>
 
     {{ template "error.html" . }}
+    {{ if .Error }}
+        <p>No Stats wo show. Add some Movies first!</p>
 
-    {{ if .WatchStats }}
+    {{ else if .WatchStats }}
     <div class="container">
         <div class="stats-container">
             <h2>Watch Stats</h2>

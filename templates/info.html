@@ -34,7 +34,7 @@
     </div>
 
     {{ template "error.html" .}}
-
+    {{ if not .Error }}
     <div class="container">
         <img class="movie-poster" src="{{.Movie.Poster}}" alt="Movie Poster">
         <div class="content-box">
@@ -96,6 +96,7 @@
             </div>
         </div>
     </div>
+    {{ end }}
 </body>
 
 </html>
