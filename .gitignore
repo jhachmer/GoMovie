@@ -1,6 +1,7 @@
 .env
 bin/*
 
+*.sqlite
 *.db
 *.csv
 
