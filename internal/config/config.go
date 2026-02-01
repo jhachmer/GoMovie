@@ -57,19 +57,19 @@ func initConfig() Config {
 		valid = false
 	}
 	omdbKey, err := GetEnv("OMDB_KEY", "")
-	if err != nil {
+	if err != nil || omdbKey == "" {
 		valid = false
 	}
-	jwtKey, err := GetEnv("GOLIST_JWT", "")
+	jwtKey, err := GetEnv("GOMOVIE_JWT", "uns3cure_jwt")
 	if err != nil {
 		valid = false
 	}
 	adminName, err := GetEnv("ADMIN_NAME", "")
-	if err != nil {
+	if err != nil || adminName == "" {
 		valid = false
 	}
 	adminPw, err := GetEnv("ADMIN_PW", "")
-	if err != nil {
+	if err != nil || adminPw == "" {
 		valid = false
 	}
 	dbType, err := GetEnv("DB_TYPE", "")
@@ -77,46 +77,47 @@ func initConfig() Config {
 		dbConfig = SQLiteConfig{
 			Path: "./gomovie.sqlite",
 		}
+	} else {
+		switch dbType {
+		case "postgres":
+			host, err := GetEnv("POSTGRES_HOST", "localhost")
+			if err != nil {
+				valid = false
+			}
+			port, err := GetEnv("POSTGRES_PORT", "5432")
+			if err != nil {
+				valid = false
+			}
+			user, err := GetEnv("POSTGRES_USER", "postgres")
+			if err != nil {
+				valid = false
+			}
+			password, err := GetEnv("POSTGRES_PASSWORD", "postgres")
+			if err != nil {
+				valid = false
+			}
+			database, err := GetEnv("POSTGRES_DB", "postgres")
+			if err != nil {
+				valid = false
+			}
+			dbConfig = &PostgresConfig{
+				Host:     host,
+				Port:     port,
+				Username: user,
+				Password: password,
+				Database: database,
+			}
+		case "sqlite3":
+			sqlitePath, err := GetEnv("SQLITE_PATH", "./gomovie.sqlite")
+			if err != nil {
+				valid = false
+			}
+			dbConfig = SQLiteConfig{
+				Path: sqlitePath,
+			}
+		}
 	}
-	switch dbType {
-	case "postgres":
-		host, err := GetEnv("POSTGRES_HOST", "localhost")
-		if err != nil {
-			valid = false
-		}
-		port, err := GetEnv("POSTGRES_PORT", "5432")
-		if err != nil {
-			valid = false
-		}
-		user, err := GetEnv("POSTGRES_USER", "postgres")
-		if err != nil {
-			valid = false
-		}
-		password, err := GetEnv("POSTGRES_PASSWORD", "postgres")
-		if err != nil {
-			valid = false
-		}
-		database, err := GetEnv("POSTGRES_DB", "postgres")
-		if err != nil {
-			valid = false
-		}
-		dbConfig = &PostgresConfig{
-			Host:     host,
-			Port:     port,
-			Username: user,
-			Password: password,
-			Database: database,
-		}
-	case "sqlite":
-		sqlitePath, err := GetEnv("SQLITE_PATH", "./gomovie.sqlite")
-		if err != nil {
-			valid = false
-		}
-		dbConfig = SQLiteConfig{
-			Path: sqlitePath,
-		}
-	}
-
+	log.Println(valid)
 	return Config{
 		Addr:       addr,
 		OmdbApiKey: omdbKey,
