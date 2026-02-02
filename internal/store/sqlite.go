@@ -82,8 +82,8 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 		title VARCHAR(255) NOT NULL,
 		year VARCHAR(255) NOT NULL,
     	director VARCHAR(500) NOT NULL,
-    	runtime VARCHAR(500) NOT NULL,
-    	rated VARCHAR(255) NOT NULL,
+    	runtime VARCHAR(10),
+    	rated VARCHAR(10) NOT NULL,
     	released VARCHAR(500) NOT NULL,
     	plot TEXT NOT NULL,
     	poster VARCHAR(500) NOT NULL,
@@ -116,7 +116,7 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 		name VARCHAR(255) NOT NULL,
 		watched INTEGER DEFAULT 0,
 		comment TEXT,
-		media_id VARCHAR(9) NOT NULL UNIQUE,
+		media_id VARCHAR(9) NOT NULL,
 		FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE SET NULL);
 		`)
 	if err != nil {

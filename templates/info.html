@@ -61,19 +61,19 @@
                     </ul>
                 </div>
 
-                <div class="feedback-box" data-has-entries="{{if .Entries}}true{{else}}false{{end}}">
+                <div class="feedback-box">
                     <h2>Notes</h2>
                     <ul id="feedback-list">
-                        {{range $val := .Entries}}
-                        <li id="entry-1">
+                        {{range $index, $val := .Entries}}
+                        <li id="entry-{{$index}}">
                             <b>{{ $val.Name }}
                                 {{if $val.Watched}}
                                 (&#10003)
                                 {{else}}
                                 (&#10006)
                                 {{end}}:</b> <i class="comment">"{{ printf "%s" $val.Comment }}"</i></br>
-                            <button class="edit-button" onclick="editEntry(1)">Edit</button>
-                            <button class="delete-button" onclick="deleteEntry(1)">Delete</button>
+                            <button class="edit-button" onclick="editEntry({{$index}})">Edit</button>
+                            <button class="delete-button" onclick="deleteEntry({{$index}})">Delete</button>
                         </li>
                         {{end}}
                     </ul>
