@@ -44,8 +44,7 @@ func (s *SQLiteStorage) TestDBConnection() error {
 
 func (s *SQLiteStorage) CreateAdminAccount(config config.Config) error {
 	if config.AdminName == "" || config.AdminPW == "" {
-		log.Fatal("admin credentials are not properly set in config!")
-		return fmt.Errorf("admin credentials are not properly set in config!")
+		return fmt.Errorf("admin credentials are not properly set in config")
 	}
 	hashedPW, err := auth.HashPassword(config.AdminPW)
 	if err != nil {
@@ -935,7 +934,7 @@ func (s *SQLiteStorage) UpdateSeries(m *types.Series) (*types.Series, error) {
 	return m, nil
 }
 
-func (s SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, error) {
+func (s *SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, error) {
 	var exists bool
 	row := s.DB.QueryRow( /*sql*/ `
 		SELECT EXISTS(SELECT media.title
@@ -970,7 +969,7 @@ func (s SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Ent
 	return e, nil
 }
 
-func (s SQLiteStorage) CreateEntryTx(tx *sql.Tx, e *types.Entry, mov *types.Movie) (*types.Entry, error) {
+func (s *SQLiteStorage) CreateEntryTx(tx *sql.Tx, e *types.Entry, mov *types.Movie) (*types.Entry, error) {
 	var exists bool
 	row := tx.QueryRow( /*sql*/ `
 		SELECT EXISTS(SELECT media.title
@@ -1005,7 +1004,7 @@ func (s SQLiteStorage) CreateEntryTx(tx *sql.Tx, e *types.Entry, mov *types.Movi
 	return e, nil
 }
 
-func (s SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool) (*types.Entry, error) {
+func (s *SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool) (*types.Entry, error) {
 	var watchedInt = 0
 	if watched {
 		watchedInt = 1
@@ -1031,7 +1030,7 @@ func (s SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool) 
 	return &entry, nil
 }
 
-func (s SQLiteStorage) DeleteEntry(imdbId string) error {
+func (s *SQLiteStorage) DeleteEntry(imdbId string) error {
 	_, err := s.DB.Exec( /*sql*/ `
 		DELETE FROM entries
 		WHERE media_id = ?
@@ -1042,8 +1041,8 @@ func (s SQLiteStorage) DeleteEntry(imdbId string) error {
 	return nil
 }
 
-func (s SQLiteStorage) GetEntries(id string) ([]*types.Entry, error) {
-	rows, err := s.DB.Query( /*sql*/ `
+func (s *SQLiteStorage) GetEntries(id string) ([]*types.Entry, error) {
+	rows, err := s.DB.Query(`
 		SELECT id, name, watched, comment
 		FROM entries
 		WHERE media_id = ?;

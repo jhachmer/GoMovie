@@ -11,6 +11,8 @@ import (
 	"github.com/jhachmer/gomovie/internal/util"
 )
 
+const IMDbIDPattern = `^tt\d{7,8}$`
+
 type Validator interface {
 	Validate() error
 }
@@ -52,7 +54,7 @@ func NewMovieIDRequest(imdbID string) (*MovieIDRequest, error) {
 
 // SendRequest returns movie data of movie in MovieIDRequest
 func (r MovieIDRequest) SendRequest() (any, error) {
-	return sendAndReturn[Movie](r)
+	return GetMediaFromRequest[Movie](r)
 }
 
 // Validate validates IMDB id in request
@@ -60,8 +62,7 @@ func (r MovieIDRequest) SendRequest() (any, error) {
 // - 7 or 8 digits
 // - two leading tt characters
 func (r MovieIDRequest) Validate() error {
-	var imdbIDregex = `^tt\d{7,8}$`
-	if !regexp.MustCompile(imdbIDregex).MatchString(r.imdbID) {
+	if !regexp.MustCompile(IMDbIDPattern).MatchString(r.imdbID) {
 		return fmt.Errorf("id %s is not a valid id", r.imdbID)
 	}
 	return nil
@@ -84,7 +85,7 @@ func NewMovieTitleRequest(title, year string) (*MovieTitleRequest, error) {
 
 // SendRequest returns movie data of movie in MovieTitleRequest
 func (r MovieTitleRequest) SendRequest() (any, error) {
-	return sendAndReturn[Movie](r)
+	return GetMediaFromRequest[Movie](r)
 }
 
 // Validate validates title and year in request
@@ -99,7 +100,7 @@ type SeriesIDRequest struct {
 }
 
 func (s SeriesIDRequest) SendRequest() (any, error) {
-	return sendAndReturn[Series](s)
+	return GetMediaFromRequest[Series](s)
 
 }
 
@@ -113,7 +114,7 @@ type SeriesTitleRequest struct {
 }
 
 func (s SeriesTitleRequest) SendRequest() (any, error) {
-	return sendAndReturn[Series](s)
+	return GetMediaFromRequest[Series](s)
 }
 
 func (s SeriesTitleRequest) Validate() error {
@@ -137,7 +138,7 @@ func validateID(id string) error {
 	return nil
 }
 
-func sendAndReturn[M MediaType](r MediaRequest) (*M, error) {
+func GetMediaFromRequest[M MediaType](r MediaRequest) (*M, error) {
 	var m M
 	requestURL, err := buildRequestURL(r)
 	if err != nil {
@@ -145,7 +146,7 @@ func sendAndReturn[M MediaType](r MediaRequest) (*M, error) {
 	}
 	switch r.(type) {
 	case MovieIDRequest, MovieTitleRequest:
-		movie, err := GetMedia[Movie](requestURL)
+		movie, err := UnmarshalResponse[Movie](requestURL)
 		if err != nil {
 			return nil, err
 		}
@@ -198,7 +199,7 @@ func buildRequestURL(r MediaRequest) (string, error) {
 	}
 }
 
-func GetMedia[MT MediaType](requestURL string) (MT, error) {
+func UnmarshalResponse[MT MediaType](requestURL string) (MT, error) {
 	var media MT
 
 	req, err := http.NewRequest("GET", requestURL, nil)
