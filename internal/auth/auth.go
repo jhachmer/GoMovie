@@ -45,7 +45,7 @@ func VerifyToken(tokenString string) (*jwt.Token, error) {
 func HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", fmt.Errorf("failed hashinf password: %w", err)
+		return "", fmt.Errorf("failed hashing password: %w", err)
 	}
 	return string(hashedPassword), nil
 }
