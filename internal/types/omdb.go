@@ -229,3 +229,24 @@ func UnmarshalResponse[MT MediaType](requestURL string) (MT, error) {
 	}
 	return media, nil
 }
+
+type SearchQueryRequest struct {
+	ImdbID string
+	Title  string
+	Year   string
+	Type   string
+}
+
+type SearchResultMedia struct {
+	Title  string `json:"Title"`
+	Year   string `json:"Year"`
+	ImdbID string `json:"imdbID"`
+	Type   string `json:"Type"`
+	Poster string `json:"Poster"`
+}
+
+type SearchResults struct {
+	Search       []SearchResultMedia `json:"Search"`
+	TotalResults string              `json:"totalResults"`
+	Response     string              `json:"Response"`
+}
