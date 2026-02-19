@@ -232,10 +232,9 @@ func UnmarshalResponse[MT MediaType](requestURL string) (MT, error) {
 }
 
 type SearchQueryRequest struct {
-	ImdbID string
-	Title  string
-	Year   string
-	Type   string
+	Title string
+	Year  string
+	Type  string
 }
 
 type SearchResultMedia struct {
@@ -250,4 +249,38 @@ type SearchResults struct {
 	Search       []SearchResultMedia `json:"Search"`
 	TotalResults string              `json:"totalResults"`
 	Response     string              `json:"Response"`
+}
+
+func QueryOMDb(query SearchQueryRequest) (*SearchResults, error) {
+	reqURL, err := url.Parse(fmt.Sprintf("%s%s", OMDbBaseURL, config.Envs.OmdbApiKey))
+	if err != nil {
+		return nil, err
+	}
+	values := reqURL.Query()
+	values.Add("s", query.Title)
+	values.Add("y", query.Year)
+	values.Add("type", query.Type)
+	reqURL.RawQuery = values.Encode()
+	req, err := http.NewRequest("GET", reqURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("OMDb API returned status %d", res.StatusCode)
+	}
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	var searchResponse SearchResults
+	err = util.UnmarshalTo(body, &searchResponse)
+	if err != nil {
+		return nil, err
+	}
+	return &searchResponse, nil
 }
