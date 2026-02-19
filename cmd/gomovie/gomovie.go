@@ -30,7 +30,6 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 	_ = w
 	_ = args
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
-	defer cancel()
 
 	cfg := config.Envs
 
@@ -38,12 +37,14 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 
 	dbStore, err := store.SetupDatabase(cfg)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		cancel()
 		os.Exit(1)
 	}
 
 	svr := setupServer(dbStore, logger)
 	err = svr.Serve(ctx)
+	cancel()
 	return err
 }
 
