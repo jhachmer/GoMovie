@@ -11,6 +11,7 @@ import (
 	"github.com/jhachmer/gomovie/internal/util"
 )
 
+const OMDbBaseURL = "https://www.omdbapi.com/?apikey="
 const IMDbIDPattern = `^tt\d{7,8}$`
 
 type Validator interface {
@@ -163,7 +164,7 @@ func buildRequestURL(r MediaRequest) (string, error) {
 	if err := r.Validate(); err != nil {
 		return "", fmt.Errorf("request not valid %w", err)
 	}
-	reqURL, err := url.Parse(fmt.Sprintf("http://www.omdbapi.com/?apikey=%s", config.Envs.OmdbApiKey))
+	reqURL, err := url.Parse(fmt.Sprintf("%s%s", OMDbBaseURL, config.Envs.OmdbApiKey))
 	if err != nil {
 		return "", err
 	}
