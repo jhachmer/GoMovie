@@ -253,14 +253,21 @@ type SearchResults struct {
 }
 
 func QueryOMDb(query SearchQueryRequest) (*SearchResults, error) {
+	if query.Title == "" {
+		return nil, fmt.Errorf("a title is needed when querying OMDb api")
+	}
 	reqURL, err := url.Parse(fmt.Sprintf("%s%s", OMDbBaseURL, config.Envs.OmdbApiKey))
 	if err != nil {
 		return nil, err
 	}
 	values := reqURL.Query()
 	values.Add("s", query.Title)
-	values.Add("y", query.Year)
-	values.Add("type", query.Type)
+	if query.Year != "" {
+		values.Add("y", query.Year)
+	}
+	if query.Type != "" {
+		values.Add("type", query.Type)
+	}
 	reqURL.RawQuery = values.Encode()
 	req, err := http.NewRequest("GET", reqURL.String(), nil)
 	if err != nil {
