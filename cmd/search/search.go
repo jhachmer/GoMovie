@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"regexp"
 
 	"github.com/jhachmer/gomovie/internal/types"
@@ -42,7 +43,8 @@ func main() {
 		fmt.Printf("  Country: %s\n", mov.Country)
 		fmt.Printf("  Rating (Votes): %s (%s)\n", mov.ImdbRating, mov.ImdbVotes)
 		fmt.Printf("  Plot: %s\n", mov.Plot)
-	} else {
+		os.Exit(0)
+	} else if title != "" {
 		searchQuery := types.SearchQueryRequest{
 			Title: title,
 			Year:  year,
@@ -54,5 +56,8 @@ func main() {
 			log.Fatal(err)
 		}
 		util.PrintJSON(result)
+		os.Exit(0)
 	}
+	log.Println("please provide either an IMDb ID or a title to search for")
+	os.Exit(1)
 }
