@@ -3,7 +3,7 @@ package types
 import (
 	"fmt"
 	"io"
-	"log/slog"
+	"log"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -273,7 +273,7 @@ func QueryOMDb(query SearchQueryRequest) (*SearchResults, error) {
 	if err != nil {
 		return nil, err
 	}
-	slog.Info("querying omdb api", "url", reqURL.String())
+	log.Println("querying omdb api:", reqURL.String())
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
