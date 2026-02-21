@@ -18,6 +18,7 @@ import (
 )
 
 func main() {
+	log.SetPrefix("[gomovie-webapp] ")
 	checkForValidConfig()
 	ctx := context.Background()
 	if err := run(ctx, os.Stdout, os.Args); err != nil {

@@ -13,6 +13,7 @@ import (
 const IMDbIDPattern = `^tt\d{7,8}$`
 
 func main() {
+	log.SetPrefix("[gomovie-search] ")
 	var imdbID string
 	var title string
 	var year string
@@ -22,19 +23,16 @@ func main() {
 	flag.StringVar(&title, "title", "", "movie title")
 	flag.StringVar(&year, "year", "", "release year")
 	flag.StringVar(&searchType, "type", "", "search type")
-
 	flag.Parse()
 
 	if imdbID != "" {
 		if !regexp.MustCompile(IMDbIDPattern).MatchString(imdbID) {
 			log.Fatalf("id %s is not a valid id", imdbID)
 		}
-
 		mov, err := types.MovieFromID(imdbID)
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		fmt.Printf("%s (%s) [%s]\n", mov.Title, mov.Year, mov.ImdbID)
 		fmt.Printf("  Director: %s\n", mov.Director)
 		fmt.Printf("  Writer: %s\n", mov.Writer)
