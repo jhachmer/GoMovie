@@ -27,7 +27,10 @@ func UnmarshalTo[T any](data []byte, v *T) error {
 	return json.Unmarshal(data, v)
 }
 
-func PrintJSON(obj interface{}) {
-	bytes, _ := json.MarshalIndent(obj, "\t", "\t")
-	fmt.Println(string(bytes))
+func JSONString(obj interface{}) (string, error) {
+	bytes, err := json.MarshalIndent(obj, "\t", "\t")
+	if err != nil {
+		return "", fmt.Errorf("json marshal err: %w", err)
+	}
+	return string(bytes), nil
 }

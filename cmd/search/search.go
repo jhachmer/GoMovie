@@ -55,7 +55,11 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		util.PrintJSON(result)
+		jsonString, err := util.JSONString(result)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(jsonString)
 		os.Exit(0)
 	}
 	log.Println("please provide either an IMDb ID or a title to search for")
