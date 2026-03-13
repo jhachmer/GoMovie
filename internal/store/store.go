@@ -3,8 +3,8 @@ package store
 import (
 	"database/sql"
 
+	"github.com/jhachmer/gomovie/internal/api"
 	"github.com/jhachmer/gomovie/internal/config"
-	"github.com/jhachmer/gomovie/internal/types"
 )
 
 type Store interface {
@@ -27,28 +27,28 @@ type UserStore interface {
 }
 
 type MediaStore interface {
-	CreateMovie(*types.Movie) (*types.Movie, error)
-	UpdateMovie(*types.Movie) (*types.Movie, error)
-	GetMovieByID(string) (*types.Movie, error)
-	GetAllMovies() ([]*types.MovieInfoData, error)
+	CreateMovie(*api.Movie) (*api.Movie, error)
+	UpdateMovie(*api.Movie) (*api.Movie, error)
+	GetMovieByID(string) (*api.Movie, error)
+	GetAllMovies() ([]*api.MovieInfoData, error)
 
-	CreateSeries(*types.Series) (*types.Series, error)
-	UpdateSeries(*types.Series) (*types.Series, error)
+	CreateSeries(*api.Series) (*api.Series, error)
+	UpdateSeries(*api.Series) (*api.Series, error)
 	//GetSeriesByID(string) (*types.Series, error)
 	//GetAllSeries() ([]*types.SeriesInfoData, error)
 
 	DeleteMedia(string) error
 
-	SearchMovie(types.SearchParams) ([]*types.MovieInfoData, error)
+	SearchMovie(api.SearchParams) ([]*api.MovieInfoData, error)
 }
 
 type EntryStore interface {
-	CreateEntry(entry *types.Entry, movie *types.Movie) (*types.Entry, error)
-	GetEntries(userID string) ([]*types.Entry, error)
-	UpdateEntry(entryID, field, newValue string, watched bool) (*types.Entry, error)
+	CreateEntry(entry *api.Entry, movie *api.Movie) (*api.Entry, error)
+	GetEntries(userID string) ([]*api.Entry, error)
+	UpdateEntry(entryID, field, newValue string, watched bool) (*api.Entry, error)
 	DeleteEntry(entryID string) error
 }
 
 type StatsStore interface {
-	GetWatchCounts() (*types.WatchStats, error)
+	GetWatchCounts() (*api.WatchStats, error)
 }

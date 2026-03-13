@@ -7,13 +7,14 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/jhachmer/gomovie/internal/types"
+	"github.com/jhachmer/gomovie/internal/api"
 	"github.com/jhachmer/gomovie/internal/util"
 )
 
 const IMDbIDPattern = `^tt\d{7,8}$`
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.SetPrefix("[gomovie-search] ")
 	var imdbID string
 	var title string
@@ -30,7 +31,7 @@ func main() {
 		if !regexp.MustCompile(IMDbIDPattern).MatchString(imdbID) {
 			log.Fatalf("id %s is not a valid id", imdbID)
 		}
-		mov, err := types.MovieFromID(imdbID)
+		mov, err := api.MovieFromID(imdbID)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -45,13 +46,13 @@ func main() {
 		fmt.Printf("  Plot: %s\n", mov.Plot)
 		os.Exit(0)
 	} else if title != "" {
-		searchQuery := types.SearchQueryRequest{
+		searchQuery := api.SearchQueryRequest{
 			Title: title,
 			Year:  year,
 			Type:  searchType,
 		}
 		fmt.Printf("Search Query: %v\n", searchQuery)
-		result, err := types.QueryOMDb(searchQuery)
+		result, err := api.QueryOMDb(searchQuery)
 		if err != nil {
 			log.Fatal(err)
 		}

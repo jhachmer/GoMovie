@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/jhachmer/gomovie/internal/types"
+	"github.com/jhachmer/gomovie/internal/api"
 )
 
 func Test_parseSearchQuery(t *testing.T) {
@@ -14,55 +14,55 @@ func Test_parseSearchQuery(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    types.SearchParams
+		want    api.SearchParams
 		wantErr bool
 	}{
 		{
 			name: "valid string",
 			args: args{query: "genre:horror,thriller;actors:Hans Albers,Keeanu Reeves"},
-			want: types.SearchParams{
+			want: api.SearchParams{
 				Genres: []string{"horror", "thriller"},
 				Actors: []string{"Hans Albers", "Keeanu Reeves"},
-				Years:  types.YearSearch{},
+				Years:  api.YearSearch{},
 			},
 			wantErr: false,
 		},
 		{
 			name:    "invalid search type",
 			args:    args{query: "invalid:horror"},
-			want:    types.SearchParams{},
+			want:    api.SearchParams{},
 			wantErr: true,
 		},
 		{
 			name:    "missing colon",
 			args:    args{query: "genre horror"},
-			want:    types.SearchParams{},
+			want:    api.SearchParams{},
 			wantErr: true,
 		},
 		{
 			name: "valid year range",
 			args: args{query: "year:1990,2000"},
-			want: types.SearchParams{
+			want: api.SearchParams{
 				Genres: nil,
 				Actors: nil,
-				Years:  types.YearSearch{StartYear: "1990", EndYear: "2000"},
+				Years:  api.YearSearch{StartYear: "1990", EndYear: "2000"},
 			},
 			wantErr: false,
 		},
 		{
 			name: "valid mixed types",
 			args: args{query: "genre:horror;actors:Hans Albers;year:1990,2000"},
-			want: types.SearchParams{
+			want: api.SearchParams{
 				Genres: []string{"horror"},
 				Actors: []string{"Hans Albers"},
-				Years:  types.YearSearch{StartYear: "1990", EndYear: "2000"},
+				Years:  api.YearSearch{StartYear: "1990", EndYear: "2000"},
 			},
 			wantErr: false,
 		},
 		{
 			name:    "empty query",
 			args:    args{query: ""},
-			want:    types.SearchParams{},
+			want:    api.SearchParams{},
 			wantErr: true,
 		},
 	}

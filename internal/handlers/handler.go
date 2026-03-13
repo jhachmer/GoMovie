@@ -5,9 +5,9 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/jhachmer/gomovie/internal/api"
 	"github.com/jhachmer/gomovie/internal/cache"
 	"github.com/jhachmer/gomovie/internal/store"
-	"github.com/jhachmer/gomovie/internal/types"
 )
 
 var validPath = regexp.MustCompile(`^tt\d{7,8}$`)
@@ -17,11 +17,11 @@ var validPath = regexp.MustCompile(`^tt\d{7,8}$`)
 type Handler struct {
 	logger   *log.Logger
 	store    store.Store
-	movCache *cache.Cache[string, *types.Movie]
-	serCache *cache.Cache[string, *types.Series]
+	movCache *cache.Cache[string, *api.Movie]
+	serCache *cache.Cache[string, *api.Series]
 }
 
-func NewHandler(store store.Store, movC *cache.Cache[string, *types.Movie], serC *cache.Cache[string, *types.Series], logger *log.Logger) *Handler {
+func NewHandler(store store.Store, movC *cache.Cache[string, *api.Movie], serC *cache.Cache[string, *api.Series], logger *log.Logger) *Handler {
 	return &Handler{
 		store:    store,
 		movCache: movC,
@@ -36,7 +36,7 @@ func (h *Handler) Close() {
 	h.store.Close()
 }
 
-func (h *Handler) getMovie(id string) (*types.Movie, error) {
+func (h *Handler) getMovie(id string) (*api.Movie, error) {
 	if mov, ok := h.movCache.Get(id); ok {
 		h.logger.Printf("got movie with id %s from cache", id)
 		return mov, nil
@@ -46,7 +46,7 @@ func (h *Handler) getMovie(id string) (*types.Movie, error) {
 		h.movCache.Set(id, mov)
 		return mov, nil
 	}
-	if mov, err := types.MovieFromID(id); err == nil {
+	if mov, err := api.MovieFromID(id); err == nil {
 		h.logger.Printf("got movie with id %s from api", id)
 		h.movCache.Set(id, mov)
 		return mov, nil

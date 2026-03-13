@@ -8,9 +8,9 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/jhachmer/gomovie/internal/api"
 	"github.com/jhachmer/gomovie/internal/auth"
 	"github.com/jhachmer/gomovie/internal/config"
-	"github.com/jhachmer/gomovie/internal/types"
 	"github.com/jhachmer/gomovie/internal/util"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -167,8 +167,8 @@ func (p *PostgresStorage) InitDatabaseTables() error {
 	return nil
 }
 
-func (p *PostgresStorage) GetWatchCounts() (*types.WatchStats, error) {
-	var stats types.WatchStats
+func (p *PostgresStorage) GetWatchCounts() (*api.WatchStats, error) {
+	var stats api.WatchStats
 	row := p.DB.QueryRow(`--sql
 	SELECT
     SUM(CASE WHEN watched = 1 THEN 1 ELSE 0 END) AS watched_count,
@@ -249,7 +249,7 @@ func (p *PostgresStorage) ToggleUserActive(active, id int) error {
 	return nil
 }
 
-func (p *PostgresStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
+func (p *PostgresStorage) CreateMovie(m *api.Movie) (*api.Movie, error) {
 	_, err := p.DB.Exec( /*sql*/ `
 		INSERT INTO media (id, title, year, director, runtime, rated, released, plot, poster, media_type)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
@@ -272,7 +272,7 @@ func (p *PostgresStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
 	return m, nil
 }
 
-func (p *PostgresStorage) CreateMovieTx(tx *sql.Tx, m *types.Movie) (*types.Movie, error) {
+func (p *PostgresStorage) CreateMovieTx(tx *sql.Tx, m *api.Movie) (*api.Movie, error) {
 	_, err := tx.Exec( /*sql*/ `
 		INSERT INTO media (id, title, year, director, runtime, rated, released, plot, poster, media_type)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
@@ -295,7 +295,7 @@ func (p *PostgresStorage) CreateMovieTx(tx *sql.Tx, m *types.Movie) (*types.Movi
 	return m, nil
 }
 
-func (p *PostgresStorage) UpdateMovie(m *types.Movie) (*types.Movie, error) {
+func (p *PostgresStorage) UpdateMovie(m *api.Movie) (*api.Movie, error) {
 	_, err := p.DB.Exec(`--sql
 	UPDATE media
 	SET title = ?, year = ?, director = ?, runtime = ?, rated = ?, released = ?, plot = ?, poster = ?
@@ -329,7 +329,7 @@ func (p *PostgresStorage) DeleteMedia(imdbId string) error {
 	return nil
 }
 
-func (p *PostgresStorage) updateRatings(m types.Media) error {
+func (p *PostgresStorage) updateRatings(m api.Media) error {
 	for _, rating := range m.GetRatings() {
 		_, err := p.DB.Exec( /*sql*/ `
 			UPDATE ratings
@@ -343,7 +343,7 @@ func (p *PostgresStorage) updateRatings(m types.Media) error {
 	return nil
 }
 
-func (p *PostgresStorage) updateGenres(m types.Media) error {
+func (p *PostgresStorage) updateGenres(m api.Media) error {
 	genres := util.SplitIMDBString(m.GetGenres())
 
 	rows, err := p.DB.Query( /*sql*/ `
@@ -410,7 +410,7 @@ func (p *PostgresStorage) updateGenres(m types.Media) error {
 	return nil
 }
 
-func (p *PostgresStorage) updateActors(m types.Media) error {
+func (p *PostgresStorage) updateActors(m api.Media) error {
 	actors := util.SplitIMDBString(m.GetActors())
 
 	rows, err := p.DB.Query( /*sql*/ `
@@ -477,8 +477,8 @@ func (p *PostgresStorage) updateActors(m types.Media) error {
 	return nil
 }
 
-func (p *PostgresStorage) GetMovieByID(movieID string) (*types.Movie, error) {
-	var movie types.Movie
+func (p *PostgresStorage) GetMovieByID(movieID string) (*api.Movie, error) {
+	var movie api.Movie
 
 	err := p.DB.QueryRow( /*sql*/ `
         SELECT
@@ -540,9 +540,9 @@ func (p *PostgresStorage) GetMovieByID(movieID string) (*types.Movie, error) {
 	}
 	defer rows.Close()
 
-	var ratings []types.Rating
+	var ratings []api.Rating
 	for rows.Next() {
-		var rating types.Rating
+		var rating api.Rating
 		if err := rows.Scan(&rating.Source, &rating.Value); err != nil {
 			return nil, err
 		}
@@ -553,8 +553,8 @@ func (p *PostgresStorage) GetMovieByID(movieID string) (*types.Movie, error) {
 	return &movie, nil
 }
 
-func (p *PostgresStorage) GetAllMovies() ([]*types.MovieInfoData, error) {
-	var movies []*types.MovieInfoData
+func (p *PostgresStorage) GetAllMovies() ([]*api.MovieInfoData, error) {
+	var movies []*api.MovieInfoData
 	rows, err := p.DB.Query( /*sql*/ `
         SELECT id
         FROM media
@@ -582,13 +582,13 @@ func (p *PostgresStorage) GetAllMovies() ([]*types.MovieInfoData, error) {
 		if err != nil {
 			return nil, err
 		}
-		data := types.MovieInfoData{Movie: movie, Entry: entries}
+		data := api.MovieInfoData{Movie: movie, Entry: entries}
 		movies = append(movies, &data)
 	}
 	return movies, nil
 }
 
-func (p *PostgresStorage) SearchMovie(params types.SearchParams) ([]*types.MovieInfoData, error) {
+func (p *PostgresStorage) SearchMovie(params api.SearchParams) ([]*api.MovieInfoData, error) {
 	filters := []string{}
 	args := []any{}
 
@@ -634,7 +634,7 @@ func (p *PostgresStorage) SearchMovie(params types.SearchParams) ([]*types.Movie
 	}
 	defer rows.Close()
 
-	results := []*types.MovieInfoData{}
+	results := []*api.MovieInfoData{}
 	for rows.Next() {
 		var id string
 		if err := rows.Scan(&id); err != nil {
@@ -648,7 +648,7 @@ func (p *PostgresStorage) SearchMovie(params types.SearchParams) ([]*types.Movie
 		if err != nil {
 			return nil, err
 		}
-		results = append(results, &types.MovieInfoData{Movie: mov, Entry: entry})
+		results = append(results, &api.MovieInfoData{Movie: mov, Entry: entry})
 	}
 
 	if err := rows.Err(); err != nil {
@@ -658,7 +658,7 @@ func (p *PostgresStorage) SearchMovie(params types.SearchParams) ([]*types.Movie
 	return results, nil
 }
 
-func (p *PostgresStorage) createMovieRatings(m *types.Movie) error {
+func (p *PostgresStorage) createMovieRatings(m *api.Movie) error {
 	for _, rating := range m.Ratings {
 		_, err := p.DB.Exec( /*sql*/ `
 			INSERT INTO ratings (media_id, source, value)
@@ -671,7 +671,7 @@ func (p *PostgresStorage) createMovieRatings(m *types.Movie) error {
 	return nil
 }
 
-func (p *PostgresStorage) createMovieRatingsTx(tx *sql.Tx, m *types.Movie) error {
+func (p *PostgresStorage) createMovieRatingsTx(tx *sql.Tx, m *api.Movie) error {
 	for _, rating := range m.Ratings {
 		_, err := tx.Exec( /*sql*/ `
 			INSERT INTO ratings (media_id, source, value)
@@ -684,7 +684,7 @@ func (p *PostgresStorage) createMovieRatingsTx(tx *sql.Tx, m *types.Movie) error
 	return nil
 }
 
-func (p *PostgresStorage) createMovieGenres(m *types.Movie) error {
+func (p *PostgresStorage) createMovieGenres(m *api.Movie) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
 		var genreID int64
@@ -716,7 +716,7 @@ func (p *PostgresStorage) createMovieGenres(m *types.Movie) error {
 	return nil
 }
 
-func (p *PostgresStorage) createMovieGenresTx(tx *sql.Tx, m *types.Movie) error {
+func (p *PostgresStorage) createMovieGenresTx(tx *sql.Tx, m *api.Movie) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
 		var genreID int64
@@ -747,7 +747,7 @@ func (p *PostgresStorage) createMovieGenresTx(tx *sql.Tx, m *types.Movie) error 
 	return nil
 }
 
-func (p *PostgresStorage) createMovieActors(m *types.Movie) error {
+func (p *PostgresStorage) createMovieActors(m *api.Movie) error {
 	actors := util.SplitIMDBString(m.Actors)
 	for _, actor := range actors {
 		var actorID int64
@@ -779,7 +779,7 @@ func (p *PostgresStorage) createMovieActors(m *types.Movie) error {
 	return nil
 }
 
-func (p *PostgresStorage) createActorsTx(tx *sql.Tx, m *types.Movie) error {
+func (p *PostgresStorage) createActorsTx(tx *sql.Tx, m *api.Movie) error {
 	actors := util.SplitIMDBString(m.Actors)
 	for _, actor := range actors {
 		var actorID int64
@@ -811,7 +811,7 @@ func (p *PostgresStorage) createActorsTx(tx *sql.Tx, m *types.Movie) error {
 	return nil
 }
 
-func (p *PostgresStorage) CreateSeries(m *types.Series) (*types.Series, error) {
+func (p *PostgresStorage) CreateSeries(m *api.Series) (*api.Series, error) {
 	_, err := p.DB.Exec( /*sql*/ `
 		INSERT INTO media (id, title, year, director, runtime, rated, released, plot, poster, media_type)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
@@ -834,7 +834,7 @@ func (p *PostgresStorage) CreateSeries(m *types.Series) (*types.Series, error) {
 	return m, nil
 }
 
-func (p *PostgresStorage) createSeriesRatings(m *types.Series) error {
+func (p *PostgresStorage) createSeriesRatings(m *api.Series) error {
 	for _, rating := range m.Ratings {
 		_, err := p.DB.Exec( /*sql*/ `
 			INSERT INTO ratings (media_id, source, value)
@@ -847,7 +847,7 @@ func (p *PostgresStorage) createSeriesRatings(m *types.Series) error {
 	return nil
 }
 
-func (p *PostgresStorage) createSeriesGenres(m *types.Series) error {
+func (p *PostgresStorage) createSeriesGenres(m *api.Series) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
 		var genreID int64
@@ -879,7 +879,7 @@ func (p *PostgresStorage) createSeriesGenres(m *types.Series) error {
 	return nil
 }
 
-func (p *PostgresStorage) createSeriesActors(m *types.Series) error {
+func (p *PostgresStorage) createSeriesActors(m *api.Series) error {
 	actors := util.SplitIMDBString(m.Actors)
 	for _, actor := range actors {
 		var actorID int64
@@ -911,7 +911,7 @@ func (p *PostgresStorage) createSeriesActors(m *types.Series) error {
 	return nil
 }
 
-func (p *PostgresStorage) UpdateSeries(m *types.Series) (*types.Series, error) {
+func (p *PostgresStorage) UpdateSeries(m *api.Series) (*api.Series, error) {
 	_, err := p.DB.Exec( /*sql*/ `
 	UPDATE media
 	SET title = ?, year = ?, director = ?, runtime = ?, rated = ?, released = ?, plot = ?, poster = ?
@@ -935,7 +935,7 @@ func (p *PostgresStorage) UpdateSeries(m *types.Series) (*types.Series, error) {
 	return m, nil
 }
 
-func (p PostgresStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, error) {
+func (p PostgresStorage) CreateEntry(e *api.Entry, mov *api.Movie) (*api.Entry, error) {
 	var exists bool
 	row := p.DB.QueryRow( /*sql*/ `
 		SELECT EXISTS(SELECT media.title
@@ -970,7 +970,7 @@ func (p PostgresStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.E
 	return e, nil
 }
 
-func (p PostgresStorage) CreateEntryTx(tx *sql.Tx, e *types.Entry, mov *types.Movie) (*types.Entry, error) {
+func (p PostgresStorage) CreateEntryTx(tx *sql.Tx, e *api.Entry, mov *api.Movie) (*api.Entry, error) {
 	var exists bool
 	row := tx.QueryRow( /*sql*/ `
 		SELECT EXISTS(SELECT media.title
@@ -1005,7 +1005,7 @@ func (p PostgresStorage) CreateEntryTx(tx *sql.Tx, e *types.Entry, mov *types.Mo
 	return e, nil
 }
 
-func (p PostgresStorage) UpdateEntry(movieId, name, comment string, watched bool) (*types.Entry, error) {
+func (p PostgresStorage) UpdateEntry(movieId, name, comment string, watched bool) (*api.Entry, error) {
 	var watchedInt = 0
 	if watched {
 		watchedInt = 1
@@ -1022,7 +1022,7 @@ func (p PostgresStorage) UpdateEntry(movieId, name, comment string, watched bool
 	if err != nil {
 		return nil, err
 	}
-	entry := types.Entry{
+	entry := api.Entry{
 		ID:      resID,
 		Name:    name,
 		Comment: []byte(comment),
@@ -1042,7 +1042,7 @@ func (p PostgresStorage) DeleteEntry(imdbId string) error {
 	return nil
 }
 
-func (p PostgresStorage) GetEntries(id string) ([]*types.Entry, error) {
+func (p PostgresStorage) GetEntries(id string) ([]*api.Entry, error) {
 	rows, err := p.DB.Query( /*sql*/ `
 		SELECT id, name, watched, comment
 		FROM entries
@@ -1053,10 +1053,10 @@ func (p PostgresStorage) GetEntries(id string) ([]*types.Entry, error) {
 	}
 	defer rows.Close()
 
-	var entries []*types.Entry
+	var entries []*api.Entry
 
 	for rows.Next() {
-		var entry types.Entry
+		var entry api.Entry
 		if err := rows.Scan(&entry.ID, &entry.Name, &entry.Watched, &entry.Comment); err != nil {
 			return nil, err
 		}

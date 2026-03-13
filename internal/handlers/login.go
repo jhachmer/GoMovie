@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jhachmer/gomovie/internal/api"
 	"github.com/jhachmer/gomovie/internal/auth"
-	"github.com/jhachmer/gomovie/internal/types"
 )
 
 func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,12 +25,12 @@ func (h *Handler) CheckLoginHandler(w http.ResponseWriter, r *http.Request) {
 	ok, err = h.store.CheckCredentials(username, password)
 	if err != nil {
 		//http.Error(w, "error while validating user", http.StatusInternalServerError)
-		data := types.LoginData{Error: fmt.Errorf("error while logging in: %w", err)}
+		data := api.LoginData{Error: fmt.Errorf("error while logging in: %w", err)}
 		renderTemplate(w, "index", data)
 		return
 	}
 	if !ok {
-		data := types.LoginData{Error: fmt.Errorf("invalid credentials")}
+		data := api.LoginData{Error: fmt.Errorf("invalid credentials")}
 		renderTemplate(w, "index", data)
 		return
 	}
@@ -67,7 +67,7 @@ func (h *Handler) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	err = h.store.CreateUser(username, password)
 	if err != nil {
-		data := types.LoginData{Error: fmt.Errorf("error creating user %w", err)}
+		data := api.LoginData{Error: fmt.Errorf("error creating user %w", err)}
 		renderTemplate(w, "register", data)
 		return
 	}

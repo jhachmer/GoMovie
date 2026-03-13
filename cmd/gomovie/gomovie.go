@@ -9,16 +9,18 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/jhachmer/gomovie/internal/api"
 	"github.com/jhachmer/gomovie/internal/cache"
 	"github.com/jhachmer/gomovie/internal/config"
 	"github.com/jhachmer/gomovie/internal/handlers"
 	"github.com/jhachmer/gomovie/internal/server"
 	"github.com/jhachmer/gomovie/internal/store"
-	"github.com/jhachmer/gomovie/internal/types"
 )
 
 func main() {
 	log.SetPrefix("[gomovie-webapp] ")
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	checkForValidConfig()
 	ctx := context.Background()
 	if err := run(ctx, os.Stdout, os.Args); err != nil {
@@ -50,8 +52,8 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 }
 
 func setupServer(store store.Store, logger *log.Logger) *server.Server {
-	movC := cache.NewCache[string, *types.Movie](time.Second*15, time.Minute*60, nil)
-	serC := cache.NewCache[string, *types.Series](time.Second*15, time.Minute*60, nil)
+	movC := cache.NewCache[string, *api.Movie](time.Second*15, time.Minute*60, nil)
+	serC := cache.NewCache[string, *api.Series](time.Second*15, time.Minute*60, nil)
 	handler := handlers.NewHandler(store, movC, serC, logger)
 
 	return server.NewServer(config.Envs.Addr, logger, handler)

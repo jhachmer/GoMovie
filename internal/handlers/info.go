@@ -6,11 +6,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jhachmer/gomovie/internal/types"
+	"github.com/jhachmer/gomovie/internal/api"
 )
 
 func (h *Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {
-	data := types.MovieInfoPage{}
+	data := api.MovieInfoPage{}
 	id := r.PathValue("imdb")
 	if !validPath.MatchString(id) {
 		http.Error(w, "not a valid id", http.StatusBadRequest)
@@ -22,7 +22,7 @@ func (h *Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// http.Error(w, err.Error(), http.StatusBadRequest)
 		data.Error = fmt.Errorf("error getting movie, %w", err)
-		data.Movie = &types.Movie{}
+		data.Movie = &api.Movie{}
 		h.logger.Println(err.Error())
 		renderTemplate(w, "info", data)
 		return
@@ -41,7 +41,7 @@ func (h *Handler) InfoIDHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateMovieHandler(w http.ResponseWriter, r *http.Request) {
-	data := types.MovieInfoPage{}
+	data := api.MovieInfoPage{}
 	id := r.PathValue("imdb")
 	mov, err := h.getMovie(id)
 	if err != nil {
@@ -74,7 +74,7 @@ func (h *Handler) UpdateMovieHandler(w http.ResponseWriter, r *http.Request) {
 		h.logger.Println("could not match id:", id)
 		return
 	}
-	updatedMovie, err := types.MovieFromID(id)
+	updatedMovie, err := api.MovieFromID(id)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("error getting movie: %s", err.Error()), http.StatusInternalServerError)
 		log.Println(err)
@@ -102,7 +102,7 @@ func (h *Handler) DeleteMovieHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {
-	data := types.MovieInfoPage{}
+	data := api.MovieInfoPage{}
 	err := r.ParseForm()
 	if err != nil {
 		//http.Error(w, "error parsing form", http.StatusInternalServerError)
@@ -122,7 +122,7 @@ func (h *Handler) CreateEntryHandler(w http.ResponseWriter, r *http.Request) {
 		h.logger.Println(err.Error())
 		renderTemplate(w, "info", data)
 	}
-	entry := types.NewEntry(name, watched, comment)
+	entry := api.NewEntry(name, watched, comment)
 	_, err = h.store.CreateEntry(entry, mov)
 	if err != nil {
 		// http.Error(w, err.Error(), http.StatusInternalServerError)

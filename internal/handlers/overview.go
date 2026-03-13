@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/jhachmer/gomovie/internal/types"
+	"github.com/jhachmer/gomovie/internal/api"
 	"github.com/jhachmer/gomovie/internal/util"
 )
 
@@ -24,9 +24,9 @@ func (h *Handler) HealthHandler(w http.ResponseWriter, r *http.Request) {
 // lists all movies retrieved from database on the overview page
 // movies retrieved get sorted before being passed to tempalte render
 func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
-	data := types.MovieOverviewData{}
+	data := api.MovieOverviewData{}
 	movies, err := h.store.GetAllMovies()
-	types.SortMovieSlice(movies)
+	api.SortMovieSlice(movies)
 	data.Movies = movies
 	if err != nil {
 		//http.Error(w, "error getting movies", http.StatusInternalServerError)
@@ -47,7 +47,7 @@ func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
 // Example string:
 // genre:horror,thriller;actors:Hans Albers, Keeanu Reeves
 func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
-	data := types.MovieOverviewData{}
+	data := api.MovieOverviewData{}
 	err := r.ParseForm()
 	if err != nil {
 		//http.Error(w, "error parsing form", http.StatusInternalServerError)
@@ -84,8 +84,8 @@ func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 // Search values are separated from the search type by colons
 // Example string:
 // genre:horror,thriller;actors:Hans Albers, Keeanu Reeves
-func parseSearchQuery(query string) (types.SearchParams, error) {
-	var sp types.SearchParams
+func parseSearchQuery(query string) (api.SearchParams, error) {
+	var sp api.SearchParams
 	if query == "" {
 		return sp, fmt.Errorf("search query must not be empty")
 	}
@@ -115,7 +115,7 @@ func parseSearchQuery(query string) (types.SearchParams, error) {
 			sp.Actors = subVals
 		case "year":
 			yearParams := strings.Split(values, ",")
-			sp.Years = types.YearSearch{StartYear: yearParams[0], EndYear: yearParams[1]}
+			sp.Years = api.YearSearch{StartYear: yearParams[0], EndYear: yearParams[1]}
 		default:
 			return sp, fmt.Errorf("invalid search type: %s", searchType)
 		}

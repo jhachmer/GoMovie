@@ -8,9 +8,9 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/jhachmer/gomovie/internal/api"
 	"github.com/jhachmer/gomovie/internal/auth"
 	"github.com/jhachmer/gomovie/internal/config"
-	"github.com/jhachmer/gomovie/internal/types"
 	"github.com/jhachmer/gomovie/internal/util"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -166,8 +166,8 @@ func (s *SQLiteStorage) InitDatabaseTables() error {
 	return nil
 }
 
-func (s *SQLiteStorage) GetWatchCounts() (*types.WatchStats, error) {
-	var stats types.WatchStats
+func (s *SQLiteStorage) GetWatchCounts() (*api.WatchStats, error) {
+	var stats api.WatchStats
 	row := s.DB.QueryRow(`--sql
 	SELECT
     SUM(CASE WHEN watched = 1 THEN 1 ELSE 0 END) AS watched_count,
@@ -248,7 +248,7 @@ func (s *SQLiteStorage) ToggleUserActive(active, id int) error {
 	return nil
 }
 
-func (s *SQLiteStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
+func (s *SQLiteStorage) CreateMovie(m *api.Movie) (*api.Movie, error) {
 	_, err := s.DB.Exec( /*sql*/ `
 		INSERT INTO media (id, title, year, director, runtime, rated, released, plot, poster, media_type)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
@@ -271,7 +271,7 @@ func (s *SQLiteStorage) CreateMovie(m *types.Movie) (*types.Movie, error) {
 	return m, nil
 }
 
-func (s *SQLiteStorage) CreateMovieTx(tx *sql.Tx, m *types.Movie) (*types.Movie, error) {
+func (s *SQLiteStorage) CreateMovieTx(tx *sql.Tx, m *api.Movie) (*api.Movie, error) {
 	_, err := tx.Exec( /*sql*/ `
 		INSERT INTO media (id, title, year, director, runtime, rated, released, plot, poster, media_type)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
@@ -294,7 +294,7 @@ func (s *SQLiteStorage) CreateMovieTx(tx *sql.Tx, m *types.Movie) (*types.Movie,
 	return m, nil
 }
 
-func (s *SQLiteStorage) UpdateMovie(m *types.Movie) (*types.Movie, error) {
+func (s *SQLiteStorage) UpdateMovie(m *api.Movie) (*api.Movie, error) {
 	_, err := s.DB.Exec(`--sql
 	UPDATE media
 	SET title = ?, year = ?, director = ?, runtime = ?, rated = ?, released = ?, plot = ?, poster = ?
@@ -328,7 +328,7 @@ func (s *SQLiteStorage) DeleteMedia(imdbId string) error {
 	return nil
 }
 
-func (s *SQLiteStorage) updateRatings(m types.Media) error {
+func (s *SQLiteStorage) updateRatings(m api.Media) error {
 	for _, rating := range m.GetRatings() {
 		_, err := s.DB.Exec( /*sql*/ `
 			UPDATE ratings
@@ -342,7 +342,7 @@ func (s *SQLiteStorage) updateRatings(m types.Media) error {
 	return nil
 }
 
-func (s *SQLiteStorage) updateGenres(m types.Media) error {
+func (s *SQLiteStorage) updateGenres(m api.Media) error {
 	genres := util.SplitIMDBString(m.GetGenres())
 
 	rows, err := s.DB.Query( /*sql*/ `
@@ -409,7 +409,7 @@ func (s *SQLiteStorage) updateGenres(m types.Media) error {
 	return nil
 }
 
-func (s *SQLiteStorage) updateActors(m types.Media) error {
+func (s *SQLiteStorage) updateActors(m api.Media) error {
 	actors := util.SplitIMDBString(m.GetActors())
 
 	rows, err := s.DB.Query( /*sql*/ `
@@ -476,8 +476,8 @@ func (s *SQLiteStorage) updateActors(m types.Media) error {
 	return nil
 }
 
-func (s *SQLiteStorage) GetMovieByID(movieID string) (*types.Movie, error) {
-	var movie types.Movie
+func (s *SQLiteStorage) GetMovieByID(movieID string) (*api.Movie, error) {
+	var movie api.Movie
 
 	err := s.DB.QueryRow( /*sql*/ `
         SELECT
@@ -539,9 +539,9 @@ func (s *SQLiteStorage) GetMovieByID(movieID string) (*types.Movie, error) {
 	}
 	defer rows.Close()
 
-	var ratings []types.Rating
+	var ratings []api.Rating
 	for rows.Next() {
-		var rating types.Rating
+		var rating api.Rating
 		if err := rows.Scan(&rating.Source, &rating.Value); err != nil {
 			return nil, err
 		}
@@ -552,8 +552,8 @@ func (s *SQLiteStorage) GetMovieByID(movieID string) (*types.Movie, error) {
 	return &movie, nil
 }
 
-func (s *SQLiteStorage) GetAllMovies() ([]*types.MovieInfoData, error) {
-	var movies []*types.MovieInfoData
+func (s *SQLiteStorage) GetAllMovies() ([]*api.MovieInfoData, error) {
+	var movies []*api.MovieInfoData
 	rows, err := s.DB.Query( /*sql*/ `
         SELECT id
         FROM media
@@ -581,13 +581,13 @@ func (s *SQLiteStorage) GetAllMovies() ([]*types.MovieInfoData, error) {
 		if err != nil {
 			return nil, err
 		}
-		data := types.MovieInfoData{Movie: movie, Entry: entries}
+		data := api.MovieInfoData{Movie: movie, Entry: entries}
 		movies = append(movies, &data)
 	}
 	return movies, nil
 }
 
-func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieInfoData, error) {
+func (s *SQLiteStorage) SearchMovie(params api.SearchParams) ([]*api.MovieInfoData, error) {
 	filters := []string{}
 	args := []any{}
 
@@ -633,7 +633,7 @@ func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieIn
 	}
 	defer rows.Close()
 
-	results := []*types.MovieInfoData{}
+	results := []*api.MovieInfoData{}
 	for rows.Next() {
 		var id string
 		if err := rows.Scan(&id); err != nil {
@@ -647,7 +647,7 @@ func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieIn
 		if err != nil {
 			return nil, err
 		}
-		results = append(results, &types.MovieInfoData{Movie: mov, Entry: entry})
+		results = append(results, &api.MovieInfoData{Movie: mov, Entry: entry})
 	}
 
 	if err := rows.Err(); err != nil {
@@ -657,7 +657,7 @@ func (s *SQLiteStorage) SearchMovie(params types.SearchParams) ([]*types.MovieIn
 	return results, nil
 }
 
-func (s *SQLiteStorage) createMovieRatings(m *types.Movie) error {
+func (s *SQLiteStorage) createMovieRatings(m *api.Movie) error {
 	for _, rating := range m.Ratings {
 		_, err := s.DB.Exec( /*sql*/ `
 			INSERT INTO ratings (media_id, source, value)
@@ -670,7 +670,7 @@ func (s *SQLiteStorage) createMovieRatings(m *types.Movie) error {
 	return nil
 }
 
-func (s *SQLiteStorage) createMovieRatingsTx(tx *sql.Tx, m *types.Movie) error {
+func (s *SQLiteStorage) createMovieRatingsTx(tx *sql.Tx, m *api.Movie) error {
 	for _, rating := range m.Ratings {
 		_, err := tx.Exec( /*sql*/ `
 			INSERT INTO ratings (media_id, source, value)
@@ -683,7 +683,7 @@ func (s *SQLiteStorage) createMovieRatingsTx(tx *sql.Tx, m *types.Movie) error {
 	return nil
 }
 
-func (s *SQLiteStorage) createMovieGenres(m *types.Movie) error {
+func (s *SQLiteStorage) createMovieGenres(m *api.Movie) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
 		var genreID int64
@@ -715,7 +715,7 @@ func (s *SQLiteStorage) createMovieGenres(m *types.Movie) error {
 	return nil
 }
 
-func (s *SQLiteStorage) createMovieGenresTx(tx *sql.Tx, m *types.Movie) error {
+func (s *SQLiteStorage) createMovieGenresTx(tx *sql.Tx, m *api.Movie) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
 		var genreID int64
@@ -746,7 +746,7 @@ func (s *SQLiteStorage) createMovieGenresTx(tx *sql.Tx, m *types.Movie) error {
 	return nil
 }
 
-func (s *SQLiteStorage) createMovieActors(m *types.Movie) error {
+func (s *SQLiteStorage) createMovieActors(m *api.Movie) error {
 	actors := util.SplitIMDBString(m.Actors)
 	for _, actor := range actors {
 		var actorID int64
@@ -778,7 +778,7 @@ func (s *SQLiteStorage) createMovieActors(m *types.Movie) error {
 	return nil
 }
 
-func (s *SQLiteStorage) createActorsTx(tx *sql.Tx, m *types.Movie) error {
+func (s *SQLiteStorage) createActorsTx(tx *sql.Tx, m *api.Movie) error {
 	actors := util.SplitIMDBString(m.Actors)
 	for _, actor := range actors {
 		var actorID int64
@@ -810,7 +810,7 @@ func (s *SQLiteStorage) createActorsTx(tx *sql.Tx, m *types.Movie) error {
 	return nil
 }
 
-func (s *SQLiteStorage) CreateSeries(m *types.Series) (*types.Series, error) {
+func (s *SQLiteStorage) CreateSeries(m *api.Series) (*api.Series, error) {
 	_, err := s.DB.Exec( /*sql*/ `
 		INSERT INTO media (id, title, year, director, runtime, rated, released, plot, poster, media_type)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
@@ -833,7 +833,7 @@ func (s *SQLiteStorage) CreateSeries(m *types.Series) (*types.Series, error) {
 	return m, nil
 }
 
-func (s *SQLiteStorage) createSeriesRatings(m *types.Series) error {
+func (s *SQLiteStorage) createSeriesRatings(m *api.Series) error {
 	for _, rating := range m.Ratings {
 		_, err := s.DB.Exec( /*sql*/ `
 			INSERT INTO ratings (media_id, source, value)
@@ -846,7 +846,7 @@ func (s *SQLiteStorage) createSeriesRatings(m *types.Series) error {
 	return nil
 }
 
-func (s *SQLiteStorage) createSeriesGenres(m *types.Series) error {
+func (s *SQLiteStorage) createSeriesGenres(m *api.Series) error {
 	genres := util.SplitIMDBString(m.Genre)
 	for _, genre := range genres {
 		var genreID int64
@@ -878,7 +878,7 @@ func (s *SQLiteStorage) createSeriesGenres(m *types.Series) error {
 	return nil
 }
 
-func (s *SQLiteStorage) createSeriesActors(m *types.Series) error {
+func (s *SQLiteStorage) createSeriesActors(m *api.Series) error {
 	actors := util.SplitIMDBString(m.Actors)
 	for _, actor := range actors {
 		var actorID int64
@@ -910,7 +910,7 @@ func (s *SQLiteStorage) createSeriesActors(m *types.Series) error {
 	return nil
 }
 
-func (s *SQLiteStorage) UpdateSeries(m *types.Series) (*types.Series, error) {
+func (s *SQLiteStorage) UpdateSeries(m *api.Series) (*api.Series, error) {
 	_, err := s.DB.Exec( /*sql*/ `
 	UPDATE media
 	SET title = ?, year = ?, director = ?, runtime = ?, rated = ?, released = ?, plot = ?, poster = ?
@@ -934,7 +934,7 @@ func (s *SQLiteStorage) UpdateSeries(m *types.Series) (*types.Series, error) {
 	return m, nil
 }
 
-func (s *SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.Entry, error) {
+func (s *SQLiteStorage) CreateEntry(e *api.Entry, mov *api.Movie) (*api.Entry, error) {
 	var exists bool
 	row := s.DB.QueryRow( /*sql*/ `
 		SELECT EXISTS(SELECT media.title
@@ -969,7 +969,7 @@ func (s *SQLiteStorage) CreateEntry(e *types.Entry, mov *types.Movie) (*types.En
 	return e, nil
 }
 
-func (s *SQLiteStorage) CreateEntryTx(tx *sql.Tx, e *types.Entry, mov *types.Movie) (*types.Entry, error) {
+func (s *SQLiteStorage) CreateEntryTx(tx *sql.Tx, e *api.Entry, mov *api.Movie) (*api.Entry, error) {
 	var exists bool
 	row := tx.QueryRow( /*sql*/ `
 		SELECT EXISTS(SELECT media.title
@@ -1004,7 +1004,7 @@ func (s *SQLiteStorage) CreateEntryTx(tx *sql.Tx, e *types.Entry, mov *types.Mov
 	return e, nil
 }
 
-func (s *SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool) (*types.Entry, error) {
+func (s *SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool) (*api.Entry, error) {
 	var watchedInt = 0
 	if watched {
 		watchedInt = 1
@@ -1021,7 +1021,7 @@ func (s *SQLiteStorage) UpdateEntry(movieId, name, comment string, watched bool)
 	if err != nil {
 		return nil, err
 	}
-	entry := types.Entry{
+	entry := api.Entry{
 		ID:      resID,
 		Name:    name,
 		Comment: []byte(comment),
@@ -1041,7 +1041,7 @@ func (s *SQLiteStorage) DeleteEntry(imdbId string) error {
 	return nil
 }
 
-func (s *SQLiteStorage) GetEntries(id string) ([]*types.Entry, error) {
+func (s *SQLiteStorage) GetEntries(id string) ([]*api.Entry, error) {
 	rows, err := s.DB.Query(`
 		SELECT id, name, watched, comment
 		FROM entries
@@ -1052,10 +1052,10 @@ func (s *SQLiteStorage) GetEntries(id string) ([]*types.Entry, error) {
 	}
 	defer rows.Close()
 
-	var entries []*types.Entry
+	var entries []*api.Entry
 
 	for rows.Next() {
-		var entry types.Entry
+		var entry api.Entry
 		if err := rows.Scan(&entry.ID, &entry.Name, &entry.Watched, &entry.Comment); err != nil {
 			return nil, err
 		}

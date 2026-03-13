@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/jhachmer/gomovie/internal/types"
+	"github.com/jhachmer/gomovie/internal/api"
 )
 
 type StatsPage struct {
-	WatchStats *types.WatchStats
+	WatchStats *api.WatchStats
 	Error      error
 }
 
