@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
+	"log/slog"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -67,14 +67,14 @@ func (h *Handler) ToggleActiveHandler(w http.ResponseWriter, r *http.Request) {
 		Active int `json:"active"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		fmt.Print(err)
+		slog.Error("error decoding request", "err", err.Error())
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	err := h.store.ToggleUserActive(request.Active, request.UserID)
 	if err != nil {
-		fmt.Print(err)
+		slog.Error("error toggling user status", "handler", "toggle_active", "err", err.Error())
 		http.Error(w, "Database update failed", http.StatusInternalServerError)
 		return
 	}

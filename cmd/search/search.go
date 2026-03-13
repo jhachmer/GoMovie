@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"regexp"
 
@@ -63,6 +64,6 @@ func main() {
 		fmt.Println(jsonString)
 		os.Exit(0)
 	}
-	log.Println("please provide either an IMDb ID or a title to search for")
+	slog.Info("please provide either an IMDb ID or a title to search for")
 	os.Exit(1)
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"time"
@@ -36,27 +37,28 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 
 	cfg := config.Envs
 
-	logger := log.New(os.Stdout, "gomovie:", log.LstdFlags)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
 
 	dbStore, err := store.SetupDatabase(cfg)
 	if err != nil {
-		log.Println(err)
+		slog.Error("failed setting up db", "err", err.Error())
 		cancel()
 		os.Exit(1)
 	}
 
-	svr := setupServer(dbStore, logger)
+	svr := setupServer(dbStore)
 	err = svr.Serve(ctx)
 	cancel()
 	return err
 }
 
-func setupServer(store store.Store, logger *log.Logger) *server.Server {
+func setupServer(store store.Store) *server.Server {
 	movC := cache.NewCache[string, *api.Movie](time.Second*15, time.Minute*60, nil)
 	serC := cache.NewCache[string, *api.Series](time.Second*15, time.Minute*60, nil)
-	handler := handlers.NewHandler(store, movC, serC, logger)
+	handler := handlers.NewHandler(store, movC, serC)
 
-	return server.NewServer(config.Envs.Addr, logger, handler)
+	return server.NewServer(config.Envs.Addr, handler)
 }
 
 func checkForValidConfig() {

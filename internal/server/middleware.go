@@ -1,7 +1,7 @@
 package server
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -38,12 +38,12 @@ func NewLogMessage(r *http.Request) *LogMessage {
 }
 
 // Logging is a middleware function that logs Path, Method, Duration
-func Logging(logger *log.Logger) Middleware {
+func Logging() Middleware {
 	return func(handlerFunc http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				message := NewLogMessage(r)
-				logger.Println(message.Method, message.Path, time.Since(message.Time).String())
+				slog.Info("request", "method", message.Method, "path", message.Path, "took", time.Since(message.Time).String())
 			}()
 			handlerFunc(w, r)
 		}
@@ -55,13 +55,13 @@ func Authenticate() Middleware {
 		return func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("gomovie")
 			if err != nil {
-				log.Println("cookie missing", err)
+				slog.Error("cookie missing", "err", err.Error())
 				http.Redirect(w, r, "/login", http.StatusUnauthorized)
 				return
 			}
 			_, err = auth.VerifyToken(cookie.Value)
 			if err != nil {
-				log.Println("jwt not verified", err)
+				slog.Error("jwt not verified", "err", err.Error())
 				http.Redirect(w, r, "/login", http.StatusUnauthorized)
 				return
 			}

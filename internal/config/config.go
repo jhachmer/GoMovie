@@ -3,7 +3,6 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -117,7 +116,6 @@ func initConfig() Config {
 			}
 		}
 	}
-	log.Println(valid)
 	return Config{
 		Addr:       addr,
 		OmdbApiKey: omdbKey,
@@ -137,7 +135,6 @@ func GetEnv(key, fallback string) (string, error) {
 		return value, nil
 	}
 	if fallback == "" {
-		log.Printf("a value (%v) is missing from config!\n", key)
 		return "", fmt.Errorf("a value (%v) is missing from config", key)
 	}
 	return fallback, nil

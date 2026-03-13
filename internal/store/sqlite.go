@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"slices"
 	"strings"
 
@@ -35,10 +35,10 @@ func (s *SQLiteStorage) Close() error {
 func (s *SQLiteStorage) TestDBConnection() error {
 	err := s.DB.Ping()
 	if err != nil {
-		log.Default().Printf("Error pinging database: %v", err)
+		slog.Error("error pinging database", "err", err.Error())
 		return err
 	}
-	log.Println("connected to DB...")
+	slog.Info("connected to DB...")
 	return nil
 }
 
@@ -48,7 +48,7 @@ func (s *SQLiteStorage) CreateAdminAccount(config config.Config) error {
 	}
 	hashedPW, err := auth.HashPassword(config.AdminPW)
 	if err != nil {
-		log.Fatal("error creating admin account")
+		slog.Error("error creating admin account")
 		return err
 	}
 	_, err = s.DB.Exec(`--sql
@@ -942,7 +942,7 @@ func (s *SQLiteStorage) CreateEntry(e *api.Entry, mov *api.Movie) (*api.Entry, e
 		WHERE media.id = ?);
 		`, mov.ImdbID)
 	if err := row.Scan(&exists); err != nil {
-		log.Println("movie exists:", exists)
+		slog.Error("checking if movie already exists", "exists", exists)
 		return nil, err
 	} else if !exists {
 		_, err := s.CreateMovie(mov)
@@ -977,7 +977,7 @@ func (s *SQLiteStorage) CreateEntryTx(tx *sql.Tx, e *api.Entry, mov *api.Movie) 
 		WHERE media.id = ?);
 		`, mov.ImdbID)
 	if err := row.Scan(&exists); err != nil {
-		log.Println("movie exists:", exists)
+		slog.Error("checking if movie already exists", "exists", exists)
 		return nil, err
 	} else if !exists {
 		_, err := s.CreateMovieTx(tx, mov)

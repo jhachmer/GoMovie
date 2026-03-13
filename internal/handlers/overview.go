@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -30,14 +31,14 @@ func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	data.Movies = movies
 	if err != nil {
 		//http.Error(w, "error getting movies", http.StatusInternalServerError)
-		h.logger.Println("HomeHandler: Getting Movies:", err)
+		slog.Error("error getting movies:", "handler", "home", "err", err)
 		data.Error = err
 	}
 	renderTemplate(w, "overview", data)
 }
 
 // SearchHandler handles requests to /search route
-// template html must have form with "query" input field
+// template HTML must have form with "query" input field
 // input strings gets parsed into SearchParams type by parseSearchQuery function
 // SearchParams are used in DB query
 //
@@ -52,14 +53,14 @@ func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		//http.Error(w, "error parsing form", http.StatusInternalServerError)
 		data.Error = fmt.Errorf("error parsing form: %w", err)
-		h.logger.Println(err.Error())
+		slog.Error("error parsing form", "handler", "search", "err", err.Error())
 		renderTemplate(w, "overview", data)
 	}
 	query := r.FormValue("query")
 	sp, err := parseSearchQuery(query)
 	if err != nil {
 		data.Error = fmt.Errorf("error parsing search query: %w", err)
-		h.logger.Println(err.Error())
+		slog.Error("error parsing search query", "handler", "search", "err", err.Error())
 		renderTemplate(w, "overview", data)
 		return
 	}
@@ -67,7 +68,7 @@ func (h *Handler) SearchHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		//http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		data.Error = fmt.Errorf("error searching for movie: %w", err)
-		h.logger.Println(err.Error())
+		slog.Error("error searching for movie", "handler", "search", "err", err.Error())
 		renderTemplate(w, "overview", data)
 		return
 	}
