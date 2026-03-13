@@ -17,8 +17,6 @@ func NewStorage(cfg config.Config) (Store, error) {
 	switch cfg.DbType {
 	case "sqlite3":
 		return NewSQLiteStore(db), nil
-	case "postgres":
-		return NewPostgresStore(db), nil
 	default:
 		return nil, fmt.Errorf("unsupported database type: %s", cfg.DbType)
 	}
