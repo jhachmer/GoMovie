@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"runtime"
 	"time"
 
 	"github.com/jhachmer/gomovie/internal/api"
@@ -39,6 +40,8 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
+
+	slog.Info("Welcome to gomovie", "goVersion", runtime.Version(), "goOS", runtime.GOOS, "goArch", runtime.GOARCH)
 
 	dbStore, err := store.SetupDatabase(cfg)
 	if err != nil {
