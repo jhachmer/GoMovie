@@ -17,11 +17,15 @@ import (
 	"github.com/jhachmer/gomovie/internal/handlers"
 	"github.com/jhachmer/gomovie/internal/server"
 	"github.com/jhachmer/gomovie/internal/store"
+	"github.com/jhachmer/gomovie/internal/util"
 )
 
 func main() {
-	log.SetPrefix("[gomovie-webapp] ")
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	debug := os.Getenv("DEBUG") != ""
+	logLevel := new(slog.LevelVar)
+	logLevel.Set(util.ResolveLogLevel(debug))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
 
 	checkForValidConfig()
 	ctx := context.Background()
@@ -37,9 +41,6 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 
 	cfg := config.Envs
-
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	slog.SetDefault(logger)
 
 	slog.Info("Welcome to gomovie", "goVersion", runtime.Version(), "goOS", runtime.GOOS, "goArch", runtime.GOARCH)
 

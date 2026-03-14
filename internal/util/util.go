@@ -2,11 +2,19 @@ package util
 
 import (
 	"io/fs"
+	"log/slog"
 	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
 )
+
+func ResolveLogLevel(debug bool) slog.Level {
+	if debug {
+		return slog.LevelDebug
+	}
+	return slog.LevelInfo
+}
 
 type DirFiles struct {
 	Name string `json:"name,omitempty"`
