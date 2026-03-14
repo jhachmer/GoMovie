@@ -55,13 +55,13 @@ func Authenticate() Middleware {
 		return func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("gomovie")
 			if err != nil {
-				slog.Error("cookie missing", "err", err.Error())
+				slog.Warn("cookie missing", "err", err.Error())
 				http.Redirect(w, r, "/login", http.StatusUnauthorized)
 				return
 			}
 			_, err = auth.VerifyToken(cookie.Value)
 			if err != nil {
-				slog.Error("jwt not verified", "err", err.Error())
+				slog.Warn("jwt not verified", "err", err.Error())
 				http.Redirect(w, r, "/login", http.StatusUnauthorized)
 				return
 			}
