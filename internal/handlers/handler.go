@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/jhachmer/go-cache"
+
 	"github.com/jhachmer/gomovie/internal/api"
-	"github.com/jhachmer/gomovie/internal/cache"
 	"github.com/jhachmer/gomovie/internal/store"
 )
 
@@ -18,11 +19,11 @@ var validPath = regexp.MustCompile(`^tt\d{7,8}$`)
 
 type Handler struct {
 	store    store.Store
-	movCache *cache.Cache[string, *api.Movie]
-	serCache *cache.Cache[string, *api.Series]
+	movCache *cache.TTLCache[string, *api.Movie]
+	serCache *cache.TTLCache[string, *api.Series]
 }
 
-func NewHandler(store store.Store, movC *cache.Cache[string, *api.Movie], serC *cache.Cache[string, *api.Series]) *Handler {
+func NewHandler(store store.Store, movC *cache.TTLCache[string, *api.Movie], serC *cache.TTLCache[string, *api.Series]) *Handler {
 	return &Handler{
 		store:    store,
 		movCache: movC,

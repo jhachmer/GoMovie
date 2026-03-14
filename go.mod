@@ -1,12 +1,14 @@
 module github.com/jhachmer/gomovie
 
-go 1.25.2
+go 1.26
 
 require (
 	github.com/google/go-cmp v0.7.0
 	github.com/joho/godotenv v1.5.1
 	github.com/ncruces/go-sqlite3 v0.30.1
 )
+
+require github.com/jhachmer/go-cache v0.5.0
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.3.0

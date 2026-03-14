@@ -11,8 +11,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/jhachmer/go-cache"
 	"github.com/jhachmer/gomovie/internal/api"
-	"github.com/jhachmer/gomovie/internal/cache"
 	"github.com/jhachmer/gomovie/internal/config"
 	"github.com/jhachmer/gomovie/internal/handlers"
 	"github.com/jhachmer/gomovie/internal/server"
@@ -58,8 +58,8 @@ func run(ctx context.Context, w io.Writer, args []string) error {
 }
 
 func setupServer(store store.Store) *server.Server {
-	movC := cache.NewCache[string, *api.Movie](time.Second*15, time.Minute*60, nil)
-	serC := cache.NewCache[string, *api.Series](time.Second*15, time.Minute*60, nil)
+	movC := cache.NewTTLCache[string, *api.Movie](time.Second*15, time.Minute*60, nil)
+	serC := cache.NewTTLCache[string, *api.Series](time.Second*15, time.Minute*60, nil)
 	handler := handlers.NewHandler(store, movC, serC)
 
 	return server.NewServer(config.Envs.Addr, handler)
