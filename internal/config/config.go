@@ -20,19 +20,6 @@ func (c SQLiteConfig) ConnectionString() string {
 	return fmt.Sprintf("file:%s", c.Path)
 }
 
-type PostgresConfig struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	Database string
-}
-
-// TODO: remove sslmode=disable
-func (c PostgresConfig) ConnectionString() string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", c.Host, c.Port, c.Username, c.Password, c.Database)
-}
-
 // Config struct holds fields set by environment variables
 type Config struct {
 	Addr       string
@@ -78,34 +65,6 @@ func initConfig() Config {
 		}
 	} else {
 		switch dbType {
-		case "postgres":
-			host, err := GetEnv("POSTGRES_HOST", "localhost")
-			if err != nil {
-				valid = false
-			}
-			port, err := GetEnv("POSTGRES_PORT", "5432")
-			if err != nil {
-				valid = false
-			}
-			user, err := GetEnv("POSTGRES_USER", "postgres")
-			if err != nil {
-				valid = false
-			}
-			password, err := GetEnv("POSTGRES_PASSWORD", "postgres")
-			if err != nil {
-				valid = false
-			}
-			database, err := GetEnv("POSTGRES_DB", "postgres")
-			if err != nil {
-				valid = false
-			}
-			dbConfig = &PostgresConfig{
-				Host:     host,
-				Port:     port,
-				Username: user,
-				Password: password,
-				Database: database,
-			}
 		case "sqlite3":
 			sqlitePath, err := GetEnv("SQLITE_PATH", "./gomovie.sqlite")
 			if err != nil {
