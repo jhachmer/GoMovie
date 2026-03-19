@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -67,6 +66,7 @@ func setupServer(store store.Store) *server.Server {
 
 func checkForValidConfig() {
 	if !config.Envs.Valid {
-		log.Fatalln("Config is not valid! Check .env File for missing values")
+		slog.Error("Config is not valid! Check .env File for missing values")
+		os.Exit(1)
 	}
 }
