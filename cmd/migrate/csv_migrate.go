@@ -11,7 +11,7 @@ import (
 
 	"github.com/jhachmer/gomovie/internal/config"
 	"github.com/jhachmer/gomovie/internal/store"
-
+	"github.com/jhachmer/gomovie/internal/util"
 	_ "github.com/ncruces/go-sqlite3/driver"
 	_ "github.com/ncruces/go-sqlite3/embed"
 )
@@ -55,7 +55,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer reader.Close()
+	defer util.CloseOrLog(reader)
 	_ = setup(reader)
 }
 
