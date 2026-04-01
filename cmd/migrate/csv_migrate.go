@@ -75,10 +75,7 @@ func UnmarshalEntry(record []string) (*CSVEntry, error) {
 }
 
 func watchedCheckboxValue(value string) bool {
-	if value == "TRUE" {
-		return true
-	}
-	return false
+	return value == "TRUE"
 }
 
 type App struct {
