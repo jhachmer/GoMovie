@@ -7,6 +7,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"strconv"
 
 	"github.com/jhachmer/gomovie/internal/api"
 	"github.com/jhachmer/gomovie/internal/config"
@@ -40,20 +41,6 @@ func (e *CSVEntry) RetrieveMovieFromEntry() (*api.Movie, error) {
 		return nil, err
 	}
 	return m, nil
-}
-
-func UnmarshalEntry(record []string) (*CSVEntry, error) {
-	entry := &CSVEntry{
-		Watched: watchedCheckboxValue(record[WatchedCol]),
-		Title:   record[TitleCol],
-		Year:    record[YearCol],
-		AddedBy: record[AddedByCol],
-	}
-	return entry, nil
-}
-
-func watchedCheckboxValue(value string) bool {
-	return value == "TRUE"
 }
 
 func ReadCSV(reader io.Reader) ([]*CSVEntry, error) {
@@ -92,7 +79,7 @@ func UnmarshalEntry(record []string) (*CSVEntry, error) {
 	entry := &CSVEntry{
 		Watched: watchedCheckboxValue(record[WatchedCol]),
 		Title:   record[TitleCol],
-		Year:    year,
+		Year:    strconv.Itoa(year),
 		AddedBy: record[AddedByCol],
 	}
 	return entry, nil
