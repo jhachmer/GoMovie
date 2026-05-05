@@ -11,7 +11,7 @@ import (
 	"github.com/jhachmer/gomovie/internal/api"
 	"github.com/jhachmer/gomovie/internal/config"
 	"github.com/jhachmer/gomovie/internal/store"
-
+	"github.com/jhachmer/gomovie/internal/util"
 	_ "github.com/ncruces/go-sqlite3/driver"
 	_ "github.com/ncruces/go-sqlite3/embed"
 )
@@ -79,9 +79,27 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer reader.Close()
-
+	defer util.CloseOrLog(reader)
 	_ = setup(reader)
+}
+
+func UnmarshalEntry(record []string) (*CSVEntry, error) {
+	year, err := strconv.Atoi(record[YearCol])
+	if err != nil {
+		slog.Error("Error parsing year", "record", record, "year", year, "err", err)
+		return nil, err
+	}
+	entry := &CSVEntry{
+		Watched: watchedCheckboxValue(record[WatchedCol]),
+		Title:   record[TitleCol],
+		Year:    year,
+		AddedBy: record[AddedByCol],
+	}
+	return entry, nil
+}
+
+func watchedCheckboxValue(value string) bool {
+	return value == "TRUE"
 }
 
 type App struct {

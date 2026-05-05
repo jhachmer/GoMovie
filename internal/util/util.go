@@ -1,6 +1,7 @@
 package util
 
 import (
+	"io"
 	"io/fs"
 	"log/slog"
 	"path/filepath"
@@ -8,6 +9,13 @@ import (
 	"strconv"
 	"strings"
 )
+
+func CloseOrLog(close io.Closer) {
+	err := close.Close()
+	if err != nil {
+		slog.Error(err.Error())
+	}
+}
 
 func ResolveLogLevel(debug bool) slog.Level {
 	if debug {
