@@ -7,8 +7,8 @@ import (
 	"log"
 	"log/slog"
 	"os"
-	"strconv"
 
+	"github.com/jhachmer/gomovie/internal/api"
 	"github.com/jhachmer/gomovie/internal/config"
 	"github.com/jhachmer/gomovie/internal/store"
 
@@ -16,20 +16,44 @@ import (
 	_ "github.com/ncruces/go-sqlite3/embed"
 )
 
-const WatchedCol = 0
-const TitleCol = 1
-const YearCol = 2
-const AddedByCol = 4
+const (
+	WatchedCol = 0
+	TitleCol   = 1
+	YearCol    = 2
+	AddedByCol = 4
+)
 
 type CSVEntry struct {
 	Watched bool
 	Title   string
-	Year    int
+	Year    string
 	AddedBy string
 }
 
-func (e CSVEntry) String() string {
+func (e *CSVEntry) String() string {
 	return fmt.Sprintf("Watched: %v, Title: %v, Year: %v", e.Watched, e.Title, e.Year)
+}
+
+func (e *CSVEntry) RetrieveMovieFromEntry() (*api.Movie, error) {
+	m, err := api.MovieFromTitleAndYear(e.Title, e.Year)
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func UnmarshalEntry(record []string) (*CSVEntry, error) {
+	entry := &CSVEntry{
+		Watched: watchedCheckboxValue(record[WatchedCol]),
+		Title:   record[TitleCol],
+		Year:    record[YearCol],
+		AddedBy: record[AddedByCol],
+	}
+	return entry, nil
+}
+
+func watchedCheckboxValue(value string) bool {
+	return value == "TRUE"
 }
 
 func ReadCSV(reader io.Reader) ([]*CSVEntry, error) {
@@ -56,33 +80,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer reader.Close()
+
 	_ = setup(reader)
 }
 
-func UnmarshalEntry(record []string) (*CSVEntry, error) {
-	year, err := strconv.Atoi(record[YearCol])
-	if err != nil {
-		slog.Error("Error parsing year", "record", record, "year", year, "err", err)
-		return nil, err
-	}
-	entry := &CSVEntry{
-		Watched: watchedCheckboxValue(record[WatchedCol]),
-		Title:   record[TitleCol],
-		Year:    year,
-		AddedBy: record[AddedByCol],
-	}
-	return entry, nil
-}
-
-func watchedCheckboxValue(value string) bool {
-	if value == "TRUE" {
-		return true
-	}
-	return false
-}
-
 type App struct {
-	store       *store.Store
+	store       store.Store
 	CSVContents []*CSVEntry
 }
 
@@ -100,7 +103,36 @@ func setup(reader io.Reader) *App {
 		os.Exit(1)
 	}
 	return &App{
-		store:       &dbStore,
+		store:       dbStore,
 		CSVContents: records,
+	}
+}
+
+// TODO: Add Transaction
+func (a *App) MigrateCSVToDatabase() {
+	for _, entry := range a.CSVContents {
+		movie, err := entry.RetrieveMovieFromEntry()
+		if err != nil {
+			slog.Error("failed to query from api", "entry", entry.String(), "error", err.Error())
+			continue
+		}
+		movie, err = a.store.CreateMovie(movie)
+		if err != nil {
+			slog.Error("failed to create movie", "entry", entry.String(), "error", err.Error())
+			continue
+		}
+		slog.Info("Created movie", "imdb_id", movie.ImdbID)
+		entry := &api.Entry{
+			ID:      0,
+			Name:    entry.AddedBy,
+			Watched: entry.Watched,
+			Comment: []byte("Migrated from Spreadsheet"),
+		}
+		entry, err = a.store.CreateEntry(entry, movie)
+		if err != nil {
+			slog.Error("could not create entry", "entry", entry, "error", err.Error())
+			continue
+		}
+		slog.Info("Created entry", "entry", entry, "imdb_id", movie.ImdbID)
 	}
 }
