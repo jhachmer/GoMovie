@@ -103,3 +103,17 @@ func RateLimit(rl *rate.RateLimiter) Middleware {
 		}
 	}
 }
+
+func preventCSRFHandler(next http.Handler) http.Handler {
+	cop := http.NewCrossOriginProtection()
+
+	// TODO: add trusted origin
+	// cop.AddTrustedOrigin("")
+
+	cop.SetDenyHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("CSRF check failed"))
+	}))
+
+	return cop.Handler(next)
+}
